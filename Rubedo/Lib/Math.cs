@@ -49,7 +49,7 @@ public static class Math
     }
     public static bool NearlyEqual(Vector2 a, Vector2 b)
     {
-        return NearlyEqual(a.X, b.X) && NearlyEqual(a.Y, b.Y);
+        return Vector2.DistanceSquared(a, b) <= EPSILON;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -92,6 +92,16 @@ public static class Math
             return Vector2.Zero;
         float invLen = 1f / MathF.Sqrt(x * x + y * y);
         return new Vector2(x * invLen, y * invLen);
+    }
+
+    /// <summary>
+    /// Computes the cross product of vectors A and B.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Cross(in Vector2 a, in Vector2 b)
+    {
+        // cz = ax * by − ay * bx
+        return a.X * b.Y - a.Y * b.X;
     }
 
     /// <summary>

@@ -100,14 +100,17 @@ public class PolygonShape : IColliderShape
     }
     public virtual void RecalculateAABB()
     {
+        if (TransformUpdateRequired)
+            TransformVertices();
         float minX = float.MaxValue;
         float maxX = float.MinValue;
         float minY = float.MaxValue;
         float maxY = float.MinValue;
 
-        for (int i = 0; i < TransformedVertices.Length; i++)
+        Vector2 point;
+        for (int i = 0; i < _transformedVertices.Length; i++)
         {
-            Vector2 point = TransformedVertices[i];
+            point = _transformedVertices[i];
             if (point.X < minX) minX = point.X;
             if (point.X > maxX) maxX = point.X;
             if (point.Y < minY) minY = point.Y;

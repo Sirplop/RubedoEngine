@@ -1,8 +1,13 @@
-﻿using Microsoft.Xna.Framework;
+﻿//#define PHYSICS_DEBUG
+
+using Microsoft.Xna.Framework;
+using Rubedo.Debug;
+using Rubedo.Lib;
 using Rubedo.Physics2D.Util;
 using Rubedo.Render;
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Rubedo.Physics2D;
 
@@ -22,18 +27,22 @@ public class PhysicsWorld
     protected List<Collider> triggerColliders; //TODO: Triggers.
 
     private readonly ManifoldPool _manifoldPool = new ManifoldPool();
-    private readonly List<CollisionPair> collisionPairs = new List<CollisionPair>();
+    private readonly List<(int, int)> collisionPairs = new List<(int, int)>();
 
     //reusable values.
     private readonly SpatialHashGrid spatialHashGrid;
     private readonly HashSet<(PhysicsObject, PhysicsObject)> _pairSet =
         new HashSet<(PhysicsObject, PhysicsObject)>(new ColliderPairComparer());
-    private readonly List<CollisionManifold> contacts = new List<CollisionManifold>();
 
     public int BodyCount => bodies.Count;
 
+    private double BroadPhaseTime = 0;
+    private double NarrowPhaseTime = 0;
+
+#if PHYSICS_DEBUG
     //debug drawing
     public readonly List<Vector2> contactPoints = new List<Vector2>();
+#endif
 
     /// <summary>
     /// Constructs a new physics system.
@@ -85,61 +94,14 @@ public class PhysicsWorld
             //accumulator -= DT;
         }
     }
-#if FALSE
     private void UpdatePhysics(float deltaTime)
     {
-        float iter = deltaTime / PHYSICS_ITERATIONS;
-        for (int x = 0; x < PHYSICS_ITERATIONS; x++)
-        {
-            for (int i = 0; i < bodies.Count; i++)
-            {
-                bodies[i].body?.Step(iter);
-            }
-            for (int i = 0; i < collisionPairs.Count; i++)
-            {
-                CollisionPair pair = collisionPairs[i];
-                PhysicsObject bodyA = pair.A;
-                PhysicsObject bodyB = pair.B;
-
-                //we don't have to check if the bodies are static because they will never both be static.
-
-                if (PhysicsCollisions.CheckCollide(bodyA.collider.shape, bodyB.collider.shape, out float depth, out Vector2 normal))
-                {
-                    if (bodyA.body.isStatic)
-                    {
-                        bodyB.body.Move(normal * depth);
-                    }
-                    else if (bodyB.body.isStatic)
-                    {
-                        bodyA.body.Move(-normal * depth);
-                    }
-                    else
-                    {
-                        bodyA.body.Move(-normal * depth * 0.5f);
-                        bodyB.body.Move(normal * depth * 0.5f);
-                    }
-
-                    CollisionManifold m = _manifoldPool.Get();
-                    m.bodyA = bodyA;
-                    m.bodyB = bodyB;
-                    m.depth = depth;
-                    m.normal = normal;
-                    contacts.Add(m);
-                }
-            }
-            for (int i = 0; i < contacts.Count; i++)
-            {
-                this.ResolveCollision(contacts[i]);
-                _manifoldPool.Release(contacts[i]);
-            }
-            contacts.Clear();
-        }
-    }
-#elif TRUE
-    private void UpdatePhysics(float deltaTime)
-    {
+#if PHYSICS_DEBUG
         contactPoints.Clear();
+#endif
         float iter = deltaTime / PHYSICS_ITERATIONS;
+        double broadTime = 0;
+        double narrowTime = 0;
         for (int it = 0; it < PHYSICS_ITERATIONS; it++)
         {
             // Movement step
@@ -148,100 +110,234 @@ public class PhysicsWorld
                 this.bodies[i].body.Step(iter);
             }
 
-            // collision step
-            for (int i = 0; i < this.bodies.Count - 1; i++)
-            {
-                PhysicsObject bodyA = this.bodies[i];
-
-                for (int j = i + 1; j < this.bodies.Count; j++)
-                {
-                    PhysicsObject bodyB = this.bodies[j];
-
-                    if (bodyA.body.isStatic && bodyB.body.isStatic)
-                        continue;
-
-                    if (!bodyA.collider.shape.Bounds.Intersects(ref bodyB.collider.shape.Bounds))
-                        continue;
-
-                    CollisionManifold m = _manifoldPool.Get();
-                    if (PhysicsCollisions.CheckCollide(bodyA.collider.shape, bodyB.collider.shape, ref m))
-                    {
-                        if (bodyA.body.isStatic)
-                        {
-                            bodyB.body.Move(m.normal * m.depth);
-                        }
-                        else if (bodyB.body.isStatic)
-                        {
-                            bodyA.body.Move(-m.normal * m.depth);
-                        }
-                        else
-                        {
-                            bodyA.body.Move(-m.normal * m.depth * 0.5f);
-                            bodyB.body.Move(m.normal * m.depth * 0.5f);
-                        }
-                        m.bodyA = bodyA;
-                        m.bodyB = bodyB;
-                        contacts.Add(m);
-                    }
-                    else
-                        _manifoldPool.Release(m); //no collision, so return manifold to pool.
-                }
-            }
-            for (int i = 0; i < contacts.Count; i++)
-            {
-                this.ResolveCollision(contacts[i]);
-                _manifoldPool.Release(contacts[i]);
-            }
-            contacts.Clear();
+            RubedoEngine.Instance.physicsPhaseWatch.Restart();
+            Broadphase();
+            RubedoEngine.Instance.physicsPhaseWatch.Stop();
+            broadTime += RubedoEngine.Instance.physicsPhaseWatch.Elapsed.TotalMilliseconds;
+            RubedoEngine.Instance.physicsPhaseWatch.Restart();
+            Narrowphase();
+            RubedoEngine.Instance.physicsPhaseWatch.Stop();
+            narrowTime += RubedoEngine.Instance.physicsPhaseWatch.Elapsed.TotalMilliseconds;
         }
+
+        BroadPhaseTime += (broadTime - BroadPhaseTime) * 0.1f;
+        NarrowPhaseTime += (narrowTime - NarrowPhaseTime) * 0.1f;
+        RubedoEngine.debugText.DrawText(new Vector2(0, 35), $"Broad Phase time: {BroadPhaseTime.ToString("0.00")} | Narrow Phase time: {NarrowPhaseTime.ToString("0.00")}", true);
     }
-#endif
-    #region Broadphase
-    private void BroadphasePairing()
+    #region Broad Phase
+    private void Broadphase()
     {
-        collisionPairs.Clear();
-        _pairSet.Clear();
-
-        for (int i = 0; i < bodies.Count; i++)
+        for (int i = 0; i < this.bodies.Count - 1; i++)
         {
-            if (bodies[i].collider.TransformChanged())
-                spatialHashGrid.Update(bodies[i]);
-        }
+            PhysicsObject bodyA = this.bodies[i];
 
-        for (int i = 0; i < bodies.Count; i++)
-        {
-            if (bodies[i].collider == null || bodies[i].body == null || bodies[i].body.isStatic)
-                continue; //static bodies do not themselves register collisions.
-            spatialHashGrid.AABB_Broadphase(bodies[i], _pairSet, collisionPairs);
+            for (int j = i + 1; j < this.bodies.Count; j++)
+            {
+                PhysicsObject bodyB = this.bodies[j];
+
+                if (bodyA.body.isStatic && bodyB.body.isStatic)
+                    continue;
+
+                if (!bodyA.collider.shape.Bounds.Intersects(ref bodyB.collider.shape.Bounds))
+                    continue;
+                collisionPairs.Add((i, j));
+            }
         }
     }
     #endregion
-
-    public void ResolveCollision(in CollisionManifold manifold)
+    #region Narrow Phase
+    public void Narrowphase()
     {
-        contactPoints.Add(manifold.contactPoint1);
-        if (manifold.contactPoint2.HasValue)
-            contactPoints.Add(manifold.contactPoint2.Value);
+        for (int i = 0; i < collisionPairs.Count; i++)
+        {
+            PhysicsObject A = bodies[collisionPairs[i].Item1]; 
+            PhysicsObject B = bodies[collisionPairs[i].Item2];
+            CollisionManifold m = _manifoldPool.Get();
+            if (PhysicsCollisions.CheckCollide(A.collider.shape, B.collider.shape, ref m))
+            {
+                SeparateBodies(A.body, B.body, m.normal * m.depth);
+                m.bodyA = A;
+                m.bodyB = B;
+                this.ResolveCollision(m);
 
-        PhysicsBody bodyA = manifold.bodyA.body;
-        PhysicsBody bodyB = manifold.bodyB.body;
+#if PHYSICS_DEBUG
+                contactPoints.Add(m.contactPoint1);
+                if (m.contactPoint2.HasValue)
+                    contactPoints.Add(m.contactPoint2.Value);
+#endif
+                _manifoldPool.Release(m);
+            }
+            else
+                _manifoldPool.Release(m); //no collision, so return manifold to pool.
+        }
+        collisionPairs.Clear();
+    }
+    #endregion
 
-        Vector2 relativeVelocity = bodyB.LinearVelocity - bodyA.LinearVelocity;
+    public void SeparateBodies(in PhysicsBody bodyA, in PhysicsBody bodyB, Vector2 minTranslation)
+    {
+        if (bodyA.isStatic)
+        {
+            bodyB.Move(minTranslation);
+        }
+        else if (bodyB.isStatic)
+        {
+            bodyA.Move(-minTranslation);
+        }
+        else
+        {
+            bodyA.Move(-minTranslation * 0.5f);
+            bodyB.Move(minTranslation * 0.5f);
+        }
+    }
 
-        //we're already traveling in the appropriate direction.
-        if (Vector2.Dot(relativeVelocity, manifold.normal) > 0f)
-            return;
+    private Vector2[] contactList = new Vector2[2];
+    private Vector2[] impulseList = new Vector2[2];
+    private Vector2[] raList = new Vector2[2];
+    private Vector2[] rbList = new Vector2[2];
+    private float[] jValue = new float[2];
+
+    public void ResolveCollision(in CollisionManifold contact)
+    {
+        PhysicsBody bodyA = contact.bodyA.body;
+        PhysicsBody bodyB = contact.bodyB.body;
+        Vector2 normal = contact.normal;
+        Vector2 contact1 = contact.contactPoint1;
+        Vector2 contact2 = contact.contactPoint2.HasValue ? contact.contactPoint2.Value : Vector2.Zero;
+        int contactCount = contact.contactPoint2.HasValue ? 2 : 1;
+
+        float staticFriction = (bodyA.staticFriction + bodyB.staticFriction) * 0.5f;
+        float dynamicFriction = (bodyA.dynamicFriction + bodyB.dynamicFriction) * 0.5f;
 
         float e = MathF.Min(bodyA.restitution, bodyB.restitution);
 
-        float j = -(1f + e) * Vector2.Dot(relativeVelocity, manifold.normal);
-        j /= bodyA.invMass + bodyB.invMass;
+        this.contactList[0] = contact1;
+        this.contactList[1] = contact2;
 
-        Vector2 impulse = j * manifold.normal;
+        for (int i = 0; i < 2; i++)
+        {
+            this.impulseList[i] = Vector2.Zero;
+            this.raList[i] = Vector2.Zero;
+            this.rbList[i] = Vector2.Zero;
+            jValue[i] = 0;
+        }
 
-        bodyA.LinearVelocity -= impulse * bodyA.invMass;
-        bodyB.LinearVelocity += impulse * bodyB.invMass;
+        //Resolve linear and angular impulses
+        for (int i = 0; i < contactCount; i++)
+        {
+            Vector2 ra = contactList[i] - bodyA.worldTransform.Position;
+            Vector2 rb = contactList[i] - bodyB.worldTransform.Position;
+
+            raList[i] = ra;
+            rbList[i] = rb;
+
+            Vector2 raPerp = new Vector2(-ra.Y, ra.X);
+            Vector2 rbPerp = new Vector2(-rb.Y, rb.X);
+
+            Vector2 angularLinearVelocityA = raPerp * bodyA.AngularVelocity;
+            Vector2 angularLinearVelocityB = rbPerp * bodyB.AngularVelocity;
+
+            Vector2 relativeVelocity =
+                (bodyB.LinearVelocity + angularLinearVelocityB) -
+                (bodyA.LinearVelocity + angularLinearVelocityA);
+
+            float contactVelocityMag = Vector2.Dot(relativeVelocity, normal);
+
+            if (contactVelocityMag > 0f)
+            {
+                continue;
+            }
+
+            float raPerpDotN = Vector2.Dot(raPerp, normal);
+            float rbPerpDotN = Vector2.Dot(rbPerp, normal);
+
+            float denom = bodyA.invMass + bodyB.invMass +
+                (raPerpDotN * raPerpDotN) * bodyA.invInertia +
+                (rbPerpDotN * rbPerpDotN) * bodyB.invInertia;
+
+            float j = -(1f + e) * contactVelocityMag;
+            j /= denom;
+            j /= (float)contactCount;
+
+            jValue[i] = j;
+            impulseList[i] = j * normal;
+        }
+
+        for (int i = 0; i < contactCount; i++)
+        {
+            Vector2 impulse = impulseList[i];
+            Vector2 ra = raList[i];
+            Vector2 rb = rbList[i];
+
+            bodyA.LinearVelocity += -impulse * bodyA.invMass;
+            bodyA.AngularVelocity += -Lib.Math.Cross(ra, impulse) * bodyA.invInertia;
+            bodyB.LinearVelocity += impulse * bodyB.invMass;
+            bodyB.AngularVelocity += Lib.Math.Cross(rb, impulse) * bodyB.invInertia;
+        }
+
+        //Resolve friction impulses
+        for (int i = 0; i < contactCount; i++)
+        {
+            Vector2 ra = contactList[i] - bodyA.worldTransform.Position;
+            Vector2 rb = contactList[i] - bodyB.worldTransform.Position;
+
+            raList[i] = ra;
+            rbList[i] = rb;
+
+            Vector2 raPerp = new Vector2(-ra.Y, ra.X);
+            Vector2 rbPerp = new Vector2(-rb.Y, rb.X);
+
+            Vector2 angularLinearVelocityA = raPerp * bodyA.AngularVelocity;
+            Vector2 angularLinearVelocityB = rbPerp * bodyB.AngularVelocity;
+
+            Vector2 relativeVelocity =
+                (bodyB.LinearVelocity + angularLinearVelocityB) -
+                (bodyA.LinearVelocity + angularLinearVelocityA);
+
+            Vector2 tangent = relativeVelocity - Vector2.Dot(relativeVelocity, contact.normal) * contact.normal;
+
+            if (Lib.Math.NearlyEqual(tangent, Vector2.Zero))
+            {
+                impulseList[i] = Vector2.Zero;
+                continue;
+            }
+            else
+                tangent = Vector2Ext.Normalize(tangent);
+
+            float raPerpDotT = Vector2.Dot(raPerp, tangent);
+            float rbPerpDotT = Vector2.Dot(rbPerp, tangent);
+
+            float denom = bodyA.invMass + bodyB.invMass +
+                (raPerpDotT * raPerpDotT) * bodyA.invInertia +
+                (rbPerpDotT * rbPerpDotT) * bodyB.invInertia;
+
+            float jt = -Vector2.Dot(relativeVelocity, tangent);
+            jt /= denom;
+            jt /= (float)contactCount;
+            Vector2 frictionImpulse;
+            float j = jValue[i];
+            //coulomb's law
+            if (MathF.Abs(jt) <= j * staticFriction)
+                frictionImpulse = jt * tangent;
+            else
+                frictionImpulse = -j * tangent * dynamicFriction;
+
+            impulseList[i] = frictionImpulse;
+        }
+
+        for (int i = 0; i < contactCount; i++)
+        {
+            Vector2 frictionImpulse = impulseList[i];
+            Vector2 ra = raList[i];
+            Vector2 rb = rbList[i];
+
+            bodyA.LinearVelocity += -frictionImpulse * bodyA.invMass;
+            bodyA.AngularVelocity += -Lib.Math.Cross(ra, frictionImpulse) * bodyA.invInertia;
+            bodyB.LinearVelocity += frictionImpulse * bodyB.invMass;
+            bodyB.AngularVelocity += Lib.Math.Cross(rb, frictionImpulse) * bodyB.invInertia;
+        }
     }
+
 
     public static void PositionalCorrection(PhysicsBody bodyA, PhysicsBody bodyB, ref float depth, ref Vector2 normal)
     {
@@ -249,7 +345,7 @@ public class PhysicsWorld
         var slop = 0.05f;    // usually 0.01 to 0.1
 
         // Only correct penetration beyond the slop.
-        float penetration = Math.Max(depth - slop, 0.0f);
+        float penetration = MathF.Max(depth - slop, 0.0f);
         float correctionMagnitude = penetration / (bodyA.mass + bodyB.mass) * percent;
         Vector2 correction = normal * correctionMagnitude;
 

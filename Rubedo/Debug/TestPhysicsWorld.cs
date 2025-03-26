@@ -1,5 +1,6 @@
 ﻿//#define CONSTANT_SHAPE
 //#define RANDOM_SHAPE
+//#define PHYSICS_DEBUG
 
 using Microsoft.Xna.Framework;
 using Rubedo.Components;
@@ -46,7 +47,7 @@ public class TestPhysicsWorld : Entity
             MakeBody(state, (ShapeType)type, x, y, Random.Flip);
         }
 #else
-
+        
         Entity entity = new Entity(new Vector2(-100, 0), -22.5f);
         Collider comp = Collider.CreateBox(entity.transform, 200, 10);
         MakeBody(state, entity, comp, true);
@@ -54,7 +55,7 @@ public class TestPhysicsWorld : Entity
         entity = new Entity(new Vector2(100, 70), 22.5f);
         comp = Collider.CreateBox(entity.transform, 200, 10);
         MakeBody(state, entity, comp, true);
-
+        
         entity = new Entity(new Vector2(0, -150));
         comp = Collider.CreateBox(entity.transform, 720, 60);
         MakeBody(state, entity, comp, true);
@@ -91,7 +92,7 @@ public class TestPhysicsWorld : Entity
     public override void Draw(Renderer sb)
     {
         shapes.Begin(RubedoEngine.Instance.Camera);
-        RubedoEngine.Instance.World.DebugDraw(shapes);
+        //RubedoEngine.Instance.World.DebugDraw(shapes);
 
         for (int i = 0; i < RubedoEngine.Instance.World.BodyCount; i++)
         {
@@ -100,7 +101,12 @@ public class TestPhysicsWorld : Entity
             {
                 case ShapeType.Circle:
                     CircleShape shape = (CircleShape)body.collider.shape;
+                    Matrix2D matrix = shape.Transform.ToMatrix();
+                    Vector2 vA = shape.Transform.Position;
+                    Vector2 vB = matrix.Transform(Vector2.UnitY * shape.Radius);
+
                     shapes.DrawCircleFill(shape.Transform, shape.Radius, 32, colors[i]);
+                    shapes.DrawLine(vA, vB, Color.White);
                     shapes.DrawCircle(shape.Transform, shape.Radius, 32, outlineColors[i]);
                     break;
                 case ShapeType.Box:
@@ -120,11 +126,13 @@ public class TestPhysicsWorld : Entity
                     break;
             }
         }
+#if PHYSICS_DEBUG
         for (int i = 0; i < RubedoEngine.Instance.World.contactPoints.Count; i++)
         {
             shapes.DrawBoxFill(RubedoEngine.Instance.World.contactPoints[i], 5, 5, 0, Vector2.One, Color.Red);
             shapes.DrawBox(RubedoEngine.Instance.World.contactPoints[i], 5, 5, 0, Vector2.One, Color.White);
         }
+#endif
         shapes.End();
     }
 
@@ -152,25 +160,4 @@ public class TestPhysicsWorld : Entity
             }
         }
     }
-
-   /* public void WrapScreen()
-    {
-        if (RubedoEngine.Instance.World.BodyCount == 0)
-            return;
-        RubedoEngine.Instance.Camera.GetExtents(out Vector2 min, out Vector2 max);
-
-        float viewWidth = max.X - min.X;
-        float viewHeight = max.Y - min.Y;
-
-        for (int i = 0; i < RubedoEngine.Instance.World.BodyCount; i++)
-        {
-            if (!RubedoEngine.Instance.World.GetBody(i, out PhysicsBodyComponent body))
-                throw new System.Exception();
-
-            if (body.worldTransform.Position.X < min.X) body.Entity.transform.Position += new Vector2(viewWidth, 0f);
-            if (body.worldTransform.Position.X > max.X) body.Entity.transform.Position -= new Vector2(viewWidth, 0f);
-            if (body.worldTransform.Position.Y < min.Y) body.Entity.transform.Position += new Vector2(0f, viewHeight);
-            if (body.worldTransform.Position.Y > max.Y) body.Entity.transform.Position -= new Vector2(0f, viewHeight);
-        }
-    }*/
 }

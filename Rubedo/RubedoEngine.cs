@@ -39,6 +39,7 @@ public class RubedoEngine : Game
 
     public static DebugText debugText;
     private Stopwatch physicsWatch;
+    public Stopwatch physicsPhaseWatch;
 
     public RubedoEngine()
     {
@@ -64,6 +65,7 @@ public class RubedoEngine : Game
         _camera.SetZoom(1);
 
         physicsWatch = Stopwatch.StartNew();
+        physicsPhaseWatch = Stopwatch.StartNew();
     }
 
     protected override void Update(GameTime gameTime)

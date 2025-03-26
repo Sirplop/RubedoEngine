@@ -15,7 +15,14 @@ public class Collider : Component
     public readonly static float UNIT_BOX_SIDE = 1f * RubedoEngine.SizeOfMeter;
     public readonly static float UNIT_CAPSULE_LENGTH = 0.334f * RubedoEngine.SizeOfMeter;
     public readonly static float UNIT_CAPSULE_RADIUS = 0.334f * RubedoEngine.SizeOfMeter;
-    public readonly static List<Vector2> UNIT_POLYGON_POINTS = new List<Vector2>() { new Vector2(0, 0), new Vector2(0.5f * RubedoEngine.SizeOfMeter, 0.866f * RubedoEngine.SizeOfMeter), new Vector2(1f * RubedoEngine.SizeOfMeter, 0f) };
+    public readonly static List<Vector2> UNIT_POLYGON_POINTS = new List<Vector2>() { Vector2.Zero, new Vector2(0.5f * RubedoEngine.SizeOfMeter, 0.866f * RubedoEngine.SizeOfMeter), new Vector2(1f * RubedoEngine.SizeOfMeter, 0f) };
+    /*public readonly static List<Vector2> UNIT_POLYGON_POINTS = 
+        new List<Vector2>() {
+            new Vector2(-1f * RubedoEngine.SizeOfMeter, -0.866f * RubedoEngine.SizeOfMeter),
+            new Vector2(0, 0.866f * RubedoEngine.SizeOfMeter), 
+            new Vector2(1f * RubedoEngine.SizeOfMeter, -0.866f * RubedoEngine.SizeOfMeter),
+            new Vector2(0, 0)
+        };*/
 
     public readonly IColliderShape shape;
     private Transform prevTransform = null;

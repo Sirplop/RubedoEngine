@@ -21,6 +21,8 @@ public class PhysicsBody : Component
     public readonly float restitution;
     public readonly float inertia;
     public readonly float invInertia;
+    public readonly float staticFriction;
+    public readonly float dynamicFriction;
 
     public bool isStatic = false;
 
@@ -30,7 +32,8 @@ public class PhysicsBody : Component
     
     public float AngularVelocity { get => angularVelocity; internal set => angularVelocity = value; }
 
-    public PhysicsBody(Collider collider, Vector2 position, float rotation, Vector2 scale, float density, float restitution, bool isStatic = true, bool active = true, bool visible = true) : base(active, visible)
+    public PhysicsBody(Collider collider, Vector2 position, float rotation, Vector2 scale, float density, float restitution, 
+        bool isStatic = true, bool active = true, bool visible = true) : base(active, visible)
     {
         localTransform = new Transform(position, rotation, scale);
         this.density = density;
@@ -40,6 +43,9 @@ public class PhysicsBody : Component
         this.isStatic = isStatic;
         this.collider = collider;
         this.force = Vector2.Zero;
+
+        this.staticFriction = 0.6f;
+        this.dynamicFriction = 0.4f;
 
         if (isStatic)
         {
@@ -64,6 +70,9 @@ public class PhysicsBody : Component
         this.mass = collider.shape.GetArea() * density;
         this.inertia = collider.shape.GetMomentOfInertia(mass);
 
+        this.staticFriction = 0.6f;
+        this.dynamicFriction = 0.4f;
+
         if (isStatic)
         {
             this.invMass = 0f;
@@ -86,7 +95,7 @@ public class PhysicsBody : Component
         velocity += RubedoEngine.Instance.World.gravity * deltaTime;
 
         Entity.transform.Position += velocity * deltaTime;
-        Entity.transform.Rotation += angularVelocity * deltaTime;
+        Entity.transform.RotationRadians += angularVelocity * deltaTime;
 
         force = Vector2.Zero;
         collider.shape.TransformUpdateRequired = true;

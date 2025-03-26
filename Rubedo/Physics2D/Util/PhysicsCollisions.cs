@@ -104,7 +104,6 @@ public static class PhysicsCollisions
     }
     #endregion
 
-
     #region Circle
     public static bool CircleCircle(Vector2 circleCenter1, float circleRadius1, Vector2 circleCenter2,
                                       float circleRadius2, ref CollisionManifold result)
@@ -114,7 +113,7 @@ public static class PhysicsCollisions
         {
             return false;
         }
-        result.normal = Vector2.Normalize(circleCenter2 - circleCenter1);
+        result.normal = Vector2Ext.Normalize(circleCenter2 - circleCenter1);
         result.depth = circleRadius1 + circleRadius2 - MathF.Sqrt(sqrDist);
         result.contactPoint1 = circleCenter2 + result.normal * circleRadius2;
 
@@ -292,8 +291,41 @@ public static class PhysicsCollisions
         //select point on capsule1 nearest to best potential endpoint on capsule2, and vice-versa
         Vector2 bestB = Collisions.ClosestPointOnLine(capsule2.Start, capsule2.End, bestA);
         bestA = Collisions.ClosestPointOnLine(capsule1.Start, capsule1.End, bestB);
+        if (bestA == bestB)
+        {   //if they're equal, that means our capsule lines are intersecting
+            //which means we need to get the perpendicular normal to the smallest squared distance.
+            result.contactPoint1 = bestA; //arbitrary contact point.
+            float min = MathF.Min(MathF.Min(d0, d1), MathF.Min(d2, d3));
+            if (min == d0)
+            {
+                result.depth = MathF.Sqrt(d0);
+                result.normal = Vector2Ext.Perpendicular(Vector2Ext.Normalize(v0));
+            } else if (min == d1)
+            {
+                result.depth = MathF.Sqrt(d1);
+                result.normal = Vector2Ext.Perpendicular(Vector2Ext.Normalize(v1));
+            }
+            else if (min == d2)
+            {
+                result.depth = MathF.Sqrt(d2);
+                result.normal = Vector2Ext.Perpendicular(Vector2Ext.Normalize(v2));
+            }
+            else
+            {
+                result.depth = MathF.Sqrt(d3);
+                result.normal = Vector2Ext.Perpendicular(Vector2Ext.Normalize(v3));
+            }
+            return true;
+        }
 
-        return CircleCircle(bestA, capsule1.Radius, bestB, capsule2.Radius, ref result);
+        bool ret = CircleCircle(bestA, capsule1.Radius, bestB, capsule2.Radius, ref result);
+        if (ret)
+        {
+            //need to fix contact point.
+            result.contactPoint1 = bestA + (result.normal * capsule1.Radius);
+            return true;
+        }
+        return false; 
     }
 
     public static bool CapsulePolygon(in CapsuleShape capsule, in PolygonShape polygon, ref CollisionManifold result)
@@ -313,7 +345,7 @@ public static class PhysicsCollisions
         }
         result.normal = retNormal;
         result.depth = retDepth;
-        result.contactPoint1 += result.normal * capsule.Radius;
+        //result.contactPoint1 -= result.normal * capsule.Radius;
 
         return retDepth != float.MinValue;
     }

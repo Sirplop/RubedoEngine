@@ -44,6 +44,17 @@ public class TestState : GameState
         shapes.outlineColors.Add(Color.Blue);
         Add(shapes);
         RubedoEngine.Instance.World.AddBody(new PhysicsObject(body, collider));
+
+        /*
+        for (int x = 0; x < 20; x++)
+        {
+            for (int y = 0; y < 5; y++)
+            {
+                Entity entity = new Entity(new Vector2(x * 30 - 250, y * 30 - 100));
+                Collider comp = Collider.CreateUnitShape(entity.transform, ShapeType.Box);
+                shapes.MakeBody(this, entity, comp, false);
+            }
+        }*/
     }
 
     public override void HandleInput()

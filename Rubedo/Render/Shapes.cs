@@ -24,6 +24,9 @@ public sealed class Shapes : IDisposable
     private int indexCount;
     private int vertexCount;
 
+    private Camera camera;
+    private bool usingCamera = false;
+
     public Shapes(RubedoEngine game)
     {
         this.game = game ?? throw new ArgumentNullException("game");
@@ -75,6 +78,7 @@ public sealed class Shapes : IDisposable
 
     public void Begin(Camera camera)
     {
+        this.camera = camera;
         if (this.started)
         {
             throw new Exception("Batch was already started.\n" +
@@ -84,12 +88,14 @@ public sealed class Shapes : IDisposable
         {
             effect.View = Matrix.Identity;
             effect.Projection = Matrix.CreateOrthographicOffCenter(0, game.GraphicsDevice.Viewport.Width, 0, game.GraphicsDevice.Viewport.Height, 0, 1.0f);
+            usingCamera = false;
         }
         else
         {
             effect.View = camera.View;
             effect.Projection = camera.Projection;
             effect.World = camera.TransformMatrix;
+            usingCamera = true;
         }
 
         started = true;
@@ -497,10 +503,10 @@ public sealed class Shapes : IDisposable
 
         // If we are using the world camera then we need to adjust the "thickness" of the line
         //  so no matter how far we have "zoomed" into the world the line will look the same.
-        /*if (this.usingCamera)
+        if (this.usingCamera)
         {
-            thickness /= (float)this.camera.Zoom;
-        }*/ //implement when camera implemented.
+            thickness /= (float)this.camera.GetZoom();
+        }
 
         float halfThickness = thickness * 0.5f;
 
