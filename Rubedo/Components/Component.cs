@@ -2,24 +2,20 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Render;
+using System;
 
 namespace Rubedo.Components;
 
 public class Component
 {
-    public Entity Entity { get; private set; }
-    public Transform localTransform;
-    public Transform worldTransform { get
-        {
-            return Entity.transform + localTransform;
-        } 
-    }
+    public Entity Entity { get; protected set; }
+    public Transform transform;
     public bool active;
     public bool visible;
 
     public Component(bool active, bool visible)
     {
-        localTransform = new Transform();
+        transform = new Transform();
         this.active = active;
         this.visible = visible;
     }
@@ -27,10 +23,12 @@ public class Component
     public virtual void Added(Entity entity)
     {
         Entity = entity;
+        transform.parent = entity.transform;
     }
     public virtual void Removed(Entity entity)
     {
         Entity = null;
+        transform.parent = null;
     }
 
     /// <summary>

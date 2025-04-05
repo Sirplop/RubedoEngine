@@ -4,7 +4,7 @@ using Rubedo.Object;
 using System;
 using System.Collections.Generic;
 
-namespace Rubedo.Physics2D.ColliderShape;
+namespace Rubedo.Physics2D.Collision.Shapes;
 
 /// <summary>
 /// I am BoxShape, and this is my summary.
@@ -33,9 +33,9 @@ public class BoxShape : PolygonShape
         List<Vector2> box = new List<Vector2>
         {
             new Vector2(-width, -height),
-            new Vector2(width, -height),
+            new Vector2(-width, height),
             new Vector2(width, height),
-            new Vector2(-width, height)
+            new Vector2(width, -height)
         };
         return box;
     }
@@ -44,12 +44,13 @@ public class BoxShape : PolygonShape
     {
         if (!TransformUpdateRequired)
             return;
-        Matrix2D matrix = Transform.ToMatrix();
+        Matrix2D matrix = Transform.ToMatrixWorld();
         _transformedVertices[0] = matrix.Transform(LocalVertices[0]);
         _transformedVertices[1] = matrix.Transform(LocalVertices[1]);
         _transformedVertices[2] = matrix.Transform(LocalVertices[2]);
         _transformedVertices[3] = matrix.Transform(LocalVertices[3]);
         TransformUpdateRequired = false;
+        areEdgeNormalsDirty = true;
     }
 
     public override float GetArea()
@@ -58,6 +59,6 @@ public class BoxShape : PolygonShape
     }
     public override float GetMomentOfInertia(float mass)
     {
-        return (mass / 12f) * (width * width + height * height);
+        return mass / 12f * (width * width + height * height);
     }
 }

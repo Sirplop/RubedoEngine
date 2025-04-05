@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Lib;
+using Rubedo.Physics2D.Dynamics;
 using Rubedo.Render;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,7 @@ namespace Rubedo.Physics2D.Util;
 /// </summary>
 public class SpatialHashGrid
 {
+    /*
     public AABB GridBounds = new AABB()
     {
         Min = Vector2.Zero,
@@ -41,13 +43,13 @@ public class SpatialHashGrid
     /// Gets the cell at the world-space x,y value. If the cell is empty and createCellIfEmpty is true a new cell will be created.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    List<PhysicsObject> CellAtPosition(int x, int y, bool createCellIfEmpty = false)
+    List<PhysicsBody> CellAtPosition(int x, int y, bool createCellIfEmpty = false)
     {
-        if (!_cells.TryGetValue(x, y, out List<PhysicsObject> cell))
+        if (!_cells.TryGetValue(x, y, out List<PhysicsBody> cell))
         {
             if (createCellIfEmpty)
             {
-                cell = new List<PhysicsObject>();
+                cell = new List<PhysicsBody>();
                 _cells.Add(x, y, cell);
             }
         }
@@ -55,7 +57,7 @@ public class SpatialHashGrid
         return cell;
     }
 
-    public void Update(PhysicsObject collider)
+    public void Update(PhysicsBody collider)
     {
         Remove(collider);
         Add(collider);
@@ -65,7 +67,7 @@ public class SpatialHashGrid
     /// adds the object to the SpatialHash
     /// </summary>
     /// <param name="collider">Object.</param>
-    public void Add(PhysicsObject collider)
+    public void Add(PhysicsBody collider)
     {
         AABB bounds = collider.collider.shape.Bounds;
         collider.collider.shape.RegisteredBounds = bounds;
@@ -93,7 +95,7 @@ public class SpatialHashGrid
     /// Removes the object from the SpatialHash
     /// </summary>
     /// <param name="collider">Collider.</param>
-    public void Remove(PhysicsObject collider)
+    public void Remove(PhysicsBody collider)
     {
         AABB bounds = collider.collider.shape.RegisteredBounds;
         Vector2Int p1 = CellCoords(bounds.Min.X, bounds.Min.Y);
@@ -123,7 +125,7 @@ public class SpatialHashGrid
     /// <summary>
     /// Returns all valid objects in cells that the object's bounding box intersects.
     /// </summary>
-    public void AABB_Broadphase(in PhysicsObject inObject, in HashSet<(PhysicsObject, PhysicsObject)> pairSet, in List<CollisionPair> pairList)
+    public void AABB_Broadphase(in PhysicsBody inObject, in HashSet<(PhysicsBody, PhysicsBody)> pairSet, in List<CollisionPair> pairList)
     {
         AABB bounds = inObject.collider.shape.Bounds;
         Vector2Int p1 = CellCoords(bounds.Min.X, bounds.Min.Y);
@@ -133,14 +135,14 @@ public class SpatialHashGrid
         {
             for (int y = p1.Y; y <= p2.Y; y++)
             {
-                List<PhysicsObject> cell = CellAtPosition(x, y);
+                List<PhysicsBody> cell = CellAtPosition(x, y);
                 if (cell == null || cell.Count == 0)
                     continue;
 
                 // we have an occupied cell. loop through and fetch all the Colliders
                 for (int i = 0; i < cell.Count; i++)
                 {
-                    PhysicsObject obj = cell[i];
+                    PhysicsBody obj = cell[i];
 
                     // skip this collider if it's the thing we're checking or if it doesnt match our layerMask
                     if (obj == inObject)// || !Flags.IsFlagSet(layerMask, collider.PhysicsLayer))
@@ -165,7 +167,7 @@ public class SpatialHashGrid
         {
             for (int y = Math.FloorToInt(GridBounds.Min.Y); y <= Math.CeilToInt(GridBounds.Max.Y); y++)
             {
-                List<PhysicsObject> cell = CellAtPosition(x, y);
+                List<PhysicsBody> cell = CellAtPosition(x, y);
                 if (cell != null && cell.Count > 0)
                     DebugDrawCellDetails(shapes, x, y, cell.Count, textScale);
             }
@@ -188,7 +190,7 @@ public class SpatialHashGrid
 
     class HashDictionary
     {
-        internal readonly Dictionary<long, List<PhysicsObject>> map = new Dictionary<long, List<PhysicsObject>>();
+        internal readonly Dictionary<long, List<PhysicsBody>> map = new Dictionary<long, List<PhysicsBody>>();
 
 
         /// <summary>
@@ -202,13 +204,13 @@ public class SpatialHashGrid
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Add(int x, int y, List<PhysicsObject> list)
+        public void Add(int x, int y, List<PhysicsBody> list)
         {
             map.Add(GetKey(x, y), list);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Remove(PhysicsObject obj)
+        public void Remove(PhysicsBody obj)
         {
             foreach (var list in map.Values)
             {
@@ -219,7 +221,7 @@ public class SpatialHashGrid
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryGetValue(int x, int y, out List<PhysicsObject> list)
+        public bool TryGetValue(int x, int y, out List<PhysicsBody> list)
         {
             return map.TryGetValue(GetKey(x, y), out list);
         }
@@ -228,5 +230,5 @@ public class SpatialHashGrid
         {
             map.Clear();
         }
-    }
+    }*/
 }

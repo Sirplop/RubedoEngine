@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Lib;
-using Rubedo.Physics2D.ColliderShape;
+using Rubedo.Physics2D.Collision.Shapes;
 using System;
 using System.Drawing;
 using System.Reflection;
@@ -29,11 +29,8 @@ public static class Collisions
     };
 
     #region Point
-    public static bool BoxContainsPoint(in BoxShape box, in Vector2 point)
+    public static bool BoxContainsPoint(in Box box, in Vector2 point)
     {
-        if (box.Transform.Rotation != 0)
-            return PolygonContainsPoint(box, point);
-
         return point.X <= box.Right &&   //is the point LEFT of the RIGHT edge?
             point.X >= box.Left &&       //is the point RIGHT of the LEFT edge?
             point.Y <= box.Top &&        //is the point BELOW the TOP edge?
@@ -43,14 +40,15 @@ public static class Collisions
     /// essentially what the algorithm is doing is shooting a ray from point out. If it intersects an odd number of polygon sides
     /// we know it is inside the polygon.
     /// </summary>
-    public static bool PolygonContainsPoint(in PolygonShape poly, in Vector2 point)
+    public static bool PolygonContainsPoint(in Polygon poly, in Vector2 point)
     {
         var isInside = false;
-        for (int i = 0, j = poly.TransformedVertices.Length - 1; i < poly.TransformedVertices.Length; j = i++)
+        Vector2 p = point - poly.transform.WorldPosition;
+        for (int i = 0, j = poly.vertices.Length - 1; i < poly.vertices.Length; j = i++)
         {
-            if (((poly.TransformedVertices[i].Y > point.Y) != (poly.TransformedVertices[j].Y > point.Y)) &&
-                (point.X < (poly.TransformedVertices[j].X - poly.TransformedVertices[i].X) * (point.Y - poly.TransformedVertices[i].Y) / (poly.TransformedVertices[j].Y - poly.TransformedVertices[i].Y) +
-                  poly.TransformedVertices[i].X))
+            if (((poly.vertices[i].Y > p.Y) != (poly.vertices[j].Y > p.Y)) &&
+                (p.X < (poly.vertices[j].X - poly.vertices[i].X) * (p.Y - poly.vertices[i].Y) / (poly.vertices[j].Y - poly.vertices[i].Y) +
+                  poly.vertices[i].X))
             {
                 isInside = !isInside;
             }

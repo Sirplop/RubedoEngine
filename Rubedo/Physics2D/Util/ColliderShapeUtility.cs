@@ -1,9 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
+using Rubedo.Physics2D.Collision.Shapes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
-namespace Rubedo.Physics2D.ColliderShape;
+namespace Rubedo.Physics2D.Util;
 
 /// <summary>
 /// I am ColliderShapeUtility, and this is my summary.
@@ -21,6 +23,27 @@ public static class ColliderShapeUtility
         float centerX = 0f;
         float centerY = 0f;
         for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i, i++)
+        {
+            float temp = polygon[j].X * polygon[i].Y - polygon[i].X * polygon[j].Y;
+            accumulatedArea += temp;
+            centerX += (polygon[j].X + polygon[i].X) * temp;
+            centerY += (polygon[j].Y + polygon[i].Y) * temp;
+        }
+
+        // Much greater than the recommended epsilon of 1e-6, but the system becomes unstable below this
+        if (Math.Abs(accumulatedArea) < 0.5f)
+            return polygon[0];
+
+        // Multiply accumulatedArea by 3 to get the proper divisor (6 * area).
+        accumulatedArea *= 3f;
+        return new Vector2(centerX / accumulatedArea, centerY / accumulatedArea);
+    }
+    public static Vector2 ComputeCentroid(List<Vector2> polygon)
+    {
+        float accumulatedArea = 0f;
+        float centerX = 0f;
+        float centerY = 0f;
+        for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i, i++)
         {
             float temp = polygon[j].X * polygon[i].Y - polygon[i].X * polygon[j].Y;
             accumulatedArea += temp;
@@ -56,11 +79,11 @@ public static class ColliderShapeUtility
         return vertices[result];
     }
     /// <summary>
-    /// gets the closest point that is on the rectangle border to the given point
+    /// Gets the closest point that is on the rectangle border to the given local point.
     /// </summary>
     /// <returns>The closest point on rectangle border to point.</returns>
     /// <param name="point">Point.</param>
-    public static Vector2 FindClosestPointOnBox(in BoxShape box, Vector2 point, out Vector2 edgeNormal)
+    public static Vector2 FindClosestPointOnBox(in Box box, Vector2 point, out Vector2 edgeNormal)
     {
         edgeNormal = Vector2.Zero;
 
@@ -114,6 +137,17 @@ public static class ColliderShapeUtility
         return res;
     }
 
+    public static int[] ComputeTriangles(int vertexCount)
+    {
+        int[] ret = new int[(vertexCount - 2) * 3];
+        for (int i = 0; i < vertexCount - 2; i++)
+        {
+            ret[i * 3] = 0;
+            ret[(i * 3) + 1] = i + 1;
+            ret[(i * 3 )+ 2] = i + 2;
+        }
+        return ret;
+    }
 
     public static void FindContactPoints(Vector2[] verticesA, Vector2[] verticesB,
             out Vector2 contact1, out Vector2 contact2, out int contactCount)
@@ -133,6 +167,7 @@ public static class ColliderShapeUtility
                 Vector2 va = verticesB[j];
                 Vector2 vb = verticesB[(j + 1) % verticesB.Length];
 
+                //PointSegmentDistance(va, vb, p, out float distSq, out Vector2 cp);
                 Vector2 cp = Collisions.ClosestPointOnLine(va, vb, p);
                 float distSq = Vector2.DistanceSquared(cp, p);
 

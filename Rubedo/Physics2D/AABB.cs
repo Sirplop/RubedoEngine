@@ -14,6 +14,11 @@ public struct AABB
     public Vector2 Max;
     public readonly float Area => MathF.Abs((Max.X - Min.X) * (Max.Y - Min.Y));
 
+    public void Set(in Vector2 min, in Vector2 max)
+    {
+        this.Min = min; this.Max = max;
+    }
+
     public bool Contains(ref Vector2 point)
     {
         return Min.X <= point.X &&

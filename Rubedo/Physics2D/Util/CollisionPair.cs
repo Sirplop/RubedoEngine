@@ -1,4 +1,5 @@
 ﻿using System;
+using Rubedo.Physics2D.Dynamics;
 
 namespace Rubedo.Physics2D.Util;
 
@@ -7,10 +8,10 @@ namespace Rubedo.Physics2D.Util;
 /// </summary>
 public class CollisionPair : IEquatable<CollisionPair>
 {
-    public readonly PhysicsObject A;
-    public readonly PhysicsObject B;
+    public readonly PhysicsBody A;
+    public readonly PhysicsBody B;
 
-    public CollisionPair(PhysicsObject A, PhysicsObject B)
+    public CollisionPair(PhysicsBody A, PhysicsBody B)
     {
         this.A = A;
         this.B = B;

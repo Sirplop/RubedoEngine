@@ -24,7 +24,7 @@ public struct Matrix2D
     public static Matrix2D Identity => _identity;
     static Matrix2D _identity = new Matrix2D(1f, 0f, 0f, 1f, 0f, 0f);
 
-
+    #region Constructors
     /// <summary>
     /// Constructs a matrix.
     /// </summary>
@@ -43,10 +43,10 @@ public struct Matrix2D
     {
         return new Matrix2D(1, 0, 0, 1, x, y);
     }
-    public static Matrix2D CreateRotation(float rotationDegrees)
+    public static Matrix2D CreateRotation(float radians)
     {
-        float sin = MathF.Sin(Lib.Math.DegToRad(rotationDegrees));
-        float cos = MathF.Cos(Lib.Math.DegToRad(rotationDegrees));
+        float sin = MathF.Sin(radians);
+        float cos = MathF.Cos(radians);
         return new Matrix2D(cos, sin, -sin, cos, 0, 0);
     }
     public static Matrix2D CreateScale(float x, float y)
@@ -71,12 +71,30 @@ public struct Matrix2D
 
         return new Matrix2D(cosScaleX, sinScaleX, -sinScaleY, cosScaleY, 0, 0);
     }
+    public static Matrix2D CreateRS(float rotationDegrees, Vector2 xy)
+    {
+        float sin = MathF.Sin(Lib.Math.DegToRad(rotationDegrees));
+        float cos = MathF.Cos(Lib.Math.DegToRad(rotationDegrees));
+
+        float cosScaleX = cos * xy.X;
+        float sinScaleX = sin * xy.X;
+        float cosScaleY = cos * xy.Y;
+        float sinScaleY = sin * xy.Y;
+
+        return new Matrix2D(cosScaleX, sinScaleX, -sinScaleY, cosScaleY, 0, 0);
+    }
     public static Matrix2D CreateTS(float x, float y, float sX, float sY)
     {
         return new Matrix2D(sX, 0, 0, sY, x, y);
     }
-
-
+    public Matrix2D Transpose()
+    { 
+        //this is a transform matrix, so we negate the position and do a 2x2 transpose.
+        return new Matrix2D(M11, M21, 
+                            M12, M22, 
+                            -M31, -M32);
+    }
+    #endregion
 
     /// <summary>
     /// Creates a new matrix which contains the sum of the two matrixes.

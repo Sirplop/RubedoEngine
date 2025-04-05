@@ -7,20 +7,20 @@ namespace Rubedo.Physics2D.Util;
 /// </summary>
 internal class ManifoldPool
 {
-    private readonly Stack<CollisionManifold> _pool = new Stack<CollisionManifold>();
+    private readonly Stack<Manifold> _pool = new Stack<Manifold>();
 
-    public CollisionManifold Get()
+    public Manifold Get()
     {
         if (_pool.Count > 0)
         {
-            CollisionManifold m = _pool.Pop();
+            Manifold m = _pool.Pop();
             m.Reset();
             return m;
         }
-        return new CollisionManifold();
+        return new Manifold();
     }
 
-    public void Release(CollisionManifold manifold)
+    public void Release(Manifold manifold)
     {
         manifold.Reset();
         _pool.Push(manifold);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo;
 using Rubedo.Components;
-using Rubedo.Physics2D;
+using Rubedo.Physics2D.Dynamics;
 using System;
 
 namespace Learninging.Gameplay;

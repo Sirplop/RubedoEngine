@@ -200,7 +200,7 @@ public sealed class Shapes : IDisposable
 
     public void DrawBoxFill(Transform transform, float width, float height, Color color)
     {
-        DrawBoxFill(transform.Position, width, height, transform.RotationRadians, transform.Scale, color);
+        DrawBoxFill(transform.WorldPosition, width, height, transform.WorldRotation, transform.WorldScale, color);
     }
     public void DrawBoxFill(Vector2 center, float width, float height, float rotation, Vector2 scale, Color color)
     {
@@ -317,6 +317,8 @@ public sealed class Shapes : IDisposable
         const int MinCirclePoints = 3;
         const int MaxCirclePoints = 64;
 
+        radius = radius * Lib.Math.Max(transform.WorldScale);
+
         int shapeVertexCount = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);    // The vertex count will just be the number of points requested by the user.
         int shapeTriangleCount = shapeVertexCount - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
         int shapeIndexCount = shapeTriangleCount * 3;       // The indices count will just be 3 times the triangle count.
@@ -343,72 +345,17 @@ public sealed class Shapes : IDisposable
 
         float ax = radius;
         float ay = 0f;
-
+        Vector2 pos = transform.WorldPosition;
         // Save all remaining vertices.
         for (int i = 0; i < shapeVertexCount; i++)
         {
-            this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(ax + transform.Position.X, ay + transform.Position.Y, 0f), color);
+            this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(ax + pos.X, ay + pos.Y, 0f), color);
 
             float bx = ax * cos - ay * sin;
             float by = ax * sin + ay * cos;
 
             ax = bx;
             ay = by;
-        }
-
-        this.shapeCount++;
-    }
-    #endregion
-    #region Ellipsis
-    public void DrawEllipseFill(float x, float y, float xRadius, float yRadius, int points, Color color)
-    {
-        this.DrawEllipseFill(new Vector2(x, y), new Vector2(xRadius, yRadius), points, color);
-    }
-
-    public void DrawEllipseFill(Vector2 center, Vector2 radius, int points, Color color)
-    {
-        /*
-         * How to draw ellipses:
-         * https://community.khronos.org/t/how-to-draw-an-oval/13428
-         */
-
-        this.EnsureStarted();
-
-        const int MinElipsePoints = 3;
-        const int MaxElipsePoints = 256;
-
-        int shapeVertexCount = Lib.Math.Clamp(points, MinElipsePoints, MaxElipsePoints);    // The vertex count will just be the number of points requested by the user.
-        int shapeTriangleCount = shapeVertexCount - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
-        int shapeIndexCount = shapeTriangleCount * 3;       // The indices count will just be 3 times the triangle count.
-
-        this.EnsureSpace(shapeVertexCount, shapeIndexCount);
-
-        float deltaAngle = MathHelper.TwoPi / (float)shapeVertexCount;
-        float angle = 0f;
-
-        int index = 1;
-
-        // Indicies;
-        for (int i = 0; i < shapeTriangleCount; i++)
-        {
-            this.indices[this.indexCount++] = 0 + this.vertexCount;
-            this.indices[this.indexCount++] = index + this.vertexCount;
-            this.indices[this.indexCount++] = index + 1 + this.vertexCount;
-
-            index++;
-        }
-
-        // Vertices;
-
-        // Save all remaining vertices.
-        for (int i = 0; i < shapeVertexCount; i++)
-        {
-            float x = MathF.Cos(angle) * radius.X + center.X;
-            float y = MathF.Sin(angle) * radius.Y + center.Y;
-
-            angle += deltaAngle;
-
-            this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(x, y, 0f), color);
         }
 
         this.shapeCount++;
@@ -443,7 +390,8 @@ public sealed class Shapes : IDisposable
             index++;
         }
 
-        Matrix2D matrix = Matrix2D.CreateRS(transform.Rotation, transform.Scale.X, transform.Scale.Y);
+
+        Matrix2D matrix = Matrix2D.CreateRS(transform.WorldRotationDegrees, transform.WorldScale);
 
         // Vertices;
         // Save all remaining vertices.
@@ -480,11 +428,11 @@ public sealed class Shapes : IDisposable
         {
             this.indices[this.indexCount++] = this.vertexCount + triangles[i];
         }
-        //Matrix2D matrix = transform.ToMatrix();
+        Matrix2D matrix = transform.ToMatrixWorld();
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector2 v = vertices[i];
-            //v = matrix.Transform(v);
+            v = matrix.Transform(v);
             this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(v.X, v.Y, 0f), color);
         }
 
@@ -635,7 +583,7 @@ public sealed class Shapes : IDisposable
 
     public void DrawBox(Transform transform, float width, float height, Color color)
     {
-        this.DrawBox(transform.Position, width, height, transform.RotationRadians, transform.Scale, color);
+        this.DrawBox(transform.WorldPosition, width, height, transform.WorldRotation, transform.WorldScale, color);
     }
 
     public void DrawBox(float x, float y, float width, float height, Color color)
@@ -710,6 +658,8 @@ public sealed class Shapes : IDisposable
         const int MinCirclePoints = 3;
         const int MaxCirclePoints = 256;
 
+        radius *= Lib.Math.Max(transform.WorldScale);
+
         points = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);
 
         float angle = MathHelper.TwoPi / (float)points;
@@ -722,14 +672,15 @@ public sealed class Shapes : IDisposable
         float ax = radius;
         float ay = 0f;
 
+        Vector2 pos = transform.WorldPosition;
         for (int i = 0; i < points; i++)
         {
             // Perform a 2D rotation transform to get the next point on the circle.
             float bx = ax * cos - ay * sin;
             float by = ax * sin + ay * cos;
 
-            this.DrawLine(ax + transform.Position.X, ay + transform.Position.Y,
-                bx + transform.Position.X, by + transform.Position.Y, color);
+            this.DrawLine(ax + pos.X, ay + pos.Y,
+                bx + pos.X, by + pos.Y, color);
 
             // Save the last transform for the next transform in the loop.
             ax = bx;
@@ -756,7 +707,7 @@ public sealed class Shapes : IDisposable
         float ay = 0;
 
         float bx = 0, by = 0;
-        Matrix2D matrix = Matrix2D.CreateRS(transform.Rotation, transform.Scale.X, transform.Scale.Y);
+        Matrix2D matrix = Matrix2D.CreateRS(transform.WorldRotationDegrees, transform.WorldScale);
 
         for (int i = 0; i < pointsPerCap / 2; i++)
         {
@@ -810,14 +761,14 @@ public sealed class Shapes : IDisposable
 
         // Now perform the rest of the vertex transforms and draw a line between each, 
         //  except for the final line segment that connects back to the first.
-        //Matrix2D matrix = transform.ToMatrix();
+        Matrix2D matrix = transform.ToMatrixWorld();
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector2 a = vertices[i];
             Vector2 b = vertices[(i + 1) % vertices.Length];
 
-            //a = matrix.Transform(a);
-            //b = matrix.Transform(b);
+            a = matrix.Transform(a);
+            b = matrix.Transform(b);
 
             this.DrawLine(a, b, color);
         }

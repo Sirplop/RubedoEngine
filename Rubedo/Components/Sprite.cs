@@ -37,7 +37,7 @@ public class Sprite : Component
     public Sprite(Texture2D texture, bool active, bool visible) : base(active, visible)
     {
         _texture = texture;
-        localTransform = new Transform();
+        transform = new Transform();
         Pivot = new Vector2(0.5f, 0.5f);
     }
 
@@ -48,12 +48,12 @@ public class Sprite : Component
 
         sb.Draw(
             _texture,
-            localTransform.Position + Entity.transform.Position,
+            transform.Position + Entity.transform.Position,
             null,
             _color,
-            localTransform.Rotation + Entity.transform.Rotation,
+            transform.RotationDegrees + Entity.transform.RotationDegrees,
             PixelPivot,
-            localTransform.Scale * Entity.transform.Scale,
+            transform.Scale * Entity.transform.Scale,
             SpriteEffects.None, 0f);
     }
 }

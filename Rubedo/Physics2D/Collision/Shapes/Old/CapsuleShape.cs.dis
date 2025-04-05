@@ -3,7 +3,7 @@ using Rubedo.Lib;
 using Rubedo.Object;
 using System;
 
-namespace Rubedo.Physics2D.ColliderShape;
+namespace Rubedo.Physics2D.Collision.Shapes;
 
 /// <summary>
 /// I am CapsuleShape, and this is my summary.
@@ -43,7 +43,8 @@ public class CapsuleShape : IColliderShape
     private bool _boundsUpdateRequired = true;
 
     public float Radius { get; protected set; }
-    public Vector2 Start {
+    public Vector2 Start
+    {
         get
         {
             if (TransformUpdateRequired)
@@ -92,21 +93,23 @@ public class CapsuleShape : IColliderShape
     {
         if (!TransformUpdateRequired)
             return;
-        Matrix2D matrix = Matrix2D.CreateTR(Transform.Position.X, Transform.Position.Y, Transform.Rotation);
-        _start = matrix.Transform(new Vector2(0, -Length * 0.5f * (Transform.Scale.Y * 0.5f + 0.5f)));
-        _end = matrix.Transform(new Vector2(0, Length * 0.5f * (Transform.Scale.Y * 0.5f + 0.5f)));
-        Radius = originalRadius * (Transform.Scale.X * 0.5f + 0.5f);
+        Matrix2D matrix = Matrix2D.CreateTR(Transform.WorldPosition.X, Transform.WorldPosition.Y, Transform.WorldRotationDegrees);
+        Vector2 scale = Transform.WorldScale;
+        _start = matrix.Transform(new Vector2(0, -Length * 0.5f * (scale.Y * 0.5f + 0.5f)));
+        _end = matrix.Transform(new Vector2(0, Length * 0.5f * (scale.Y * 0.5f + 0.5f)));
+        Radius = originalRadius * (scale.X * 0.5f + 0.5f);
         _transformUpdateRequired = false;
     }
     public float GetArea()
     {
         //a capsule is 2 halves of the same circle on either end of a rectangle of a given length with width 2R
         //so we just sum the area of the circle and area of the rectangle.
-        return (MathHelper.Pi * originalRadius * originalRadius * Transform.Scale.X) + (Length * originalRadius * 2 * Transform.Scale.Y);
+        Vector2 scale = Transform.WorldScale;
+        return MathHelper.Pi * originalRadius * originalRadius * scale.X + Length * originalRadius * 2 * scale.Y;
     }
     public float GetMomentOfInertia(float mass)
     {
         //might be wrong, idk, it's the right principle
-        return (0.5f * mass * Radius * Radius) + (mass * Length / 3f);
+        return 0.5f * mass * Radius * Radius + mass * Length / 3f;
     }
 }

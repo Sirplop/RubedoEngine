@@ -54,11 +54,11 @@ public class RubedoEngine : Game
         AssetManager.Initialize(Content);
 
         IsMouseVisible = true;
+        IsFixedTimeStep = false;
     }
 
     protected override void Initialize()
     {
-        base.Initialize();
         _renderer = new Renderer(this);
         _screen = new Screen(this, Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight);
         _camera = new Camera(_screen);
@@ -66,25 +66,32 @@ public class RubedoEngine : Game
 
         physicsWatch = Stopwatch.StartNew();
         physicsPhaseWatch = Stopwatch.StartNew();
+
+        base.Initialize(); //this calls LoadContent, so it must happen last.
     }
 
+    public bool physicsOn = true;
+    public bool stepPhysics = false;
     protected override void Update(GameTime gameTime)
     {
-        if (!IsActive)
-            return;
-
         rawDeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         deltaTime = rawDeltaTime * timeRate;
 
-        _inputManager.Update();
-
-        physicsWatch.Restart();
-        physicsWatch.Start();
-        _physicsWorld.Update();
-        physicsWatch.Stop();
-        debugText.DrawText(new Vector2(0, 20), $"Bodies: {_physicsWorld.BodyCount} | Physics time: {physicsWatch.Elapsed.TotalMilliseconds}", true);
+        if (IsActive)
+            _inputManager.Update();
 
         _stateManager.Update();
+        physicsWatch.Restart();
+        physicsWatch.Start();
+        if (physicsOn || stepPhysics)
+        {
+            _physicsWorld.Step();
+            stepPhysics = false;
+        }
+        physicsWatch.Stop();
+        debugText.DrawText(new Vector2(0, 20), $"Bodies: {_physicsWorld.BodyCount} | Physics time: {physicsWatch.Elapsed.TotalMilliseconds.ToString("0.00")}", true);
+
+        //_stateManager.Update();
         base.Update(gameTime);
     }
 
@@ -92,7 +99,7 @@ public class RubedoEngine : Game
     protected override void Draw(GameTime gameTime)
     {
         _screen.Set();
-        GraphicsDevice.Clear(Color.Gray);
+        GraphicsDevice.Clear(Color.Black);
         _renderer.Begin(_camera, SamplerState.PointClamp);
         _stateManager.Draw(_renderer);
         _renderer.End();

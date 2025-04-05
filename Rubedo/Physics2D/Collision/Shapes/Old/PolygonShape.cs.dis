@@ -1,10 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Lib;
 using Rubedo.Object;
+using Rubedo.Physics2D.Util;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Rubedo.Physics2D.ColliderShape;
+namespace Rubedo.Physics2D.Collision.Shapes;
 
 /// <summary>
 /// I am PolygonShape, and this is my summary.
@@ -44,13 +45,15 @@ public class PolygonShape : IColliderShape
     private bool _boundsUpdateRequired = true;
 
     /// <summary>
-    /// Local-space vertices of the polygon, in clockwise or counterclockwise order.
+    /// Local-space vertices of the polygon, in clockwise order.
     /// </summary>
     public Vector2[] LocalVertices { get; protected set; }
     /// <summary>
     /// World-space vertices of the polygon, updated by setting <see cref="TransformUpdateRequired"/>.
+    /// In clockwise order!
     /// </summary>
-    public Vector2[] TransformedVertices { 
+    public Vector2[] TransformedVertices
+    {
         get
         {
             if (TransformUpdateRequired)
@@ -82,20 +85,24 @@ public class PolygonShape : IColliderShape
 
     public bool IsBox = false;
 
+    public int VertexCount => _vertexCount;
+    protected int _vertexCount;
+
     public PolygonShape(Transform transform, IEnumerable<Vector2> vertices)
     {
         Transform = transform;
         LocalVertices = vertices.ToArray();
         Vector2 centroid = ColliderShapeUtility.ComputeCentroid(LocalVertices);
 
-        areEdgeNormalsDirty = true; 
+        areEdgeNormalsDirty = true;
+        _vertexCount = LocalVertices.Length;
 
         // Shift each vertex so the centroid is at (0,0)
-        for (int i = 0; i < LocalVertices.Length; i++)
+        for (int i = 0; i < _vertexCount; i++)
         {
             LocalVertices[i] -= centroid;
         }
-        TransformedVertices = new Vector2[LocalVertices.Length];
+        TransformedVertices = new Vector2[_vertexCount];
         TransformUpdateRequired = true;
     }
     public virtual void RecalculateAABB()
@@ -108,7 +115,7 @@ public class PolygonShape : IColliderShape
         float maxY = float.MinValue;
 
         Vector2 point;
-        for (int i = 0; i < _transformedVertices.Length; i++)
+        for (int i = 0; i < _vertexCount; i++)
         {
             point = _transformedVertices[i];
             if (point.X < minX) minX = point.X;
@@ -128,12 +135,13 @@ public class PolygonShape : IColliderShape
     {
         if (!TransformUpdateRequired)
             return;
-        Matrix2D matrix = Transform.ToMatrix();
-        for (int i = 0; i < LocalVertices.Length; i++)
+        Matrix2D matrix = Transform.ToMatrixWorld();
+        for (int i = 0; i < _vertexCount; i++)
         {
             _transformedVertices[i] = matrix.Transform(LocalVertices[i]);
         }
         TransformUpdateRequired = false;
+        areEdgeNormalsDirty = true;
     }
 
 
@@ -142,22 +150,17 @@ public class PolygonShape : IColliderShape
     /// </summary>
     protected void BuildEdgeNormals()
     {
-        var totalEdges = IsBox ? 2 : TransformedVertices.Length;
+        if (TransformUpdateRequired)
+            TransformVertices();
+        //TODO: Make boxes optimized by having only 2 edges. shouldn't be too hard.
+        var totalEdges = _vertexCount; //IsBox ? 2 : _vertexCount;
         if (_edgeNormals == null || _edgeNormals.Length != totalEdges)
             _edgeNormals = new Vector2[totalEdges];
-
-        Vector2 p2;
+        
         for (var i = 0; i < totalEdges; i++)
         {
-            var p1 = TransformedVertices[i];
-            if (i + 1 >= TransformedVertices.Length)
-                p2 = TransformedVertices[0];
-            else
-                p2 = TransformedVertices[i + 1];
-
-            var perp = Vector2Ext.Perpendicular(ref p1, ref p2);
-            Vector2Ext.Normalize(ref perp);
-            _edgeNormals[i] = perp;
+            Vector2 face = _transformedVertices[(i + 1) % _vertexCount] - _transformedVertices[i];
+            _edgeNormals[i] = Math.Normalize(Math.Right(face));
         }
         areEdgeNormalsDirty = false;
         return;
@@ -170,14 +173,13 @@ public class PolygonShape : IColliderShape
     public virtual float GetArea()
     {
         float total = 0f;
-        int count = LocalVertices.Length;
 
         // Sum over edges, possibly negative for CW ordering
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < _vertexCount; i++)
         {
-            int j = (i + 1) % count;
-            total += (LocalVertices[i].X * LocalVertices[j].Y)
-                - (LocalVertices[j].X * LocalVertices[i].Y);
+            int j = (i + 1) % _vertexCount;
+            total += LocalVertices[i].X * LocalVertices[j].Y
+                - LocalVertices[j].X * LocalVertices[i].Y;
         }
 
         // Multiply by 0.5 and take absolute value so the area is positive
@@ -187,34 +189,34 @@ public class PolygonShape : IColliderShape
     {
         // 1) Compute the polygon’s area using the shoelace formula.
         float area = GetArea();
-        if (area < Lib.Math.EPSILON)
+        if (area < Math.EPSILON)
             return 0f; // Degenerate polygon
 
         float crossSum = 0f;
         float numer = 0f;
 
         // 2) Sum over each edge in the polygon.
-        for (int i = 0; i < LocalVertices.Length; i++)
+        for (int i = 0; i < _vertexCount; i++)
         {
-            int j = (i + 1) % LocalVertices.Length;
+            int j = (i + 1) % _vertexCount;
             Vector2 v0 = LocalVertices[i];
             Vector2 v1 = LocalVertices[j];
 
-            float cross = (v0.X * v1.Y - v1.X * v0.Y);
-            float termX = (v0.X * v0.X) + (v0.X * v1.X) + (v1.X * v1.X);
-            float termY = (v0.Y * v0.Y) + (v0.Y * v1.Y) + (v1.Y * v1.Y);
+            float cross = v0.X * v1.Y - v1.X * v0.Y;
+            float termX = v0.X * v0.X + v0.X * v1.X + v1.X * v1.X;
+            float termY = v0.Y * v0.Y + v0.Y * v1.Y + v1.Y * v1.Y;
 
             numer += cross * (termX + termY);
             crossSum += cross;
         }
 
         crossSum = System.Math.Abs(crossSum);
-        if (crossSum < 1e-8f)
+        if (crossSum < Math.EPSILON)
             return 0f;  // Nearly degenerate polygon
 
         // 3) Use the standard formula:
         // I = (mass/(6 * sum(cross))) * numer
-        float iPoly = (mass * numer) / (6f * crossSum);
+        float iPoly = mass * numer / (6f * crossSum);
         return System.Math.Abs(iPoly);
     }
 
@@ -256,7 +258,7 @@ public class PolygonShape : IColliderShape
             }
         }
 
-        Vector2Ext.Normalize(ref edgeNormal);
+        Math.Normalize(ref edgeNormal);
 
         return closestPoint;
     }

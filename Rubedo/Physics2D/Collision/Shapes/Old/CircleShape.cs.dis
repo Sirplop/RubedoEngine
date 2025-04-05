@@ -1,9 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo.Lib;
 using Rubedo.Object;
 using System;
 
-namespace Rubedo.Physics2D.ColliderShape;
+namespace Rubedo.Physics2D.Collision.Shapes;
 
 /// <summary>
 /// I am CircleShape, and this is my summary.
@@ -11,7 +10,8 @@ namespace Rubedo.Physics2D.ColliderShape;
 public class CircleShape : IColliderShape
 {
     public ShapeType ShapeType => ShapeType.Circle;
-    public Transform Transform {
+    public Transform Transform
+    {
         get
         {
             return _transform;
@@ -29,7 +29,9 @@ public class CircleShape : IColliderShape
     private bool _transformUpdateRequired = true;
 
     public AABB RegisteredBounds { get; set; }
-    public ref AABB Bounds { get
+    public ref AABB Bounds
+    {
+        get
         {
             if (_boundsUpdateRequired)
                 RecalculateAABB();
@@ -42,6 +44,8 @@ public class CircleShape : IColliderShape
     private bool _boundsUpdateRequired = true;
 
     public float Radius { get; protected set; }
+
+    public float OriginalRadius => originalRadius;
     protected float originalRadius;
 
     public CircleShape(Transform transform, float radius)
@@ -56,10 +60,11 @@ public class CircleShape : IColliderShape
         // A circle's AABB is independent of rotation.
         if (TransformUpdateRequired)
             TransformVertices();
+        Vector2 pos = Transform.WorldPosition;
         _bounds = new AABB
         {
-            Min = new Vector2(Transform.Position.X - Radius, Transform.Position.Y - Radius),
-            Max = new Vector2(Transform.Position.X + Radius, Transform.Position.Y + Radius)
+            Min = new Vector2(pos.X - Radius, pos.Y - Radius),
+            Max = new Vector2(pos.X + Radius, pos.Y + Radius)
         };
         _boundsUpdateRequired = false;
     }
@@ -67,12 +72,12 @@ public class CircleShape : IColliderShape
     {
         if (!TransformUpdateRequired)
             return;
-        Radius = originalRadius * MathF.Max(Transform.Scale.X, Transform.Scale.Y);
+        Radius = originalRadius * Lib.Math.Max(Transform.WorldScale);
         TransformUpdateRequired = false;
     }
     public float GetArea()
     {
-        return MathHelper.Pi * originalRadius * originalRadius * MathF.Max(Transform.Scale.X, Transform.Scale.Y);
+        return MathHelper.Pi * originalRadius * originalRadius * Lib.Math.Max(Transform.WorldScale);
     }
 
     public float GetMomentOfInertia(float mass)

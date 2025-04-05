@@ -68,7 +68,7 @@ public sealed class Renderer : IDisposable
     }
     public void Draw(Texture2D texture, Transform transform, Color color)
     {
-        Sprites.Draw(texture, transform.Position, null, color, transform.Rotation, Vector2.Zero, transform.Scale, SpriteEffects.FlipVertically, 0);
+        Sprites.Draw(texture, transform.Position, null, color, transform.RotationDegrees, Vector2.Zero, transform.Scale, SpriteEffects.FlipVertically, 0);
     }
 
     public void Draw(Texture2D texture, Transform transform, Rectangle? sourceRectangle, Color color, Vector2 origin, SpriteEffects effects, float layerDepth)
@@ -80,7 +80,7 @@ public sealed class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale, effects, layerDepth);
+        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.RotationDegrees, origin, transform.Scale, effects, layerDepth);
     }
 
     public void Draw(Texture2D texture, Rectangle? sourceRectangle, Rectangle destinationRectangle, Color color)

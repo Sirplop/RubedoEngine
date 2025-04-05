@@ -31,8 +31,8 @@ public class Text : Component
 
     public override void Draw(Renderer sb)
     {
-        AdjustPositionForCentering(sb.Sprites);
-        sb.DrawString(font, text, worldTransform.Position, color, localTransform.Rotation, Lib.Math.Max(worldTransform.Scale) / RubedoEngine.Instance.Camera.GetZoom(), SpriteEffects.None);
+        //AdjustPositionForCentering(sb.Sprites);
+        sb.DrawString(font, text, transform.WorldPosition, color, transform.RotationDegrees, Lib.Math.Max(transform.WorldScale) / RubedoEngine.Instance.Camera.GetZoom(), SpriteEffects.None);
     }
 
     protected void AdjustPositionForCentering(SpriteBatch sb)
@@ -58,6 +58,6 @@ public class Text : Component
             default:
                 break;
         }
-        localTransform.Position = new Vector2(x, y);
+        transform.Position = new Vector2(x, y);
     }
 }
