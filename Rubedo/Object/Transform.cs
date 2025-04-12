@@ -1,192 +1,392 @@
-﻿
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using PhysicsEngine2D;
 using Rubedo.Lib;
 using System;
-using System.Runtime.InteropServices;
-using static System.Formats.Asn1.AsnWriter;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.Object;
 
-public class Transform : IEquatable<Transform>
+/// <summary>
+/// Contains information about a given object's position, rotation, and scale in space, possibly relative to a parent.
+/// </summary>
+public class Transform
 {
-    public readonly static Transform Identity = new Transform(Vector2.Zero, 0, Vector2.One);
+    [Flags]
+    enum Dirt
+    {
+        Clean = 0,
+        Position = 1,
+        Rotation = 2,
+        Scale = 4
+    }
 
-    public Transform parent;
-    #region Local Properties
+    private  Transform _parent;
+    private readonly List<Transform> _children = new List<Transform>();
+
+    private Dirt _dirtyType = (Dirt)7; //all dirty at start.
+    private bool _localDirty = true;
+
+    private bool _positionDirty = true;
+    private bool _worldPositionDirty = true;
+    private bool _rotationDirty = true;
+    private bool _scaleDirty = true;
+    private bool _worldToLocalDirty = true;
+
+    private Vector2 _position;
+    private float _rotation;
+    private Vector2 _scale;
+
+    private Vector2 _localPosition;
+    private float _localRotation; //rotation is stored in radians.
+    private Vector2 _localScale;
+
+    private Matrix2D _localTransform;
+    private Matrix2D _worldTransform = Matrix2D.Identity;
+    private Matrix2D _worldToLocalTransform = Matrix2D.Identity;
+
+    private Matrix2D _positionMatrix;
+    private Matrix2D _rotationMatrix;
+    private Matrix2D _scaleMatrix;
+
+    public int ChildCount => _children.Count;
+    public Transform Parent
+    {
+        get => _parent;
+        set => SetParent(value);
+    }
+
+    #region Constructors
+    public Transform()
+    {
+        _localPosition = Vector2.Zero;
+        _localRotation = 0;
+        _localScale = Vector2.One;
+    }
+    public Transform(Vector2 position)
+    {
+        _localPosition = position;
+        _localRotation = 0;
+        _localScale = Vector2.One;
+    }
+    public Transform(Vector2 position, float rotationDegrees)
+    {
+        _localPosition = position;
+        _localRotation = Lib.Math.DegToRad(rotationDegrees % 360);
+        _localScale = Vector2.One;
+    }
+    public Transform(Vector2 position, float rotationDegrees, Vector2 scale)
+    {
+        _localPosition = position;
+        _localRotation = Lib.Math.DegToRad(rotationDegrees % 360);
+        _localScale = scale;
+    }
+    #endregion
+
+    #region Local
+    /// <summary>
+    /// Gets the local-space position.
+    /// </summary>
+    public Vector2 LocalPosition
+    {
+        get
+        {
+            UpdateTransform();
+            return _localPosition;
+        }
+        set => SetLocalPosition(value);
+    }
+    /// <summary>
+    /// Gets the local-space rotation in degrees.
+    /// </summary>
+    public float LocalRotationDegrees
+    {
+        get
+        {
+            UpdateTransform();
+            return Lib.Math.RadToDeg(_localRotation);
+        }
+        set => SetLocalRotation(Lib.Math.DegToRad(value));
+    }
+    /// <summary>
+    /// Gets the local-space rotation in radians.
+    /// </summary>
+    public float LocalRotation
+    {
+        get
+        {
+            UpdateTransform();
+            return _localRotation;
+        }
+        set => SetLocalRotation(value);
+    }
+    /// <summary>
+    /// Gets the local-space scale.
+    /// </summary>
+    public Vector2 LocalScale
+    {
+        get
+        {
+            UpdateTransform();
+            return _localScale;
+        }
+        set => SetLocalScale(value);
+    }
+    #endregion
+    #region World
+    /// <summary>
+    /// Gets the world-space position.
+    /// </summary>
     public Vector2 Position
     {
         get
         {
+            UpdateTransform();
+            if (_worldPositionDirty)
+            {
+                if (_parent != null)
+                {
+                    _parent.UpdateTransform();
+                    _parent._worldTransform.TransformPoint(_localPosition, out _position);
+                }
+                else
+                {
+                    _position = _localPosition;
+                }
+
+                _worldPositionDirty = false;
+            }
+
             return _position;
         }
-        set
-        {
-            _position = value;
-        }
+        set => SetPosition(value);
     }
-    private Vector2 _position;
+    /// <summary>
+    /// Get the world-space rotation in degrees.
+    /// </summary>
     public float RotationDegrees
     {
         get
         {
+            UpdateTransform();
             return Lib.Math.RadToDeg(_rotation);
         }
-        set
-        {
-            _rotation = Lib.Math.RadToDeg(value % 360);
-        }
+        set => SetRotationDegrees(value);
     }
+    /// <summary>
+    /// Gets the world-space rotation in radians.
+    /// </summary>
     public float Rotation
     {
         get
         {
+            UpdateTransform();
             return _rotation;
         }
-        set
-        {
-            _rotation = value % MathHelper.TwoPi;
-        }
+        set => SetRotation(value);
     }
-    //rotation is stored in radians.
-    private float _rotation;
+    /// <summary>
+    /// Gets the world-space scale.
+    /// </summary>
     public Vector2 Scale
     {
         get
         {
+            UpdateTransform();
             return _scale;
         }
-        set
-        {
-            _scale = value;
-        }
+        set => SetScale(value);
     }
-    private Vector2 _scale;
     #endregion
-    #region World Properties
-    public Vector2 WorldPosition
+    #region Matrix
+    public Matrix2D LocalToWorldTransform
     {
         get
         {
-            if (parent == null)
-                return _position;
-            return parent.ToMatrixWorld().Transform(_position);
+            UpdateTransform();
+            return _worldTransform;
         }
     }
-    /// <summary>
-    /// In radians.
-    /// </summary>
-    public float WorldRotation
+
+
+    public Matrix2D WorldToLocalTransform
     {
         get
         {
-            if (parent == null)
-                return _rotation;
-            return parent.WorldRotation + _rotation;
-        }
-    }
-    public float WorldRotationDegrees
-    {
-        get
-        {
-            if (parent == null)
-                return Lib.Math.RadToDeg(_rotation);
-            return Lib.Math.RadToDeg(parent.WorldRotation + _rotation);
-        }
-    }
-    public Vector2 WorldScale
-    {
-        get
-        {
-            if (parent == null)
-                return _scale;
-            return parent.WorldScale * _scale;
+            if (_worldToLocalDirty)
+            {
+                if (_parent != null)
+                    _parent.UpdateTransform();
+                Matrix2D.Invert(ref _worldTransform, out _worldToLocalTransform);
+
+                _worldToLocalDirty = false;
+            }
+
+            return _worldToLocalTransform;
         }
     }
     #endregion
-    #region Constructors
-    public Transform()
+
+    #region Setters
+    public void SetParent(Transform parent)
     {
-        _position = Vector2.Zero;
-        _rotation = 0;
-        _scale = Vector2.One;
+        if (_parent == parent)
+            return;
+
+        if (_parent != null)
+            _parent._children.Remove(this);
+
+        if (parent != null)
+            parent._children.Add(this);
+
+        _parent = parent;
+        SetDirty(Dirt.Position & Dirt.Rotation & Dirt.Scale);
     }
-    public Transform(Vector2 position)
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetPosition(Vector2 position)
     {
+        if (position == _position)
+            return;
+
         _position = position;
-        _rotation = 0;
-        _scale = Vector2.One;
+        if (_parent != null)
+            LocalPosition = WorldToLocalTransform.TransformPoint(position);
+        else
+            LocalPosition = position;
+
+        _worldPositionDirty = false;
     }
-    public Transform(Vector2 position, float rotation)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetRotation(float radians)
     {
-        _position = position;
-        _rotation = rotation % 360;
-        _scale = Vector2.One;
+        _rotation = radians;
+        if (_parent != null)
+            LocalRotation = _parent.Rotation + radians;
+        else
+            LocalRotation = radians;
     }
-    public Transform(Vector2 position, float rotation, Vector2 scale)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetRotationDegrees(float degrees)
     {
-        _position = position;
-        _rotation = rotation % 360;
+        SetRotation(Lib.Math.DegToRad(degrees));
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetScale(Vector2 scale)
+    {
         _scale = scale;
+        if (_parent != null)
+            LocalScale = scale / _parent._scale;
+        else
+            LocalScale = scale;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetLocalPosition(Vector2 localPosition)
+    {
+        if (localPosition == _localPosition)
+            return;
+
+        _localPosition = localPosition;
+        _localDirty = _positionDirty = _worldPositionDirty = true;
+        SetDirty(Dirt.Position);
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetLocalRotation(float radians)
+    {
+        _localRotation = radians % MathHelper.TwoPi;
+        _localDirty = _rotationDirty = true;
+        SetDirty(Dirt.Rotation);
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetLocalScale(Vector2 scale)
+    {
+        _localScale = scale;
+        _localDirty = _scaleDirty = true;
+        SetDirty(Dirt.Scale);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SetDirty(Dirt dirt)
+    {
+        if ((_dirtyType & dirt) == 0) //not already dirty
+        {
+            _dirtyType |= dirt;
+            for (var i = 0; i < _children.Count; i++)
+                _children[i].SetDirty(dirt);
+        }
+    }
+
+    #endregion
+
+    #region Updaters
+    public void UpdateTransform()
+    {
+        if (_dirtyType != Dirt.Clean)
+        {
+            if (_parent != null)
+                _parent.UpdateTransform();
+
+            if (_localDirty)
+            {
+                if (_positionDirty)
+                {
+                    Matrix2D.CreateTranslation(_localPosition, out _positionMatrix);
+                    _positionDirty = false;
+                }
+                if (_rotationDirty)
+                {
+                    Matrix2D.CreateRotation(_localRotation, out _rotationMatrix);
+                    _rotationDirty = false;
+                }
+                if (_scaleDirty)
+                {
+                    Matrix2D.CreateScale(_localScale, out _scaleMatrix);
+                    _scaleDirty = false;
+                }
+
+                Matrix2D.Multiply(ref _scaleMatrix, ref _rotationMatrix, out _localTransform);
+                Matrix2D.Multiply(ref _localTransform, ref _positionMatrix, out _localTransform);
+
+                if (_parent == null)
+                {
+                    _worldTransform = _localTransform;
+                    _rotation = _localRotation;
+                    _scale = _localScale;
+                }
+                _localDirty = false;
+            }
+            if (_parent != null)
+            {
+                Matrix2D.Multiply(ref _localTransform, ref _parent._worldTransform, out _worldTransform);
+                _rotation = _localRotation + _parent._rotation;
+                _scale = _parent._scale * _localScale;
+            }
+
+            _worldToLocalDirty = true;
+            _worldPositionDirty = true;
+            _dirtyType = Dirt.Clean;
+        }
     }
     #endregion
 
-    /// <summary>
-    /// Constructs a Matrix version of this transform, ignoring parent transforms.
-    /// </summary>
-    /// <returns></returns>
-    public Matrix2D ToMatrixLocal()
-    {
-        float sin = MathF.Sin(_rotation);
-        float cos = MathF.Cos(_rotation);
-
-        float cosScaleX = cos * _scale.X;
-        float sinScaleX = sin * _scale.X;
-        float cosScaleY = cos * _scale.Y;
-        float sinScaleY = sin * _scale.Y;
-
-        return new Matrix2D(cosScaleX, sinScaleX, -sinScaleY, cosScaleY, _position.X, _position.Y);
-    }
-    /// <summary>
-    /// Constructs a Matrix version of this transform, including any parent transforms.
-    /// </summary>
-    /// <returns></returns>
-    public Matrix2D ToMatrixWorld()
-    {
-        if (parent == null)
-            return ToMatrixLocal();
-        float rot = WorldRotation;
-        float sin = MathF.Sin(rot);
-        float cos = MathF.Cos(rot);
-
-        Vector2 scale = WorldScale;
-        float cosScaleX = cos * scale.X;
-        float sinScaleX = sin * scale.X;
-        float cosScaleY = cos * scale.Y;
-        float sinScaleY = sin * scale.Y;
-        Vector2 pos = WorldPosition;
-
-        return new Matrix2D(cosScaleX, sinScaleX, -sinScaleY, cosScaleY, pos.X, pos.Y);
-    }
-
-    public bool Equals(Transform other)
-    {
-        return _position.Equals(other._position) && _rotation.Equals(other._rotation) && _scale.Equals(other._scale);
-    }
-    //TODO: Make use a cached matrix.
-    public Vector2 WorldToLocalPosition(Vector2 worldPosition)
-    {
-        return Lib.Math.RotateRadians(worldPosition - WorldPosition, -WorldRotation);
-    }
     public Vector2 LocalToWorldPosition(Vector2 localPosition)
     {
-        return Lib.Math.RotateRadians(localPosition + WorldPosition, WorldRotation);
+        return LocalToWorldTransform.TransformPoint(localPosition);
     }
-    public Vector2 WorldToLocalDirection(Vector2 worldDirection)
-    {
-        return Lib.Math.RotateRadians(worldDirection, -WorldRotation);
-    }
+
     public Vector2 LocalToWorldDirection(Vector2 localDirection)
     {
-        return Lib.Math.RotateRadians(localDirection, WorldRotation);
+        return Lib.Math.RotateRadians(localDirection, Rotation);
+    }
+
+    public Vector2 WorldToLocalPosition(Vector2 worldPosition)
+    {
+        return WorldToLocalTransform.TransformPoint(worldPosition);
+    }
+
+    public Vector2 WorldToLocalDirection(Vector2 worldDirection)
+    {
+        return Lib.Math.RotateRadians(worldDirection, -Rotation);
     }
 }

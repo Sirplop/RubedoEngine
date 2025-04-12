@@ -4,7 +4,7 @@ using System;
 namespace Rubedo.Lib;
 
 /// <summary>
-/// Implementation of Squirrel3 RNG. Very fast and Burst compatible.
+/// Implementation of Squirrel3 RNG. Extremely fast noise that does not suck eggs.
 /// </summary>
 public struct Squirrel3
 {
@@ -54,9 +54,6 @@ public struct Squirrel3
         n ^= n >> 8;
         return n % CAP;
     }
-
-    //TODO
-    //public void Print() => Debug.Log($"{_seed} - {_n}");
 }
 
 public static class Random

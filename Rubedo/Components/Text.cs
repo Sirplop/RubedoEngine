@@ -32,7 +32,7 @@ public class Text : Component
     public override void Draw(Renderer sb)
     {
         //AdjustPositionForCentering(sb.Sprites);
-        sb.DrawString(font, text, transform.WorldPosition, color, transform.RotationDegrees, Lib.Math.Max(transform.WorldScale) / RubedoEngine.Instance.Camera.GetZoom(), SpriteEffects.None);
+        sb.DrawString(font, text, transform.Position, color, transform.RotationDegrees, Lib.Math.Max(transform.Scale) / RubedoEngine.Instance.Camera.GetZoom(), SpriteEffects.None);
     }
 
     protected void AdjustPositionForCentering(SpriteBatch sb)

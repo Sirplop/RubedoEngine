@@ -1,9 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
+using PhysicsEngine2D;
 using Rubedo.Components;
-using Rubedo.Object;
-using Rubedo.Physics2D.Collision.Shapes;
 using System.Collections.Generic;
 using System;
+using Rubedo.Physics2D.Collision.Shapes;
+using Rubedo.Physics2D.Dynamics.Shapes;
 
 namespace Rubedo.Physics2D.Dynamics;
 
@@ -15,9 +16,10 @@ public class Collider : Component
     public static float UNIT_CIRCLE_RADIUS => 0.5f * RubedoEngine.SizeOfMeter;
     public static float UNIT_BOX_SIDE => 1f * RubedoEngine.SizeOfMeter;
     public static float UNIT_CAPSULE_LENGTH => 0.334f * RubedoEngine.SizeOfMeter;
-    public static float UNIT_CAPSULE_RADIUS => 0.334f * RubedoEngine.SizeOfMeter;
+    public static float UNIT_CAPSULE_RADIUS => 0.5f * RubedoEngine.SizeOfMeter;
 
-    public readonly IShape shape;
+    public readonly Shape shape;
+    
     private Vector2 prevPos = Vector2.Zero;
     private float prevAngle = 0f;
     private Vector2 prevScale = Vector2.One;
@@ -26,6 +28,7 @@ public class Collider : Component
     {
         shape = new Circle(transform, radius);
     }
+    
     protected Collider(ShapeType type, float r1, float r2) : base(true, true)
     {
         switch (type)
@@ -74,7 +77,7 @@ public class Collider : Component
                 return CreateCapsule(UNIT_CAPSULE_LENGTH, UNIT_CAPSULE_RADIUS);
             case ShapeType.Polygon:
                 List<Vector2> vertices = new List<Vector2>();
-                polygonOnlySideCount = Math.Max(3, polygonOnlySideCount);
+                polygonOnlySideCount = System.Math.Max(3, polygonOnlySideCount);
                 float r = RubedoEngine.SizeOfMeter * 0.5f;
                 float a = MathHelper.Pi / (polygonOnlySideCount % 2 == 1 ? 2 : 4); //make sure a side faces down.
                 for (int i = 0; i < polygonOnlySideCount; i++)
@@ -86,19 +89,22 @@ public class Collider : Component
         }
         return null;
     }
-
+    /*
     public override void Update()
     {
         base.Update();
-        Vector2 pos = transform.WorldPosition;
-        float angle = transform.WorldRotation;
-        Vector2 scale = transform.WorldScale;
-        if (pos != prevPos || angle != prevAngle || scale != prevScale)
+        if (shape.type == ShapeType.Box ||  shape.type == ShapeType.Polygon)
         {
-            shape.BoundsUpdateRequired = true;
-            prevPos = pos;
-            prevAngle = angle;
-            prevScale = scale;
+            Vector2 pos = transform.Position;
+            float angle = transform.Rotation;
+            Vector2 scale = transform.Scale;
+            if (pos != prevPos || angle != prevAngle || scale != prevScale)
+            {
+                ((Polygon)shape).normalsDirty = true;
+                prevPos = pos;
+                prevAngle = angle;
+                prevScale = scale;
+            }
         }
-    }
+    }*/
 }

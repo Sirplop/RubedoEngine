@@ -6,12 +6,13 @@ using Rubedo.Debug;
 using Rubedo.Object;
 using Rubedo;
 using System.IO;
+using Test.Gameplay.Demo;
 
 namespace Learninging;
 
-public class Game1 : Rubedo.RubedoEngine
+public class DemoGame : Rubedo.RubedoEngine
 {
-    public Game1() : base() { }
+    public DemoGame() : base() { }
 
     protected override void Initialize()
     {
@@ -21,16 +22,10 @@ public class Game1 : Rubedo.RubedoEngine
     protected override void LoadContent()
     {
         base.LoadContent();
-        _stateManager.AddState(new TestState(_stateManager, _inputManager));
+        //_stateManager.AddState(new TestState(_stateManager, _inputManager));
+        _stateManager.AddState(new DemoState(_stateManager, _inputManager));
 
-        _stateManager.SwitchState("ball");
-
-        debugText = new DebugText(AssetManager.LoadFont("Consolas"), Color.White);
-        Entity textEnt = new Entity
-        {
-            debugText
-        };
-        _stateManager.CurrentState().Add(textEnt);
+        _stateManager.SwitchState("DemoState");
     }
 
     protected override void Update(GameTime gameTime)

@@ -1,47 +1,54 @@
 ﻿using Microsoft.Xna.Framework;
+using PhysicsEngine2D;
 using Rubedo.Components;
-using Rubedo.Object;
+using Rubedo.Lib;
 
 namespace Rubedo.Physics2D.Dynamics;
 
 /// <summary>
-/// I am PhysicsObject, and this is my summary.
+/// I am PhysicsBody, and this is my summary.
 /// </summary>
 public class PhysicsBody : Component
 {
-    private Vector2 velocity = Vector2.Zero;
-    private float angularVelocity = 0;
+    internal Vector2 velocity = Vector2.Zero;
+    internal float angularVelocity = 0;
 
     private Vector2 force;
     private float torque;
 
+    public AABB bounds;
+
     public float mass => _mass;
-    private float _mass;
+    internal float _mass;
     public float invMass => _invMass;
-    private float _invMass;
+    internal float _invMass;
     public float inertia => _inertia;
-    private float _inertia;
+    internal float _inertia;
     public float invInertia => _invInertia;
-    private float _invInertia;
+    internal float _invInertia;
 
     public PhysicsMaterial material;
 
     public bool isStatic = false;
     public float gravityScale = 1;
 
-    public readonly Collider collider;
+    public readonly Collider collider; //TODO: Handle linked colliders better.
+
+    // For use in broadphase
+    public object data;
+
+    public Vector2 position => transform.Position;
 
     public Vector2 LinearVelocity { get => velocity; internal set => velocity = value; }
-
     public float AngularVelocity { get => angularVelocity; internal set => angularVelocity = value; }
 
-    public PhysicsBody(Collider collider, PhysicsMaterial material,
-        bool active = true, bool visible = true) : base(active, visible)
+    public PhysicsBody(Collider collider, PhysicsMaterial material, bool active, bool visible) : base(active, visible)
     {
         this.material = material;
         this.collider = collider;
         force = Vector2.Zero;
         torque = 0;
+
         _mass = collider.shape.GetArea() * material.density;
         _inertia = collider.shape.GetMomentOfInertia(_mass);
 
@@ -49,87 +56,66 @@ public class PhysicsBody : Component
         _invInertia = 1f / _inertia;
     }
 
-    #region Internal
-    internal void IntegrateForces(float deltaTime)
-    {
-        if (isStatic)
-            return;
-        velocity += deltaTime * invMass * Lib.Math.MulAdd(force, _mass * gravityScale, RubedoEngine.Instance.World.gravity);
-        angularVelocity += +deltaTime * invInertia * torque;
-
-        velocity *= 1f / (1f + deltaTime * material.linearDamping);
-        angularVelocity *= 1f / (1f + deltaTime * material.angularDamping);
-    }
-    internal void IntegrateVelocities(float deltaTime)
-    {
-        if (isStatic)
-            return;
-        Entity.transform.Position += velocity * deltaTime;
-        Entity.transform.Rotation += angularVelocity * deltaTime;
-    }
-    internal void ApplyImpulse(Vector2 impulse, Vector2 contactVector)
-    {
-        if (isStatic)
-            return;
-        velocity += impulse * _invMass;
-        angularVelocity += _invInertia * Lib.Math.Cross(contactVector, impulse);
-    }
-    #endregion
-    #region Public Methods
     public void SetStatic()
     {
-        isStatic = !isStatic;
+        _invMass = 0;
+        _invInertia = 0;
+        isStatic = true;
+    }
 
-        if (isStatic)
+    public void IntegrateForces(float dt)
+    {
+        if (_invMass == 0)
+            return;
+
+        velocity += dt * (_invMass * force);
+        angularVelocity += dt * torque * _invInertia;
+
+        velocity *= 1f / (1f + dt * material.linearDamping);
+        angularVelocity *= 1f / (1f + dt * material.angularDamping);
+
+        //apply gravity after so we don't have any weird drag.
+        velocity += dt * PhysicsWorld.gravity * gravityScale;
+
+        force = Vector2.Zero;
+        torque = 0;
+    }
+
+    public void IntegrateVelocity(float dt)
+    {
+        if (_invMass == 0)
+            return;
+
+        Entity.transform.Position += velocity * dt;
+        Entity.transform.Rotation += angularVelocity * dt;
+    }
+
+    public override void Update()
+    {
+        base.Update();
+        //Update bounds for Broad phase
+        bounds = collider.shape.GetBoundingBox();
+    }
+
+    public override void EntityRemoved(GameState state)
+    {
+        base.EntityRemoved(state);
+        RubedoEngine.Instance.World.RemoveBody(this);
+    }
+
+    internal void ApplyImpulse(ref Vector2 impulse, ref Vector2 contactRadius, bool negate)
+    {
+        if (negate)
         {
-            _invMass = 0f;
-            _invInertia = 0f;
+            MathV.MulSub(ref velocity, ref impulse, invMass, out velocity);
+            Lib.Math.Cross(ref contactRadius, ref impulse, out float lambda);
+            angularVelocity += invInertia * -lambda;
         }
         else
         {
-            _invMass = 1f / _mass;
-            _invInertia = 1f / _inertia;
+            MathV.MulAdd(ref velocity, ref impulse, invMass, out velocity);
+            Lib.Math.Cross(ref contactRadius, ref impulse, out float lambda);
+            angularVelocity += invInertia * lambda;
         }
     }
-    public void AddForce(Vector2 force)
-    {
-        if (isStatic)
-            return;
-        this.force += force;
-    }
-    public void AddTorque(float force)
-    {
-        if (isStatic)
-            return;
-        torque += force;
-    }
-
-    public void SetVelocity(Vector2 val)
-    {
-        if (isStatic)
-            return;
-        velocity = val;
-    }
-    public void SetAngularVelocity(float val)
-    {
-        if (isStatic)
-            return;
-        angularVelocity = val;
-    }
-    public void ClampVelocity(float max)
-    {
-        if (isStatic)
-            return;
-        float sqrMag = velocity.LengthSquared();
-        if (max * max < sqrMag)
-            velocity = Lib.Math.Normalize(velocity) * max;
-    }
-    public void ClampAngularVelocity(float max)
-    {
-        if (isStatic)
-            return;
-        if (max < angularVelocity)
-            angularVelocity = max;
-    }
-    #endregion
 }

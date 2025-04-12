@@ -3,7 +3,7 @@
 //#define PYRAMID
 //#define DROP
 //#define STAIRCASE
-#define RAMPS
+//#define RAMPS
 #define PLATFORM
 //#define SIDES
 //#define BIG_PYRAMID
@@ -13,9 +13,10 @@ using Rubedo.Object;
 using Microsoft.Xna.Framework;
 using Rubedo.Tests;
 using Microsoft.Xna.Framework.Input;
-using Rubedo.Physics2D.Collision.Shapes;
-using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D;
+using PhysicsEngine2D;
+using Rubedo.Physics2D.Dynamics;
+using Rubedo.Physics2D.Collision.Shapes;
 
 namespace Learninging.Gameplay;
 
@@ -45,6 +46,7 @@ public class TestState : GameState
 
         PhysicsMaterial material = new PhysicsMaterial(1, 0.5f, 0.5f);
 
+
 #if STAIRCASE
         for (int x = 0, y = 0; x < 10 && y < 10; x++, y++)
         {
@@ -63,6 +65,9 @@ public class TestState : GameState
         shapes.MakeBody(this, entity, material, comp, true);
 #endif
 #if PLATFORM
+        //Polygon polygon = new Polygon(12 * meter, 1 * meter);
+        //shapes.MakeBody(polygon, material, new Vector2(0, -5 * meter), 0f, true);
+        
         entity = new Entity(new Vector2(0, -5 * meter));
         comp = Collider.CreateBox(24 * meter, 2 * meter);
         shapes.MakeBody(this, entity, material, comp, true);
@@ -80,9 +85,12 @@ public class TestState : GameState
         {
             for (int y = 0; y < 5; y++)
             {
-                entity = new Entity(new Vector2(x * 35 - 330, y * 30 - 105));
+                polygon = new Polygon(0.5f, 0.5f);
+                shapes.MakeBody(polygon, material, new Vector2(x * (1.1f * meter) - (11 * meter), y * meter - (3.5f * meter)), 0, false);
+                /*entity = new Entity(new Vector2(x * 35 - 330, y * 30 - 105));
                 comp = Collider.CreateUnitShape(ShapeType.Box, 4);
                 shapes.MakeBody(this, entity, material, comp, false);
+                */
             }
         }
 #endif
@@ -118,34 +126,40 @@ public class TestState : GameState
 #if BIG_PYRAMID
 
         RubedoEngine.SizeOfMeter = 5f;
-        RubedoEngine.Instance.World.ResetGravity();
+        //RubedoEngine.Instance.World.ResetGravity();
         RubedoEngine.Instance.Camera.SetZoom(4);
 
+        /*
         entity = new Entity(new Vector2(0, -45));
         comp = Collider.CreateBox(200, 10);
-        shapes.MakeBody(this, entity, material, comp, true);
+        shapes.MakeBody(this, entity, material, comp, true);*/
+
+        Polygon polygon = new Polygon(100, 5);
+        shapes.MakeBody(polygon, material, new Vector2(0, -45), 0f, true);
 
 
         float width = 100;
         float height = width / RubedoEngine.Instance.GraphicsDevice.Viewport.AspectRatio;
-        Vector2 pX = new Vector2(-width / 2 + 3, (-height / 2 + 1.5f) - 5);
+        Vector2 pX = new Vector2(-width / 2 + 3, (-height / 2 + 1.5f) - 10f);
 
         const int N = 20;
 
+        Polygon box = new Polygon(2.5f, 2.5f);
         for (int i = 0; i < N; ++i)
         {
             Vector2 y = pX;
             for (int j = i; j < N; ++j)
             {
-                entity = new Entity(y);
+                shapes.MakeBody(box.Clone(), material, y, 0f, false);
+                /*entity = new Entity(y);
                 comp = Collider.CreateUnitShape(ShapeType.Box);
-                shapes.MakeBody(this, entity, material, comp, false);
+                shapes.MakeBody(this, entity, material, comp, false);*/
 
-                y += Vector2.UnitX * 1.125f * Collider.UNIT_BOX_SIDE;
+                y += Vector2.UnitX * 1.125f * 5;//Collider.UNIT_BOX_SIDE;
             }
 
             // x += Vector2(0.5625f, 1.125f);
-            pX += new Vector2(0.5625f, 1.0f) * Collider.UNIT_BOX_SIDE;
+            pX += new Vector2(0.5625f, 1.0f) * 5f;//Collider.UNIT_BOX_SIDE;
         }
 #endif
 #if DROP
@@ -158,13 +172,6 @@ public class TestState : GameState
 #endif
     }
 
-    public override void Update()
-    {
-        base.Update();
-        /*material.Rotation += 60 * RubedoEngine.DeltaTime;
-        entityCollider.shape.TransformUpdateRequired = true;
-        entityCollider.shape.BoundsUpdateRequired = true;*/
-    }
 
     private bool shapeSet = true;
     public override void HandleInput()
@@ -172,7 +179,10 @@ public class TestState : GameState
         base.HandleInput();
         if (inputManager.MousePressed(InputManager.MouseButtons.Mouse1))
         {
-            PhysicsMaterial material = new PhysicsMaterial(1, 0.5f, 0.5f);
+            PhysicsMaterial material = new PhysicsMaterial(1, 0.5f, 0.5f, 0, 0.5f);
+
+            //Circle circle = new Circle(0.5f);
+            //shapes.MakeBody(circle, material, inputManager.MouseWorldPosition(), 45, false);
             Entity entity = new Entity(inputManager.MouseWorldPosition());
             Collider comp = Collider.CreateUnitShape(shapeSet ? ShapeType.Circle : ShapeType.Capsule);
             shapes.MakeBody(this, entity, material, comp, false);
@@ -180,6 +190,8 @@ public class TestState : GameState
         if (inputManager.MousePressed(InputManager.MouseButtons.Mouse2))
         {
             PhysicsMaterial material = new PhysicsMaterial(1, 0.5f, 0.5f);
+            //Polygon polygon = new Polygon(0.5f, 0.5f);
+            //shapes.MakeBody(polygon, material, inputManager.MouseWorldPosition(), 45, false);
             Entity entity = new Entity(inputManager.MouseWorldPosition());
             Collider comp = Collider.CreateUnitShape(shapeSet ? ShapeType.Box : ShapeType.Polygon, 3);
             shapes.MakeBody(this, entity, material, comp, false);

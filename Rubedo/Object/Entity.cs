@@ -1,7 +1,6 @@
 ﻿using Rubedo.Components;
 using Rubedo.Internal;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.Collections;
 using System.Collections.Generic;
 using Rubedo.Render;

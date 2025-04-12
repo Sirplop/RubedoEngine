@@ -6,6 +6,7 @@ using Rubedo.Debug;
 using Rubedo.Object;
 using System.Diagnostics;
 using System;
+using PhysicsEngine2D;
 
 namespace Rubedo;
 
@@ -28,17 +29,19 @@ public class RubedoEngine : Game
 
     public static float DeltaTime => Instance.deltaTime;
     public static float RawDeltaTime => Instance.rawDeltaTime;
+    public static double RawTime => Instance.rawTime;
 
     public float deltaTime { get; private set; }
     public float rawDeltaTime { get; private set; }
+    public double rawTime { get; private set; }
     public float timeRate = 1.0f;
 
     public Camera Camera => _camera;
     public Screen Screen => _screen;
     public PhysicsWorld World => _physicsWorld;
+    public static InputManager Input => Instance._inputManager;
 
-    public static DebugText debugText;
-    private Stopwatch physicsWatch;
+    public Stopwatch physicsWatch;
     public Stopwatch physicsPhaseWatch;
 
     public RubedoEngine()
@@ -74,6 +77,7 @@ public class RubedoEngine : Game
     public bool stepPhysics = false;
     protected override void Update(GameTime gameTime)
     {
+        rawTime = gameTime.TotalGameTime.TotalMilliseconds;
         rawDeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         deltaTime = rawDeltaTime * timeRate;
 
@@ -85,13 +89,11 @@ public class RubedoEngine : Game
         physicsWatch.Start();
         if (physicsOn || stepPhysics)
         {
-            _physicsWorld.Step();
+            _physicsWorld.Update(deltaTime);
             stepPhysics = false;
         }
         physicsWatch.Stop();
-        debugText.DrawText(new Vector2(0, 20), $"Bodies: {_physicsWorld.BodyCount} | Physics time: {physicsWatch.Elapsed.TotalMilliseconds.ToString("0.00")}", true);
 
-        //_stateManager.Update();
         base.Update(gameTime);
     }
 

@@ -200,7 +200,7 @@ public sealed class Shapes : IDisposable
 
     public void DrawBoxFill(Transform transform, float width, float height, Color color)
     {
-        DrawBoxFill(transform.WorldPosition, width, height, transform.WorldRotation, transform.WorldScale, color);
+        DrawBoxFill(transform.Position, width, height, transform.Rotation, transform.Scale, color);
     }
     public void DrawBoxFill(Vector2 center, float width, float height, float rotation, Vector2 scale, Color color)
     {
@@ -317,7 +317,7 @@ public sealed class Shapes : IDisposable
         const int MinCirclePoints = 3;
         const int MaxCirclePoints = 64;
 
-        radius = radius * Lib.Math.Max(transform.WorldScale);
+        radius = radius * Lib.Math.Max(transform.Scale);
 
         int shapeVertexCount = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);    // The vertex count will just be the number of points requested by the user.
         int shapeTriangleCount = shapeVertexCount - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
@@ -345,7 +345,7 @@ public sealed class Shapes : IDisposable
 
         float ax = radius;
         float ay = 0f;
-        Vector2 pos = transform.WorldPosition;
+        Vector2 pos = transform.Position;
         // Save all remaining vertices.
         for (int i = 0; i < shapeVertexCount; i++)
         {
@@ -391,7 +391,7 @@ public sealed class Shapes : IDisposable
         }
 
 
-        Matrix2D matrix = Matrix2D.CreateRS(transform.WorldRotationDegrees, transform.WorldScale);
+        Matrix2D matrix = Matrix2D.CreateRotation(transform.Rotation);
 
         // Vertices;
         // Save all remaining vertices.
@@ -399,7 +399,7 @@ public sealed class Shapes : IDisposable
         {
             float x = MathF.Cos(angle) * radius;
             float y = MathF.Sin(angle) * radius;
-            Vector2 val = matrix.Transform(x, y) + start;
+            Vector2 val = matrix.TransformPoint(x, y) + start;
             angle += deltaAngle;
 
             this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(val, 0f), color);
@@ -409,7 +409,7 @@ public sealed class Shapes : IDisposable
         {
             float x = MathF.Cos(angle) * radius;
             float y = MathF.Sin(angle) * radius;
-            Vector2 val = matrix.Transform(x, y) + end;
+            Vector2 val = matrix.TransformPoint(x, y) + end;
             angle += deltaAngle;
 
             this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(val, 0f), color);
@@ -428,11 +428,11 @@ public sealed class Shapes : IDisposable
         {
             this.indices[this.indexCount++] = this.vertexCount + triangles[i];
         }
-        Matrix2D matrix = transform.ToMatrixWorld();
+        Matrix2D matrix = transform.LocalToWorldTransform;
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector2 v = vertices[i];
-            v = matrix.Transform(v);
+            v = matrix.TransformPoint(v);
             this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(v.X, v.Y, 0f), color);
         }
 
@@ -583,7 +583,7 @@ public sealed class Shapes : IDisposable
 
     public void DrawBox(Transform transform, float width, float height, Color color)
     {
-        this.DrawBox(transform.WorldPosition, width, height, transform.WorldRotation, transform.WorldScale, color);
+        this.DrawBox(transform.Position, width, height, transform.Rotation, transform.Scale, color);
     }
 
     public void DrawBox(float x, float y, float width, float height, Color color)
@@ -653,12 +653,42 @@ public sealed class Shapes : IDisposable
     }
     #endregion
     #region Hollow Circle
+    public void DrawCircle(Vector2 position, float radius, int points, Color color)
+    {
+        const int MinCirclePoints = 3;
+        const int MaxCirclePoints = 256;
+        points = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);
+
+        float angle = MathHelper.TwoPi / (float)points;
+
+        // Precalculate the trig. functions.
+        float sin = MathF.Sin(angle);
+        float cos = MathF.Cos(angle);
+
+        // Initial point location on the unit circle.
+        float ax = radius;
+        float ay = 0f;
+
+        for (int i = 0; i < points; i++)
+        {
+            // Perform a 2D rotation transform to get the next point on the circle.
+            float bx = ax * cos - ay * sin;
+            float by = ax * sin + ay * cos;
+
+            this.DrawLine(ax + position.X, ay + position.Y,
+                bx + position.X, by + position.Y, color);
+
+            // Save the last transform for the next transform in the loop.
+            ax = bx;
+            ay = by;
+        }
+    }
     public void DrawCircle(Transform transform, float radius, int points, Color color)
     {
         const int MinCirclePoints = 3;
         const int MaxCirclePoints = 256;
 
-        radius *= Lib.Math.Max(transform.WorldScale);
+        radius *= Lib.Math.Max(transform.Scale);
 
         points = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);
 
@@ -672,7 +702,7 @@ public sealed class Shapes : IDisposable
         float ax = radius;
         float ay = 0f;
 
-        Vector2 pos = transform.WorldPosition;
+        Vector2 pos = transform.Position;
         for (int i = 0; i < points; i++)
         {
             // Perform a 2D rotation transform to get the next point on the circle.
@@ -707,7 +737,7 @@ public sealed class Shapes : IDisposable
         float ay = 0;
 
         float bx = 0, by = 0;
-        Matrix2D matrix = Matrix2D.CreateRS(transform.WorldRotationDegrees, transform.WorldScale);
+        Matrix2D matrix = Matrix2D.CreateRotation(transform.Rotation);
 
         for (int i = 0; i < pointsPerCap / 2; i++)
         {
@@ -716,8 +746,8 @@ public sealed class Shapes : IDisposable
             by = ax * sin + ay * cos;
 
             this.DrawLine(
-                matrix.Transform(ax, ay) + start,
-                matrix.Transform(bx, by) + start,
+                matrix.TransformPoint(ax, ay) + start,
+                matrix.TransformPoint(bx, by) + start,
                 color);
 
             // Save the last transform for the next transform in the loop.
@@ -726,8 +756,8 @@ public sealed class Shapes : IDisposable
         }
 
         this.DrawLine(
-                matrix.Transform(ax, ay) + start,
-                matrix.Transform(bx, by) + end,
+                matrix.TransformPoint(ax, ay) + start,
+                matrix.TransformPoint(bx, by) + end,
             color);
         for (int i = 0; i < pointsPerCap / 2; i++)
         {
@@ -736,8 +766,8 @@ public sealed class Shapes : IDisposable
             by = ax * sin + ay * cos;
 
             this.DrawLine(
-                matrix.Transform(ax, ay) + end,
-                matrix.Transform(bx, by) + end,
+                matrix.TransformPoint(ax, ay) + end,
+                matrix.TransformPoint(bx, by) + end,
                 color);
 
             // Save the last transform for the next transform in the loop.
@@ -745,8 +775,8 @@ public sealed class Shapes : IDisposable
             ay = by;
         }
         this.DrawLine(
-                matrix.Transform(ax, ay) + end,
-                matrix.Transform(bx, by) + start,
+                matrix.TransformPoint(ax, ay) + end,
+                matrix.TransformPoint(bx, by) + start,
                 color);
     }
     #endregion
@@ -761,14 +791,14 @@ public sealed class Shapes : IDisposable
 
         // Now perform the rest of the vertex transforms and draw a line between each, 
         //  except for the final line segment that connects back to the first.
-        Matrix2D matrix = transform.ToMatrixWorld();
+        Matrix2D matrix = transform.LocalToWorldTransform;
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector2 a = vertices[i];
             Vector2 b = vertices[(i + 1) % vertices.Length];
 
-            a = matrix.Transform(a);
-            b = matrix.Transform(b);
+            a = matrix.TransformPoint(a);
+            b = matrix.TransformPoint(b);
 
             this.DrawLine(a, b, color);
         }

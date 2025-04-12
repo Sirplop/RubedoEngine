@@ -1,8 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
+using PhysicsEngine2D;
 using Rubedo.Object;
+using Rubedo.Physics2D.Collision.Shapes;
+using System;
 using System.Collections.Generic;
 
-namespace Rubedo.Physics2D.Collision.Shapes;
+namespace PhysicsEngine2D;
 
 /// <summary>
 /// I am Box, and this is my summary.
@@ -17,24 +20,13 @@ public class Box : Polygon
     public float Top => vertices[2].Y;
     public float Bottom => vertices[0].Y;
 
-    public Box(Transform transform, float width, float height) : base(transform, BuildBox(width, height))
+    public Box(Transform refTransform, float width, float height) : base(refTransform)
     {
+        type = ShapeType.Box;
         this.width = width;
         this.height = height;
-    }
 
-    private static List<Vector2> BuildBox(float width, float height)
-    {
-        width *= 0.5f;
-        height *= 0.5f;
-        List<Vector2> box = new List<Vector2>
-        {
-            new Vector2(-width, -height),
-            new Vector2(width, -height),
-            new Vector2(width, height),
-            new Vector2(-width, height)
-        };
-        return box;
+        SetBox(width * 0.5f, height * 0.5f);
     }
 
     public override float GetArea()

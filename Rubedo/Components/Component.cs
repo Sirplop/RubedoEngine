@@ -23,12 +23,12 @@ public class Component
     public virtual void Added(Entity entity)
     {
         Entity = entity;
-        transform.parent = entity.transform;
+        transform.SetParent(entity.transform);
     }
     public virtual void Removed(Entity entity)
     {
         Entity = null;
-        transform.parent = null;
+        transform.SetParent(null);
     }
 
     /// <summary>
@@ -36,7 +36,10 @@ public class Component
     /// </summary>
     public virtual void EntityAwake() { }
     public virtual void EntityAdded(GameState state) { }
-    public virtual void EntityRemoved(GameState state) { }
+    public virtual void EntityRemoved(GameState state) 
+    {
+        this.Entity = null;
+    }
 
     public virtual void Update() { }
 

@@ -6,7 +6,7 @@
 public enum ShapeType
 {
     Circle = 0,
-    Box = 1,
-    Capsule = 2,
+    Capsule = 1,
+    Box = 2,
     Polygon = 3
 }

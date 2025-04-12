@@ -21,7 +21,7 @@ public static class Math
         return (int)MathF.Ceiling(val);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Clamp(float val, float min, float max)
+    public static float Clamp(in float val, in float min, in float max)
     {
         return MathF.Max(MathF.Min(val, max), min);
     }
@@ -114,6 +114,14 @@ public static class Math
         return (a.X * b.Y) - (a.Y * b.X);
     }
     /// <summary>
+    /// Computes the cross product of vectors A and B.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Cross(ref Vector2 a, ref Vector2 b, out float l)
+    {
+        l = (a.X * b.Y) - (a.Y * b.X);
+    }
+    /// <summary>
     /// Rotate a vector 90 degrees counter-clockwise.
     /// </summary>
     /// <returns>A vector perpendicular to vector <paramref name="a"/> and the Z axis</returns>
@@ -138,9 +146,11 @@ public static class Math
     public static Vector2 Rotate(in Vector2 v, float delta)
     {
         delta = DegToRad(delta);
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
         return new Vector2(
-            v.X * MathF.Cos(delta) - v.Y * MathF.Sin(delta),
-            v.X * MathF.Sin(delta) + v.Y * MathF.Cos(delta)
+            v.X * cos - v.Y * sin,
+            v.X * sin + v.Y * cos
         );
     }
     /// <summary>
@@ -149,26 +159,32 @@ public static class Math
     public static void Rotate(float x, float y, float delta, out float z, out float w)
     {
         delta = DegToRad(delta);
-        z = x * MathF.Cos(delta) - y * MathF.Sin(delta);
-        w = x * MathF.Sin(delta) + y * MathF.Cos(delta);
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        z = x * cos - y * sin;
+        w = x * sin + y * cos;
+    }
+    /// <summary>
+    /// Rotates the given point around (0,0) by the specified radian angle. This is a local-space transform.
+    /// </summary>
+    public static Vector2 RotateRadians(in Vector2 v, float delta, float scaleX = 1, float scaleY = 1)
+    {
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        return new Vector2(
+            v.X * (cos * scaleX) - v.Y * (sin * scaleY),
+            v.X * (sin * scaleX) + v.Y * (cos * scaleY)
+        );
     }
     /// <summary>
     /// Rotates the given point around (0,0) by the specified degree angle. This is a local-space transform.
     /// </summary>
     public static void RotateRadians(float x, float y, float delta, out float z, out float w)
     {
-        z = x * MathF.Cos(delta) - y * MathF.Sin(delta);
-        w = x * MathF.Sin(delta) + y * MathF.Cos(delta);
-    }
-    /// <summary>
-    /// Rotates the given point around (0,0) by the specified radian angle. This is a local-space transform.
-    /// </summary>
-    public static Vector2 RotateRadians(in Vector2 v, float delta)
-    {
-        return new Vector2(
-            v.X * MathF.Cos(delta) - v.Y * MathF.Sin(delta),
-            v.X * MathF.Sin(delta) + v.Y * MathF.Cos(delta)
-        );
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        z = x * cos - y * sin;
+        w = x * sin + y * cos;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
