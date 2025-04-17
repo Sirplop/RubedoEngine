@@ -1,6 +1,5 @@
 ﻿using Rubedo.Components;
 using Rubedo.Object;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -163,6 +162,13 @@ public class ComponentList : IEnumerable<Component>
                 component.Update();
         LockState = LockStates.Open;
     }
+    internal void TransformChanged()
+    {
+        LockState = LockStates.Locked;
+        foreach (var component in components)
+            component.TransformChanged();
+        LockState = LockStates.Open;
+    }
 
     internal void Draw(Renderer sb)
     {
@@ -182,4 +188,5 @@ public class ComponentList : IEnumerable<Component>
     {
         return current.GetEnumerator();
     }
+
 }

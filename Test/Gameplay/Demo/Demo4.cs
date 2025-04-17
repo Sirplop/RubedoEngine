@@ -59,13 +59,13 @@ internal class Demo4 : DemoBase
         float y;
         /*
         curScale = polyBody.Entity.transform.LocalScale;
-        y = Rubedo.Lib.Math.Wave.Sine((float)RubedoEngine.RawTime, 5000, 2, 0) + 3;
+        y = Rubedo.Lib.Wave.Sine((float)RubedoEngine.RawTime, 5000, 2, 0) + 3;
         curScale.Y = y;
         polyBody.Entity.transform.LocalScale = curScale;
         polyBody.Entity.transform.LocalRotation += RubedoEngine.DeltaTime;
         */
         curScale = meanPolyBody.Entity.transform.LocalScale;
-        y = Rubedo.Lib.Math.Wave.Sine((float)RubedoEngine.RawTime, 5000, 2, 0) + 3;
+        y = Rubedo.Lib.Wave.Sine((float)RubedoEngine.RawTime, 5000, 2, 0) + 3;
         curScale.Y = y;
         meanPolyBody.Entity.transform.LocalScale = curScale;
         meanPolyBody.Entity.transform.LocalRotation += RubedoEngine.DeltaTime;

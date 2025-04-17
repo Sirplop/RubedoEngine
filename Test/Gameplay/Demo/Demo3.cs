@@ -4,6 +4,7 @@ using Rubedo.Physics2D;
 using Rubedo;
 using Microsoft.Xna.Framework;
 using Rubedo.Physics2D.Collision.Shapes;
+using Rubedo.Lib;
 
 namespace Test.Gameplay.Demo;
 
@@ -66,22 +67,25 @@ internal class Demo3 : DemoBase
     private bool shapeSet = true;
     public override void HandleInput(DemoState state)
     {
-        if (state.inputManager.MousePressed(InputManager.MouseButtons.Mouse1))
+        if (state.inputManager.MousePressed(InputManager.MouseButtons.Mouse1) ||
+            (DemoState.fastPlace && state.inputManager.MouseDown(InputManager.MouseButtons.Mouse1)))
         {
             PhysicsMaterial material = new PhysicsMaterial(1, 0.5f, 0.5f, 0, 0.5f);
+            float x = Random.Range(0.5f, 2f);
+            float y = Random.Range(0.5f, 2f);
 
-            //Circle circle = new Circle(0.5f);
-            //shapes.MakeBody(circle, material, inputManager.MouseWorldPosition(), 45, false);
-            Entity entity = new Entity(state.inputManager.MouseWorldPosition());
+            Entity entity = new Entity(state.inputManager.MouseWorldPosition(), 0, new Vector2(x, y));
             Collider comp = Collider.CreateUnitShape(shapeSet ? ShapeType.Circle : ShapeType.Capsule);
             state.MakeBody(entity, material, comp, false);
         }
-        if (state.inputManager.MousePressed(InputManager.MouseButtons.Mouse2))
+        if (state.inputManager.MousePressed(InputManager.MouseButtons.Mouse2) ||
+            (DemoState.fastPlace && state.inputManager.MouseDown(InputManager.MouseButtons.Mouse2)))
         {
             PhysicsMaterial material = new PhysicsMaterial(1, 0.5f, 0.5f);
-            //Polygon polygon = new Polygon(0.5f, 0.5f);
-            //shapes.MakeBody(polygon, material, inputManager.MouseWorldPosition(), 45, false);
-            Entity entity = new Entity(state.inputManager.MouseWorldPosition());
+            float x = Random.Range(0.5f, 2f);
+            float y = Random.Range(0.5f, 2f);
+
+            Entity entity = new Entity(state.inputManager.MouseWorldPosition(), 0, new Vector2(x, y));
             Collider comp = Collider.CreateUnitShape(shapeSet ? ShapeType.Box : ShapeType.Polygon, 3);
             state.MakeBody(entity, material, comp, false);
         }

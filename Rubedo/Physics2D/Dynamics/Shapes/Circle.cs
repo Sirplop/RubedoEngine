@@ -2,6 +2,7 @@
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics.Shapes;
+using Rubedo.Physics2D.Math;
 using System;
 
 namespace PhysicsEngine2D;
@@ -33,7 +34,7 @@ public class Circle : Shape
         return 0.5f * mass * radius * radius;
     }
 
-    public override bool Raycast(Ray2 ray, float distance, out RaycastResult result)
+    public override bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
     {
         result = new RaycastResult();
 

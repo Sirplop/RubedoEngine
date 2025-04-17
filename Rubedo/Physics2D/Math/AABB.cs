@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Lib;
+using Rubedo.Physics2D.Math;
 using System;
 using Math = System.Math;
 
@@ -115,7 +116,7 @@ public struct AABB : IEquatable<AABB>
         return true;
     }
 
-    public readonly bool Raycast(Ray2 ray, float distance = Ray2.Tmax)
+    public readonly bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance = Rubedo.Physics2D.Math.Ray2D.TMAX)
     {
         float tminX = (min.X - ray.origin.X) / ray.direction.X;
         float tmaxX = (max.X - ray.origin.X) / ray.direction.X;
@@ -135,7 +136,11 @@ public struct AABB : IEquatable<AABB>
         return true;
     }
 
-    public bool Equals(AABB other)
+    public override bool Equals(object obj)
+    {
+        return obj is AABB && Equals((AABB)obj);
+    }
+    public readonly bool Equals(AABB other)
     {
         return min.X == other.min.X && max.X == other.max.X &&
             min.Y == other.min.Y && max.Y == other.max.Y;
@@ -147,5 +152,10 @@ public struct AABB : IEquatable<AABB>
     public static bool operator !=(AABB left, AABB right)
     {
         return !left.Equals(right);
+    }
+
+    public override int GetHashCode()
+    {
+        return min.GetHashCode() ^ max.GetHashCode();
     }
 }

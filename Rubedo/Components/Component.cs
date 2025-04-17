@@ -1,12 +1,9 @@
 ﻿using Rubedo.Object;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Render;
-using System;
 
 namespace Rubedo.Components;
 
-public class Component
+public class Component : ITransformable
 {
     public Entity Entity { get; protected set; }
     public Transform transform;
@@ -16,6 +13,7 @@ public class Component
     public Component(bool active, bool visible)
     {
         transform = new Transform();
+        transform.attached = this;
         this.active = active;
         this.visible = visible;
     }
@@ -42,6 +40,7 @@ public class Component
     }
 
     public virtual void Update() { }
+    public virtual void TransformChanged() { }
 
     public virtual void Draw(Renderer sb)  { }
 

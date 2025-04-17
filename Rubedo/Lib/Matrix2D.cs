@@ -148,7 +148,7 @@ public struct Matrix2D
 
         return new Matrix2D(cosScaleX, sinScaleX, -sinScaleY, cosScaleY, 0, 0);
     }
-    public static void CreateRS(float radians, Vector2 xy, out Matrix2D matrix)
+    public static void CreateRS(float radians, ref Vector2 xy, out Matrix2D matrix)
     {
         CreateRS(radians, xy.X, xy.Y, out matrix);
     }
@@ -166,7 +166,7 @@ public struct Matrix2D
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public float Determinant()
+    public readonly float Determinant()
     {
         return M11 * M22 - M12 * M21;
     }
@@ -222,14 +222,9 @@ public struct Matrix2D
         };
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void TransformPoint(in Vector2 value, out Vector2 result)
+    public readonly void TransformPoint(ref Vector2 value, out Vector2 result)
     {
         result.X = (M11 * value.X + M21 * value.Y) + M31;
         result.Y = (M12 * value.X + M22 * value.Y) + M32;
-    }
-
-    public void SetPosition(ref Vector2 val)
-    {
-        M31 = val.X; M32 = val.Y;
     }
 }

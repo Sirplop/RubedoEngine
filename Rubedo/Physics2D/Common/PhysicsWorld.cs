@@ -5,6 +5,7 @@ using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Collision.Broadphase;
 using Rubedo.Physics2D.Constraints;
 using Rubedo.Physics2D.Dynamics;
+using Rubedo.Physics2D.Math;
 using Rubedo.Render;
 using System.Collections.Generic;
 
@@ -21,7 +22,8 @@ public class PhysicsWorld
 
     public List<PhysicsBody> bodies = new List<PhysicsBody>();
 
-    internal HashSet<Manifold> manifolds = new HashSet<Manifold>();
+    internal HashSet<Manifold> manifoldSet = new HashSet<Manifold>();
+    internal List<Manifold> manifolds = new List<Manifold>();
 
     private IBroadphase broadphase;
 
@@ -57,25 +59,26 @@ public class PhysicsWorld
     {
         bodies.Clear();
         manifolds.Clear();
+        manifoldSet.Clear();
         broadphase.Clear();
     }
 
     public bool Raycast(Vector2 origin, Vector2 direction, out RaycastResult result)
     {
-        return Raycast(origin, direction, Ray2.Tmax, out result);
+        return Raycast(origin, direction, Rubedo.Physics2D.Math.Ray2D.TMAX, out result);
     }
 
     public bool Raycast(Vector2 origin, Vector2 direction, float distance, out RaycastResult result)
     {
-        return Raycast(new Ray2(origin, direction), distance, out result);
+        return Raycast(new Rubedo.Physics2D.Math.Ray2D(origin, direction), distance, out result);
     }
 
-    public bool Raycast(Ray2 ray, out RaycastResult result)
+    public bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, out RaycastResult result)
     {
-        return Raycast(ray, Ray2.Tmax, out result);
+        return Raycast(ray, Rubedo.Physics2D.Math.Ray2D.TMAX, out result);
     }
 
-    public bool Raycast(Ray2 ray, float distance, out RaycastResult result)
+    public bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
     {
         return broadphase.Raycast(ray, distance, out result);
     }
@@ -83,16 +86,18 @@ public class PhysicsWorld
     public void Update(float dt)
     {
         Timer timer = new Timer();
-        foreach (PhysicsBody b in bodies)
-            b.Update();
+        int i;
 
-        foreach (PhysicsBody b in bodies)
-            b.IntegrateForces(dt);
+        for (i = 0; i < bodies.Count; i++)
+            bodies[i].Update();
+
+        for (i = 0; i < bodies.Count; i++)
+            bodies[i].IntegrateForces(dt);
 
         timer.Start();
         if (bruteForce)
         {
-            for (int i = 0; i < bodies.Count - 1; i++)
+            for (i = 0; i < bodies.Count - 1; i++)
             {
                 for (int j = i + 1; j < bodies.Count; j++)
                 {
@@ -101,8 +106,10 @@ public class PhysicsWorld
                     if (bodies[i].bounds.Overlaps(bodies[j].bounds))
                     {
                         Manifold key = new Manifold(bodies[i], bodies[j]);
-                        if (!manifolds.Contains(key))
+                        if (manifoldSet.Add(key))
+                        {
                             manifolds.Add(key);
+                        }
                     }
                 }
             }
@@ -113,7 +120,7 @@ public class PhysicsWorld
             //Broad phase
             broadphase.Update(bodies);
             timer.Step("B.U: ");
-            broadphase.ComputePairs(manifolds);
+            broadphase.ComputePairs(manifolds, manifoldSet);
             timer.Step("B.C: ");
         }
 
@@ -122,21 +129,23 @@ public class PhysicsWorld
         timer.Step("N.SC: ");
 
         float invDT = 1f / dt;
-        foreach (Manifold m in manifolds)
-            ContactConstraintSolver.PresolveConstraint(m, invDT);
+        for (i = 0; i < manifolds.Count; i++)
+            ContactConstraintSolver.PresolveConstraint(manifolds[i], invDT);
         timer.Step("N.PC: ");
-        foreach (Manifold m in manifolds)
-            ContactConstraintSolver.WarmStart(m);
+
+        for (i = 0; i < manifolds.Count; i++)
+            ContactConstraintSolver.WarmStart(manifolds[i]);
         timer.Step("N.WS: ");
+
         //Process maxIterations times for more stability
-        for (int i = 0; i < maxIterations; i++)
-            foreach (Manifold m in manifolds)
-                ContactConstraintSolver.ApplyImpulse(m);
+        for (int j = 0; j < maxIterations; j++)
+            for (i = 0; i < manifolds.Count; i++)
+                ContactConstraintSolver.ApplyImpulse(manifolds[i]);
 
         timer.Step("N.AI: ");
         //Integrate positions
-        foreach (PhysicsBody b in bodies)
-            b.IntegrateVelocity(dt);
+        for (i = 0; i < bodies.Count; i++)
+            bodies[i].IntegrateVelocity(dt);
         timer.Stop("N.IV: ");
 
         DebugText.Instance.DrawTextStack(timer.GetAsString(", "));
@@ -144,11 +153,13 @@ public class PhysicsWorld
 
     private void SolveContacts()
     {
-        foreach (Manifold m in manifolds)
+        for (int i = manifolds.Count - 1; i >= 0; i--)
         {
+            Manifold m = manifolds[i];
             if (m.A.Entity == null || m.B.Entity == null || !m.SolveContact())
             {
-                manifolds.Remove(m);
+                manifolds.RemoveAt(i);
+                manifoldSet.Remove(m);
             }
         }
     }

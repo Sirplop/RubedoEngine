@@ -2,6 +2,7 @@
 using PhysicsEngine2D;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Dynamics;
+using Rubedo.Physics2D.Math;
 using Rubedo.Render;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -94,9 +95,8 @@ internal class SpatialHashGrid : IBroadphase
         }
     }
     private readonly HashSet<Manifold> pairs = new HashSet<Manifold>();
-    public void ComputePairs(HashSet<Manifold> manifolds)
+    public void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> manifoldSet)
     {
-        pairs.Clear();
         foreach (List<PhysicsBody> body in cells.cells.Values)
         {
             if (body.Count <= 1) //ignore cells with 1 thing in it.
@@ -109,14 +109,28 @@ internal class SpatialHashGrid : IBroadphase
                         continue; //static bodies can't collide.
                     if (body[i].bounds.Overlaps(body[j].bounds))
                     {
+                        //TODO: ManifoldPool class, please. Too many allocations.
                         Manifold m = new Manifold(body[i], body[j]);
-                        pairs.Add(m); //TODO: ManifoldPool class, please. Too many allocations.
-                        manifolds.Add(m);
+                        if (pairs.Add(m) && manifoldSet.Add(m))
+                        {
+                            manifolds.Add(m);
+                        }
                     }
                 }
             }
         }
-        manifolds.RemoveWhere(m => !pairs.Contains(m)); //TODO: Investigate better stale manifold removal.
+        /*manifoldSet.RemoveWhere(m => !pairs.Contains(m)); //TODO: Investigate better stale manifold removal.
+        manifolds.Clear();
+        manifolds.AddRange(manifoldSet);*/
+        for (int i = manifolds.Count - 1; i >= 0; i--)
+        {
+            if (!pairs.Contains(manifolds[i]))
+            {
+                manifoldSet.Remove(manifolds[i]);
+                manifolds.RemoveAt(i);
+            }
+        }
+        pairs.Clear();
     }
 
     public void Add(PhysicsBody body)
@@ -158,7 +172,7 @@ internal class SpatialHashGrid : IBroadphase
         bodySet.Remove(body);
     }
 
-    public bool Raycast(Ray2 ray, float distance, out RaycastResult result)
+    public bool Raycast(Math.Ray2D ray, float distance, out RaycastResult result)
     {
         throw new System.NotImplementedException();
     }

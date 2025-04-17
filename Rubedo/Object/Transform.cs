@@ -21,7 +21,9 @@ public class Transform
         Scale = 4
     }
 
-    private  Transform _parent;
+    internal ITransformable attached;
+
+    private Transform _parent;
     private readonly List<Transform> _children = new List<Transform>();
 
     private Dirt _dirtyType = (Dirt)7; //all dirty at start.
@@ -72,13 +74,13 @@ public class Transform
     public Transform(Vector2 position, float rotationDegrees)
     {
         _localPosition = position;
-        _localRotation = Lib.Math.DegToRad(rotationDegrees % 360);
+        _localRotation = Lib.Math.ToRadians(rotationDegrees % 360);
         _localScale = Vector2.One;
     }
     public Transform(Vector2 position, float rotationDegrees, Vector2 scale)
     {
         _localPosition = position;
-        _localRotation = Lib.Math.DegToRad(rotationDegrees % 360);
+        _localRotation = Lib.Math.ToRadians(rotationDegrees % 360);
         _localScale = scale;
     }
     #endregion
@@ -94,7 +96,7 @@ public class Transform
             UpdateTransform();
             return _localPosition;
         }
-        set => SetLocalPosition(value);
+        set => SetLocalPosition(ref value);
     }
     /// <summary>
     /// Gets the local-space rotation in degrees.
@@ -104,9 +106,9 @@ public class Transform
         get
         {
             UpdateTransform();
-            return Lib.Math.RadToDeg(_localRotation);
+            return Lib.Math.ToDegrees(_localRotation);
         }
-        set => SetLocalRotation(Lib.Math.DegToRad(value));
+        set => SetLocalRotation(Lib.Math.ToRadians(value));
     }
     /// <summary>
     /// Gets the local-space rotation in radians.
@@ -130,7 +132,7 @@ public class Transform
             UpdateTransform();
             return _localScale;
         }
-        set => SetLocalScale(value);
+        set => SetLocalScale(ref value);
     }
     #endregion
     #region World
@@ -147,7 +149,7 @@ public class Transform
                 if (_parent != null)
                 {
                     _parent.UpdateTransform();
-                    _parent._worldTransform.TransformPoint(_localPosition, out _position);
+                    _parent._worldTransform.TransformPoint(ref _localPosition, out _position);
                 }
                 else
                 {
@@ -159,7 +161,7 @@ public class Transform
 
             return _position;
         }
-        set => SetPosition(value);
+        set => SetPosition(ref value);
     }
     /// <summary>
     /// Get the world-space rotation in degrees.
@@ -169,7 +171,7 @@ public class Transform
         get
         {
             UpdateTransform();
-            return Lib.Math.RadToDeg(_rotation);
+            return Lib.Math.ToDegrees(_rotation);
         }
         set => SetRotationDegrees(value);
     }
@@ -195,7 +197,7 @@ public class Transform
             UpdateTransform();
             return _scale;
         }
-        set => SetScale(value);
+        set => SetScale(ref value);
     }
     #endregion
     #region Matrix
@@ -207,7 +209,6 @@ public class Transform
             return _worldTransform;
         }
     }
-
 
     public Matrix2D WorldToLocalTransform
     {
@@ -244,7 +245,7 @@ public class Transform
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetPosition(Vector2 position)
+    public void SetPosition(ref Vector2 position)
     {
         if (position == _position)
             return;
@@ -269,10 +270,10 @@ public class Transform
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetRotationDegrees(float degrees)
     {
-        SetRotation(Lib.Math.DegToRad(degrees));
+        SetRotation(Lib.Math.ToRadians(degrees));
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetScale(Vector2 scale)
+    public void SetScale(ref Vector2 scale)
     {
         _scale = scale;
         if (_parent != null)
@@ -282,7 +283,7 @@ public class Transform
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetLocalPosition(Vector2 localPosition)
+    public void SetLocalPosition(ref Vector2 localPosition)
     {
         if (localPosition == _localPosition)
             return;
@@ -299,7 +300,7 @@ public class Transform
         SetDirty(Dirt.Rotation);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetLocalScale(Vector2 scale)
+    public void SetLocalScale(ref Vector2 scale)
     {
         _localScale = scale;
         _localDirty = _scaleDirty = true;
@@ -314,6 +315,8 @@ public class Transform
             _dirtyType |= dirt;
             for (var i = 0; i < _children.Count; i++)
                 _children[i].SetDirty(dirt);
+
+            attached.TransformChanged();
         }
     }
 
@@ -360,7 +363,7 @@ public class Transform
             {
                 Matrix2D.Multiply(ref _localTransform, ref _parent._worldTransform, out _worldTransform);
                 _rotation = _localRotation + _parent._rotation;
-                _scale = _parent._scale * _localScale;
+                Vector2.Multiply(ref _parent._scale, ref _localScale, out _scale);
             }
 
             _worldToLocalDirty = true;
@@ -374,19 +377,17 @@ public class Transform
     {
         return LocalToWorldTransform.TransformPoint(localPosition);
     }
-
-    public Vector2 LocalToWorldDirection(Vector2 localDirection)
+    public void LocalToWorldPosition(ref Vector2 localPosition, out Vector2 worldPosition)
     {
-        return Lib.Math.RotateRadians(localDirection, Rotation);
+        LocalToWorldTransform.TransformPoint(ref localPosition, out worldPosition);
     }
 
     public Vector2 WorldToLocalPosition(Vector2 worldPosition)
     {
         return WorldToLocalTransform.TransformPoint(worldPosition);
     }
-
-    public Vector2 WorldToLocalDirection(Vector2 worldDirection)
+    public void WorldToLocalPosition(ref Vector2 worldPosition, out Vector2 localPosition)
     {
-        return Lib.Math.RotateRadians(worldDirection, -Rotation);
+        WorldToLocalTransform.TransformPoint(ref worldPosition, out localPosition);
     }
 }

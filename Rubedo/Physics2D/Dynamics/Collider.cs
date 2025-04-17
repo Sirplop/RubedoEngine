@@ -19,10 +19,6 @@ public class Collider : Component
     public static float UNIT_CAPSULE_RADIUS => 0.5f * RubedoEngine.SizeOfMeter;
 
     public readonly Shape shape;
-    
-    private Vector2 prevPos = Vector2.Zero;
-    private float prevAngle = 0f;
-    private Vector2 prevScale = Vector2.One;
 
     protected Collider(float radius) : base(true, true)
     {
@@ -89,22 +85,11 @@ public class Collider : Component
         }
         return null;
     }
-    /*
-    public override void Update()
+
+    public override void TransformChanged()
     {
-        base.Update();
-        if (shape.type == ShapeType.Box ||  shape.type == ShapeType.Polygon)
-        {
-            Vector2 pos = transform.Position;
-            float angle = transform.Rotation;
-            Vector2 scale = transform.Scale;
-            if (pos != prevPos || angle != prevAngle || scale != prevScale)
-            {
-                ((Polygon)shape).normalsDirty = true;
-                prevPos = pos;
-                prevAngle = angle;
-                prevScale = scale;
-            }
-        }
-    }*/
+        shape.transformDirty = true;
+        shape.normalsDirty = true;
+        shape.boundsDirty = true;
+    }
 }

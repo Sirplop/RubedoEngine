@@ -75,10 +75,10 @@ internal class Demo1 : DemoBase
             (DemoState.fastPlace && state.inputManager.MouseDown(InputManager.MouseButtons.Mouse2)))
         {
             PhysicsMaterial material = new PhysicsMaterial(1, 0.5f, 0.5f);
-            float x = 1f;// Random.Range(0.5f, 2f);
-            float y = 5f;//Random.Range(0.5f, 2f);
+            float x = Random.Range(0.5f, 2f);
+            float y = Random.Range(0.5f, 2f);
 
-            Entity entity = new Entity(state.inputManager.MouseWorldPosition(), -90, new Vector2(x, y));
+            Entity entity = new Entity(state.inputManager.MouseWorldPosition(), 0, new Vector2(x, y));
             Collider comp = Collider.CreateUnitShape(shapeSet ? ShapeType.Box : ShapeType.Polygon, 3);
             state.MakeBody(entity, material, comp, false);
         }
@@ -114,9 +114,9 @@ internal class Demo1 : DemoBase
             state.MakeBody(orb, material, comp, true);
 
             //magnificent polygon
-            //poly = new Entity(new Vector2(0, 0), 45, new Vector2(5f, 10f));
-            //comp = Collider.CreateUnitShape(ShapeType.Polygon, 3);
-            //state.MakeBody(poly, material, comp, true);
+            poly = new Entity(new Vector2(0, 0), 45, new Vector2(5f, 10f));
+            comp = Collider.CreateUnitShape(ShapeType.Polygon, 3);
+            state.MakeBody(poly, material, comp, true);
 
             //magnificent capsule
             capsule = new Entity(new Vector2(width / 4, 0), -0, new Vector2(1, 2));

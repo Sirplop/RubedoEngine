@@ -7,7 +7,7 @@ using Rubedo.Render;
 
 namespace Rubedo.Object;
 
-public class Entity : IEnumerable<Component>, IEnumerable
+public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
 {
     public GameState State {  get; private set; }
     public ComponentList Components { get; private set; }
@@ -20,6 +20,7 @@ public class Entity : IEnumerable<Component>, IEnumerable
     public Entity(Vector2 position, float rotation, Vector2 scale)
     {
         transform = new Transform(position, rotation, scale);
+        transform.attached = this;
         Components = new ComponentList(this);
     }
 
@@ -38,11 +39,17 @@ public class Entity : IEnumerable<Component>, IEnumerable
 
     public virtual void Update()
     {
-        Components.Update();
+        if (active)
+            Components.Update();
+    }
+    void ITransformable.TransformChanged()
+    {
+        Components.TransformChanged();
     }
     public virtual void Draw(Renderer sb)
     {
-        Components.Draw(sb);
+        if (visible)
+            Components.Draw(sb);
     }
 
     public virtual void Add(Component component)

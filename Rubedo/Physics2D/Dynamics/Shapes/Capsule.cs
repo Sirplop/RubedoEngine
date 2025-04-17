@@ -1,9 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Diagnostics.Runtime.Utilities;
+using Microsoft.Xna.Framework;
 using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics.Shapes;
+using Rubedo.Physics2D.Math;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace PhysicsEngine2D;
 
@@ -16,6 +19,10 @@ public class Capsule : Shape
     internal float radius;
     internal Vector2 start;
     internal Vector2 end;
+
+    public Vector2 transStart;
+    public Vector2 transEnd;
+    public float transRadius;
 
     public Capsule(Transform refTransform, float length, float radius) : base(refTransform)
     {
@@ -35,12 +42,12 @@ public class Capsule : Shape
 
     public override AABB GetBoundingBox()
     {
-        GetTransformedPoints(out Vector2 s, out Vector2 e, out float rad);
+        TransformPoints();
 
-        float r = MathF.Max(s.X, e.X) + rad;
-        float b = MathF.Min(s.Y, e.Y) - rad;
-        float l = MathF.Min(s.X, e.X) - rad;
-        float t = MathF.Max(s.Y, e.Y) + rad;
+        float r = MathF.Max(transStart.X, transEnd.X) + transRadius;
+        float b = MathF.Min(transStart.Y, transEnd.Y) - transRadius;
+        float l = MathF.Min(transStart.X, transEnd.X) - transRadius;
+        float t = MathF.Max(transStart.Y, transEnd.Y) + transRadius;
 
         return new AABB(l, b, r, t);
         //_bounds.Set(new Vector2(l, b), new Vector2(r, t));
@@ -52,18 +59,34 @@ public class Capsule : Shape
         return 0.5f * mass * radius * radius + mass * length / 3f;
     }
 
-    public override bool Raycast(Ray2 ray, float distance, out RaycastResult result)
+    public override bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
     {
         throw new System.NotImplementedException();
     }
 
-    public void GetTransformedPoints(out Vector2 startR, out Vector2 endR, out float radiusR)
+    public void TransformPoints()
     {
+        if (!transformDirty)
+            return;
+
         Vector2 pos = transform.Position;
-        Matrix2D matrix = Matrix2D.CreateTR(pos.X, pos.Y, transform.Rotation);
+        float radians = transform.Rotation;
+        float sin = MathF.Sin(radians);
+        float cos = MathF.Cos(radians);
         Vector2 scale = transform.Scale;
-        startR = matrix.TransformPoint(new Vector2(0, -length * 0.5f * (scale.Y * 0.5f + 0.5f)));
-        endR = matrix.TransformPoint(new Vector2(0, length * 0.5f * (scale.Y * 0.5f + 0.5f)));
-        radiusR = radius * (scale.X * 0.5f + 0.5f);
+
+        Vector2 s = new Vector2(0, -length * 0.5f * (scale.Y * 0.5f + 0.5f));
+        Vector2 e = new Vector2(0, -s.Y);
+        TransformPoint(ref s, ref pos, ref sin, ref cos, out transStart);
+        TransformPoint(ref e, ref pos, ref sin, ref cos, out transEnd);
+        transRadius = radius * (scale.X * 0.5f + 0.5f);
+
+        transformDirty = false;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void TransformPoint(ref Vector2 value, ref Vector2 pos, ref float sin, ref float cos, out Vector2 result)
+    {
+        result.X = (cos * value.X - sin * value.Y) + pos.X;
+        result.Y = (sin * value.X + cos * value.Y) + pos.Y;
     }
 }

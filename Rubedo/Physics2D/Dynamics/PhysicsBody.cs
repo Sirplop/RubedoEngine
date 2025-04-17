@@ -108,13 +108,13 @@ public class PhysicsBody : Component
         if (negate)
         {
             MathV.MulSub(ref velocity, ref impulse, invMass, out velocity);
-            Lib.Math.Cross(ref contactRadius, ref impulse, out float lambda);
+            MathV.Cross(ref contactRadius, ref impulse, out float lambda);
             angularVelocity += invInertia * -lambda;
         }
         else
         {
             MathV.MulAdd(ref velocity, ref impulse, invMass, out velocity);
-            Lib.Math.Cross(ref contactRadius, ref impulse, out float lambda);
+            MathV.Cross(ref contactRadius, ref impulse, out float lambda);
             angularVelocity += invInertia * lambda;
         }
     }

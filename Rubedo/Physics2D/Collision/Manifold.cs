@@ -51,8 +51,6 @@ public class Manifold : IEquatable<Manifold>
     public float friction;
     public float restitution;
 
-    public List<Vector2> closestPoints = new List<Vector2>();
-
     public Manifold(PhysicsBody bodyA, PhysicsBody bodyB)
     {
         A = bodyA;

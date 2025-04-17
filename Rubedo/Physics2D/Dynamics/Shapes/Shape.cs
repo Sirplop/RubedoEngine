@@ -1,14 +1,19 @@
 ﻿using PhysicsEngine2D;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision.Shapes;
+using Rubedo.Physics2D.Math;
 
 namespace Rubedo.Physics2D.Dynamics.Shapes;
 
 public abstract class Shape
 {
     public Transform transform => _transform;
-    protected Transform _transform;
+    internal Transform _transform;
     internal AABB RegisteredBounds; //used for broadphase
+
+    internal bool transformDirty;
+    internal bool normalsDirty;
+    internal bool boundsDirty;
 
     public Shape(Transform refTransform)
     {
@@ -20,5 +25,5 @@ public abstract class Shape
     public abstract AABB GetBoundingBox();
     public abstract float GetArea();
     public abstract float GetMomentOfInertia(float mass);
-    public abstract bool Raycast(Ray2 ray, float distance, out RaycastResult result);
+    public abstract bool Raycast(Ray2D ray, float distance, out RaycastResult result);
 }

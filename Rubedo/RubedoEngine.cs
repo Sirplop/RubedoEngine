@@ -7,6 +7,7 @@ using Rubedo.Object;
 using System.Diagnostics;
 using System;
 using PhysicsEngine2D;
+using Rubedo.Debug.Benchmarks;
 
 namespace Rubedo;
 
@@ -58,6 +59,8 @@ public class RubedoEngine : Game
 
         IsMouseVisible = true;
         IsFixedTimeStep = false;
+
+        //BenchmarkRun.RunBenchmark();
     }
 
     protected override void Initialize()

@@ -81,6 +81,18 @@ public class ShapeUtility
         float t = Vector2.Dot(point - A, AB) / Vector2.Dot(AB, AB);
         return A + Lib.Math.Clamp(t, 0, 1) * AB;
     }
+    /// <summary>
+    /// Gets the closest point on line <paramref name="A"/><paramref name="B"/> to the given <paramref name="point"/>.
+    /// </summary>
+    public static void ClosestPointOnLine(ref Vector2 A, ref Vector2 B, ref Vector2 point, out Vector2 closest)
+    {
+        Vector2.Subtract(ref B, ref A, out Vector2 AB);
+        Vector2.Subtract(ref point, ref A, out Vector2 AP);
+        Vector2.Dot(ref AP, ref AB, out float dA);
+        Vector2.Dot(ref AB, ref AB, out float dAB);
+        float t = dA / dAB;
+        MathV.MulAdd(ref A, ref AB, Lib.Math.Clamp(t, 0, 1), out closest);
+    }
 
     public static Vector2 GetClosestPointOnPolygon(Polygon poly, Vector2 point,
                                                    out float distanceSquared, out Vector2 edgeNormal)
@@ -88,32 +100,23 @@ public class ShapeUtility
         distanceSquared = float.MaxValue;
         edgeNormal = Vector2.Zero;
         Vector2 closestPoint = Vector2.Zero;
+        int bestNormal = -1;
 
         float tempDistanceSquared;
-        Vector2 offPoint = poly.transform.LocalToWorldPosition(poly.vertices[0]);
-        Vector2 b;
         Vector2 closest;
         for (int i = 0; i < poly.VertexCount; i++)
         {
-            b = poly.transform.LocalToWorldPosition(poly.vertices[(i + 1) % poly.VertexCount]);
-
-            closest = ClosestPointOnLine(offPoint, b, point);
+            ClosestPointOnLine(ref poly.transformedNormals[i], ref poly.transformedNormals[(i + 1) % poly.VertexCount], ref point, out closest);
             Vector2.DistanceSquared(ref point, ref closest, out tempDistanceSquared);
 
             if (tempDistanceSquared < distanceSquared)
             {
                 distanceSquared = tempDistanceSquared;
                 closestPoint = closest;
-
-                // get the normal of the line
-                Vector2 line = b - offPoint;
-                edgeNormal.X = -line.Y;
-                edgeNormal.Y = line.X;
+                bestNormal = i;
             }
-            offPoint = b;
         }
-
-        Rubedo.Lib.Math.Normalize(ref edgeNormal);
+        edgeNormal = poly.transformedVertices[bestNormal];
 
         return closestPoint;
     }

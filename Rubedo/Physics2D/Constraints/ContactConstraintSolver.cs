@@ -20,7 +20,7 @@ public static class ContactConstraintSolver
         float invMassSum = m.A.invMass + m.B.invMass;
         float e = MathF.Min(m.A.material.restitution, m.B.material.restitution);
         m.friction = (m.A.material.friction + m.B.material.friction) * 0.5f;
-        m.tangent = Lib.Math.Right(m.normal);
+        MathV.Right(ref m.normal, out m.tangent);
 
         for (int i = 0; i < m.contactCount; i++)
         {
@@ -52,14 +52,14 @@ public static class ContactConstraintSolver
                 Mᴬ  Mᴮ      Iᴬ            Iᴮ
             */
 
-            Lib.Math.Cross(ref c.ra, ref m.normal, out float rn1);
-            Lib.Math.Cross(ref c.rb, ref m.normal, out float rn2);
+            MathV.Cross(ref c.ra, ref m.normal, out float rn1);
+            MathV.Cross(ref c.rb, ref m.normal, out float rn2);
 
             c.normalMass = 1f / (invMassSum + m.A.invInertia * (rn1 * rn1) +
                                         m.B.invInertia * (rn2 * rn2));
 
-            Lib.Math.Cross(ref c.ra, ref m.tangent, out float rt1);
-            Lib.Math.Cross(ref c.rb, ref m.tangent, out float rt2);
+            MathV.Cross(ref c.ra, ref m.tangent, out float rt1);
+            MathV.Cross(ref c.rb, ref m.tangent, out float rt2);
 
             c.tangentMass = 1f / (invMassSum + m.A.invInertia * (rt1 * rt1) +
                                          m.B.invInertia * (rt2 * rt2));
@@ -77,15 +77,13 @@ public static class ContactConstraintSolver
 
     public static void WarmStart(Manifold m)
     {
-        Vector2 tangent = Lib.Math.Right(m.normal);
-
         for (int i = 0; i < m.contactCount; i++)
         {
             Contact c = m.contacts[i];
             if (c.penetration < 0f) continue;
 
             //Accumulated impulses
-            MathV.MulAdd2(ref m.normal, c.accumImpulse, ref tangent, c.accumFriction, out Vector2 p);
+            MathV.MulAdd2(ref m.normal, c.accumImpulse, ref m.tangent, c.accumFriction, out Vector2 p);
 
             m.A.ApplyImpulse(ref p, ref c.ra, true);
             m.B.ApplyImpulse(ref p, ref c.rb, false);

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using PhysicsEngine2D;
+using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Physics2D;
 using Rubedo.Physics2D.Collision.Shapes;
@@ -62,7 +63,7 @@ public class TestPhysicsWorld : Entity
             {
                 float val = body.LinearVelocity.Length() * 5f;
                 float vel = 220 - System.MathF.Min(val, 220) % 360;
-                Lib.Math.HsvToRgb(vel, 1, 1, out int r, out int g, out int b);
+                MathColor.HsvToRgb(vel, 1, 1, out int r, out int g, out int b);
                 speedColor = new Color(r, g, b);
             }
 
@@ -87,9 +88,9 @@ public class TestPhysicsWorld : Entity
                     break;
                 case ShapeType.Capsule:
                     Capsule capsule = (Capsule)body.collider.shape;
-                    capsule.GetTransformedPoints(out Vector2 start, out Vector2 end, out float radius);
-                    shapes.DrawCapsuleFill(capsule.transform, radius, start, end, 11, speedColor);
-                    shapes.DrawCapsule(capsule.transform, radius, start, end, 11, Color.White);
+                    capsule.TransformPoints();
+                    shapes.DrawCapsuleFill(capsule.transform, capsule.transRadius, capsule.transStart, capsule.transEnd, 11, speedColor);
+                    shapes.DrawCapsule(capsule.transform, capsule.transRadius, capsule.transStart, capsule.transEnd, 11, Color.White);
                     break;
                 case ShapeType.Polygon:
                     Polygon polygon = (Polygon)body.collider.shape;

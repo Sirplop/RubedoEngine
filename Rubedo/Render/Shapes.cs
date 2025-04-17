@@ -462,7 +462,7 @@ public sealed class Shapes : IDisposable
         float e1x = x2 - x1;
         float e1y = y2 - y1;
 
-        Lib.Math.Normalize(ref e1x, ref e1y);
+        MathV.Normalize(ref e1x, ref e1y);
 
         float n1x = -e1y;
         float n1y = e1x;
@@ -522,7 +522,7 @@ public sealed class Shapes : IDisposable
         float e1x = x2 - x1;
         float e1y = y2 - y1;
 
-        Lib.Math.Normalize(ref e1x, ref e1y);
+        MathV.Normalize(ref e1x, ref e1y);
 
         float n1x = -e1y;
         float n1y = e1x;

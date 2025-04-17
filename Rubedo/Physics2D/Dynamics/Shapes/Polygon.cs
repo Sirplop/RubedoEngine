@@ -1,22 +1,24 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo;
+using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics.Shapes;
 using Rubedo.Physics2D.Math;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace PhysicsEngine2D;
 
 /// <summary>
-/// Note: Vertices in clockwise winding order.
+/// Note: Vertices in counter-clockwise winding order.
 /// </summary>
 public class Polygon : Shape
 {
     public Vector2[] vertices;
     public Vector2[] normals;
+    public Vector2[] transformedVertices;
+    public Vector2[] transformedNormals;
 
     public int VertexCount
     {
@@ -32,12 +34,16 @@ public class Polygon : Shape
     {
         SetVertices(verts);
         type = ShapeType.Polygon;
+        transformDirty = true;
+        normalsDirty = true;
     }
 
     public Polygon(Transform refTransform, float halfWidth, float halfHeight) : base(refTransform)
     {
         SetBox(halfWidth, halfHeight);
         type = ShapeType.Polygon;
+        transformDirty = true;
+        normalsDirty = true;
     }
 
     public void SetVertices(IEnumerable<Vector2> verts)
@@ -55,9 +61,12 @@ public class Polygon : Shape
         for (int i = 0; i < VertexCount; i++)
         {
             Vector2 face = vertices[(i + 1) % VertexCount] - vertices[i];
-            normals[i] = Rubedo.Lib.Math.Right(face);
+            normals[i] = MathV.Right(face);
             normals[i].Normalize();
         }
+
+        transformedVertices = new Vector2[VertexCount];
+        transformedNormals = new Vector2[VertexCount];
     }
 
     public void SetBox(float halfWidth, float halfHeight)
@@ -135,11 +144,11 @@ public class Polygon : Shape
         return System.Math.Abs(iPoly);
     }
 
-    public override bool Raycast(Ray2 ray, float distance, out RaycastResult result)
+    public override bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
     {
         result = new RaycastResult();
 
-        float tmin = Ray2.Tmax;
+        float tmin = Rubedo.Physics2D.Math.Ray2D.TMAX;
         int crossings = 0;
 
         for (int i = 0; i < VertexCount; i++)
@@ -158,7 +167,7 @@ public class Polygon : Shape
                     tmin = t;
 
                     result.point = ray.origin + ray.direction * tmin;
-                    result.normal = transform.LocalToWorldDirection(normals[i]);
+                    //result.normal = transform.LocalToWorldDirection(normals[i]);
                     result.distance = tmin;
                 }
             }
@@ -168,50 +177,31 @@ public class Polygon : Shape
         return crossings > 0 && crossings % 2 == 0;
     }
 
-    //Get furthest vertex on polygon in a direction
-    public Vector2 GetSupportPoint(Vector2 dir)
+    public void TransformVertices()
     {
-        Vector2 support = Vector2.Zero;
-        float maxProjection = float.MinValue;
-
-        foreach(Vector2 vertex in vertices)
+        if (!transformDirty)
+            return;
+        for (int i = 0; i < vertices.Length; i++)
         {
-            float projection = Vector2.Dot(vertex, dir);
-
-            //If vertex is furthest, projection is greatest
-            if(projection > maxProjection)
-            {
-                maxProjection = projection;
-                support = vertex;
-            }
+            transform.LocalToWorldPosition(ref vertices[i], out transformedVertices[i]);
         }
-
-        return support;
+        transformDirty = false;
     }
-
-    public void GetTransformedNormal(int vertex, out Vector2 normal)
+    public void TransformNormals()
     {
-        Vector2 face = transform.LocalToWorldPosition(vertices[(vertex + 1) % VertexCount]) - transform.LocalToWorldPosition(vertices[vertex]);
-        normal = Rubedo.Lib.Math.Right(face);
-        Rubedo.Lib.Math.Normalize(ref normal);
-    }
+        if (!normalsDirty)
+            return;
 
-    public bool ContainsPoint(Vector2 point)
-    {
-        // normalize the point to be in our Polygon coordinate space
-        point = transform.WorldToLocalPosition(point);
-
-        bool isInside = false;
-        for (int i = 0, j = vertices.Length - 1; i < vertices.Length; j = i++)
+        Vector2 face, vert1, vert2;
+        for (int i = 0; i < vertices.Length; i++)
         {
-            if (((vertices[i].Y > point.Y) != (vertices[j].Y > point.Y)) &&
-                (point.X < (vertices[j].X - vertices[i].X) * (point.Y - vertices[i].Y) / (vertices[j].Y - vertices[i].Y) +
-                 vertices[i].X))
-            {
-                isInside = !isInside;
-            }
+            transform.LocalToWorldPosition(ref vertices[i], out vert1);
+            transform.LocalToWorldPosition(ref vertices[(i + 1) % VertexCount], out vert2);
+            Vector2.Subtract(ref vert2, ref vert1, out face);
+            MathV.Right(ref face, out face);
+            MathV.Normalize(ref face);
+            transformedNormals[i] = face;
         }
-
-        return isInside;
+        normalsDirty = false;
     }
 }

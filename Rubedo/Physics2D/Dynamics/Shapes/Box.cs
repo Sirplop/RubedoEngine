@@ -27,6 +27,8 @@ public class Box : Polygon
         this.height = height;
 
         SetBox(width * 0.5f, height * 0.5f);
+        transformDirty = true;
+        normalsDirty = true;
     }
 
     public override float GetArea()
