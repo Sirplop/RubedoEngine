@@ -22,7 +22,7 @@ public class Collider : Component
 
     protected Collider(float radius) : base(true, true)
     {
-        shape = new Circle(transform, radius);
+        shape = new Circle(compTransform, radius);
     }
     
     protected Collider(ShapeType type, float r1, float r2) : base(true, true)
@@ -30,10 +30,10 @@ public class Collider : Component
         switch (type)
         {
             case ShapeType.Box:
-                shape = new Box(transform, r1, r2);
+                shape = new Box(compTransform, r1, r2);
                 break;
             case ShapeType.Capsule:
-                shape = new Capsule(transform, r1, r2);
+                shape = new Capsule(compTransform, r1, r2);
                 break;
             default:
                 throw new ArgumentException("Given ShapeType does not belong in this constructor!");
@@ -41,7 +41,7 @@ public class Collider : Component
     }
     protected Collider(List<Vector2> vertices) : base(true, true)
     {
-        shape = new Polygon(transform, vertices);
+        shape = new Polygon(compTransform, vertices);
     }
 
     public static Collider CreateCircle(float radius)

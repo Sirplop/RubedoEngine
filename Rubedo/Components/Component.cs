@@ -1,49 +1,83 @@
 ﻿using Rubedo.Object;
 using Rubedo.Render;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.Components;
 
 public class Component : ITransformable
 {
     public Entity Entity { get; protected set; }
-    public Transform transform;
+    /// <summary>
+    /// Short for <see cref="Entity.transform"/>
+    /// </summary>
+    public Transform Transform
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => Entity.transform;
+    }
+    public Transform compTransform;
     public bool active;
     public bool visible;
 
     public Component(bool active, bool visible)
     {
-        transform = new Transform();
-        transform.attached = this;
+        compTransform = new Transform();
+        compTransform.attached = this;
         this.active = active;
         this.visible = visible;
     }
 
+    /// <summary>
+    /// Called when this component is added to an Entity.
+    /// </summary>
     public virtual void Added(Entity entity)
     {
         Entity = entity;
-        transform.SetParent(entity.transform);
+        compTransform.SetParent(entity.transform);
     }
+    /// <summary>
+    /// Called when this component is removed from an Entity.
+    /// </summary>
+    /// <param name="entity"></param>
     public virtual void Removed(Entity entity)
     {
         Entity = null;
-        transform.SetParent(null);
+        compTransform.SetParent(null);
     }
 
     /// <summary>
-    /// Only called when the Entity this component is attached to awakes.
+    /// Called when the Entity this component is attached to awakes.
     /// </summary>
     public virtual void EntityAwake() { }
+    /// <summary>
+    /// Called when the Entity this component is attached to is added to a scene.
+    /// </summary>
     public virtual void EntityAdded(GameState state) { }
+    /// <summary>
+    /// Called when the Entity this component is attached to is removed from a scene.
+    /// </summary>
     public virtual void EntityRemoved(GameState state) 
     {
         this.Entity = null;
     }
 
+    /// <summary>
+    /// Called every frame while <see cref="Entity.active"/> and <see cref="active"/> are both true.
+    /// </summary>
     public virtual void Update() { }
+    /// <summary>
+    /// Called when this transform receives a change in a frame, I.E. the transform is marked "dirty".
+    /// </summary>
     public virtual void TransformChanged() { }
 
+    /// <summary>
+    /// Draws the component, if needed.
+    /// </summary>
     public virtual void Draw(Renderer sb)  { }
 
+    /// <summary>
+    /// Removes this component from its parent entity. Short for calling <see cref="Entity.Remove(Component)"/>
+    /// </summary>
     public void RemoveSelf()
     {
         if (Entity != null)

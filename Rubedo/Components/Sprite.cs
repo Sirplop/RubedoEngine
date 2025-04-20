@@ -2,11 +2,13 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Render;
+using System;
 
 namespace Rubedo.Components;
 
 public class Sprite : Component
 {
+
     protected Texture2D _texture;
     protected Color _color = Color.White;
     protected int layer = 0;
@@ -28,17 +30,27 @@ public class Sprite : Component
         }
     }
     private Vector2 _pixelPivot;
+    public Color Color => _color;
 
     public float Width => _texture.Width;
     public float Height => _texture.Height;
+
+    public Vector2 HalfWH => _halfWH;
+    protected Vector2 _halfWH;
+
     public Sprite(string texture) : this(AssetManager.LoadTexture(texture), true, true) { }
     public Sprite(string texture, bool active, bool visible) : this(AssetManager.LoadTexture(texture), active, visible) { }
     public Sprite(Texture2D texture) : this(texture, true, true) { }
     public Sprite(Texture2D texture, bool active, bool visible) : base(active, visible)
     {
-        _texture = texture;
-        transform = new Transform();
+        _texture = texture ?? throw new NullReferenceException("Sprite texture cannot be null!");
         Pivot = new Vector2(0.5f, 0.5f);
+        _halfWH = new Vector2(Width * 0.5f, Height * 0.5f);
+    }
+
+    public void SetColor(Color color)
+    {
+        this._color = color;
     }
 
     public override void Draw(Renderer sb)
@@ -48,12 +60,12 @@ public class Sprite : Component
 
         sb.Draw(
             _texture,
-            transform.Position + Entity.transform.Position,
+            compTransform.Position,
             null,
             _color,
-            transform.RotationDegrees + Entity.transform.RotationDegrees,
+            compTransform.Rotation,
             PixelPivot,
-            transform.Scale * Entity.transform.Scale,
+            compTransform.Scale,
             SpriteEffects.None, 0f);
     }
 }

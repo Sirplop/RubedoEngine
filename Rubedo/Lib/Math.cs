@@ -70,58 +70,23 @@ public static class Math
         return RAD2DEG * angleRadians;
     }
 
-    /// <summary>
-    /// Rotates the given point around (0,0) by the specified degree angle. This is a local-space transform.
-    /// </summary>
-    public static Vector2 Rotate(in Vector2 v, float delta)
-    {
-        delta = ToRadians(delta);
-        float sin = MathF.Sin(delta);
-        float cos = MathF.Cos(delta);
-        return new Vector2(
-            v.X * cos - v.Y * sin,
-            v.X * sin + v.Y * cos
-        );
-    }
-    /// <summary>
-    /// Rotates the given point around (0,0) by the specified degree angle. This is a local-space transform.
-    /// </summary>
-    public static void Rotate(float x, float y, float delta, out float z, out float w)
-    {
-        delta = ToRadians(delta);
-        float sin = MathF.Sin(delta);
-        float cos = MathF.Cos(delta);
-        z = x * cos - y * sin;
-        w = x * sin + y * cos;
-    }
-    /// <summary>
-    /// Rotates the given point around (0,0) by the specified radian angle. This is a local-space transform.
-    /// </summary>
-    public static Vector2 RotateRadians(in Vector2 v, float delta, float scaleX = 1, float scaleY = 1)
-    {
-        float sin = MathF.Sin(delta);
-        float cos = MathF.Cos(delta);
-        return new Vector2(
-            v.X * (cos * scaleX) - v.Y * (sin * scaleY),
-            v.X * (sin * scaleX) + v.Y * (cos * scaleY)
-        );
-    }
-    /// <summary>
-    /// Rotates the given point around (0,0) by the specified degree angle. This is a local-space transform.
-    /// </summary>
-    public static void RotateRadians(float x, float y, float delta, out float z, out float w)
-    {
-        float sin = MathF.Sin(delta);
-        float cos = MathF.Cos(delta);
-        z = x * cos - y * sin;
-        w = x * sin + y * cos;
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool BiasGreaterThan(float a, float b)
     {
         const float BiasRelative = 0.95f;
         const float BiasAbsolute = 0.01f;
         return a >= b * BiasRelative + a * BiasAbsolute;
+    }
+
+
+    /// <summary>
+    /// Gets the value T from a lerp, using the inputs <paramref name="a"/> and <paramref name="b"/> and the output <paramref name="c"/>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float LerpTVal(float a, float b, float c)
+    {
+        if (a == b) //prevent divide by 0
+            return 1;
+        return (c - a) / (b - a);
     }
 }

@@ -198,4 +198,72 @@ public static class MathV
         float invLen = 1f / MathF.Sqrt(x * x + y * y);
         return new Vector2(x * invLen, y * invLen);
     }
+
+    /// <summary>
+    /// Rotates <paramref name="v"/> by <paramref name="delta"/> degrees.
+    /// </summary>
+    public static Vector2 Rotate(in Vector2 v, float delta)
+    {
+        delta = Math.ToRadians(delta);
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        return new Vector2(
+            v.X * cos - v.Y * sin,
+            v.X * sin + v.Y * cos
+        );
+    }
+    /// <summary>
+    /// Rotates <paramref name="v"/> by <paramref name="delta"/> degrees.
+    /// </summary>
+    public static void Rotate(ref Vector2 v, float delta, out Vector2 o)
+    {
+        delta = Math.ToRadians(delta);
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        o.X = v.X * cos - v.Y * sin;
+        o.Y = v.X * sin + v.Y * cos;
+    }
+    /// <summary>
+    /// Rotates the vector (<paramref name="x"/>, <paramref name="y"/>) by <paramref name="delta"/> degrees.
+    /// </summary>
+    public static void Rotate(float x, float y, float delta, out float z, out float w)
+    {
+        delta = Math.ToRadians(delta);
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        z = x * cos - y * sin;
+        w = x * sin + y * cos;
+    }
+    /// <summary>
+    /// Rotates <paramref name="v"/> by <paramref name="delta"/> radians.
+    /// </summary>
+    public static Vector2 RotateRadians(in Vector2 v, float delta, float scaleX = 1, float scaleY = 1)
+    {
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        return new Vector2(
+            v.X * (cos * scaleX) - v.Y * (sin * scaleY),
+            v.X * (sin * scaleX) + v.Y * (cos * scaleY)
+        );
+    }
+    /// <summary>
+    /// Rotates <paramref name="v"/> by <paramref name="delta"/> radians.
+    /// </summary>
+    public static void RotateRadians(ref Vector2 v, float delta, out Vector2 o)
+    {
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        o.X = v.X * cos - v.Y * sin;
+        o.Y = v.X * sin + v.Y * cos;
+    }
+    /// <summary>
+    /// Rotates the vector (<paramref name="x"/>, <paramref name="y"/>) by <paramref name="delta"/> radians.
+    /// </summary>
+    public static void RotateRadians(float x, float y, float delta, out float z, out float w)
+    {
+        float sin = MathF.Sin(delta);
+        float cos = MathF.Cos(delta);
+        z = x * cos - y * sin;
+        w = x * sin + y * cos;
+    }
 }

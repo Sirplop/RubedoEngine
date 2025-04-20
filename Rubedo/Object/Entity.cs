@@ -27,8 +27,16 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     public virtual void Added(GameState state) 
     {
         State = state;
+        if (Components != null)
+            foreach (var c in Components)
+                c.EntityAdded(state);
     }
-    public virtual void Awake(GameState state) { }
+    public virtual void Awake(GameState state)
+    {
+        if (Components != null)
+            foreach (var c in Components)
+                c.EntityAwake();
+    }
     public virtual void Removed(GameState state) 
     {
         if (Components != null)
@@ -39,8 +47,7 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
 
     public virtual void Update()
     {
-        if (active)
-            Components.Update();
+        Components.Update();
     }
     void ITransformable.TransformChanged()
     {
@@ -48,8 +55,7 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     }
     public virtual void Draw(Renderer sb)
     {
-        if (visible)
-            Components.Draw(sb);
+        Components.Draw(sb);
     }
 
     public virtual void Add(Component component)

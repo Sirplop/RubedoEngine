@@ -98,7 +98,7 @@ public class TestPhysicsWorld : Entity
                     shapes.DrawPolygon(polygon.vertices, polygon.transform, Color.White);
                     break;
             }
-            shapes.DrawLine(body.transform.Position, body.transform.Position + body.LinearVelocity, Color.Aquamarine);
+            shapes.DrawLine(body.compTransform.Position, body.compTransform.Position + body.LinearVelocity, Color.Aquamarine);
         }
 
         RubedoEngine.Instance.World.DebugDraw(shapes);

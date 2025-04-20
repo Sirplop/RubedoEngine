@@ -37,7 +37,7 @@ public class PhysicsBody : Component
     // For use in broadphase
     public object data;
 
-    public Vector2 position => transform.Position;
+    public Vector2 position => compTransform.Position;
 
     public Vector2 LinearVelocity { get => velocity; internal set => velocity = value; }
     public float AngularVelocity { get => angularVelocity; internal set => angularVelocity = value; }
