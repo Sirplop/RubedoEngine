@@ -29,11 +29,14 @@ public class StateManager
     {
         if (_states.ContainsKey(name))
         {
-            if (_currentState != null) _currentState.Exit();
+            if (_currentState != null) 
+                _currentState.Exit();
 
             _currentState = _states[name];
             _currentState.LoadContent();
             _currentState.Enter();
+            //immediately update the lists to make sure everything spawns when the state is activated.
+            _currentState.Entities.UpdateLists();
         }
     }
 
@@ -44,11 +47,13 @@ public class StateManager
 
     public void Update()
     {
-        _currentState.Update();
+        if (_currentState != null)
+            _currentState.Update();
     }
 
     public void Draw(Renderer sb)
     {
-        _currentState.Draw(sb);
+        if (_currentState != null)
+            _currentState.Draw(sb);
     }
 }

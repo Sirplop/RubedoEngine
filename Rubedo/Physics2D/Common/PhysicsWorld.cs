@@ -85,6 +85,9 @@ public class PhysicsWorld
 
     public void Update(float dt)
     {
+        if (bodies.Count == 0)
+            return; //nothing to update.
+
         Timer timer = new Timer();
         int i;
 

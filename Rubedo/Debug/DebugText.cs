@@ -40,7 +40,7 @@ public class DebugText
     }
     public void DrawTextStack(string text)
     {
-        drawData.Add(new TextData() { position = stackPosition, text = text, scale = 1f });
+        drawData.Add(new TextData() { position = stackPosition, text = text, scale = 0.5f });
         drawDataSpace.Add(true);
         stackPosition += new Vector2(0, 20);
     }

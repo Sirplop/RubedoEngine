@@ -505,7 +505,7 @@ internal static class PhysicsCollisions
 
         if (useDist2)
         {
-            if (contacts[0] == null || !MathV.FastEquals(ref contacts[0].position, ref v2))
+            if (contacts[0] == null || contacts[0].position != v2)
             {
                 contacts[cp] = new Contact(v2);
                 contacts[cp].penetration = radius - MathF.Sqrt(dist2);
@@ -514,7 +514,7 @@ internal static class PhysicsCollisions
         }
         if (useDist3)
         {
-            if (contacts[0] == null || !MathV.FastEquals(ref contacts[0].position, ref v3))
+            if (contacts[0] == null || contacts[0].position != v3)
             {
                 contacts[cp] = new Contact(v3);
                 contacts[cp].penetration = radius - MathF.Sqrt(dist3 - Lib.Math.EPSILON);

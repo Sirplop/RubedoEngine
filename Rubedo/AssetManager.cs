@@ -41,7 +41,7 @@ public static class AssetManager
     {
         try
         {
-            return _content.Load<SoundEffect>("soundFx/" + name);
+            return _content.Load<SoundEffect>("sound/" + name);
         }
         catch (Exception)
         {

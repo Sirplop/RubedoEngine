@@ -16,7 +16,7 @@ public class GameState
 
     protected string _name = "";
 
-    protected EntityList Entities { get; private set; }
+    protected internal EntityList Entities { get; private set; }
 
     public string Name => _name;
     public GameState(StateManager sm, InputManager ih)
@@ -33,7 +33,11 @@ public class GameState
     public virtual void Exit()
     {
         foreach (Entity obj in Entities)
+        {
             obj.Removed(this);
+            Entities.Remove(obj);
+        }
+        Entities.UpdateLists();
     }
 
     public virtual void LoadContent()

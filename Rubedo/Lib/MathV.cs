@@ -10,14 +10,6 @@ namespace Rubedo.Lib;
 public static class MathV
 {
     /// <summary>
-    /// Probably dumb, but who cares.
-    /// </summary>
-    public static bool FastEquals(ref Vector2 a, ref Vector2 b)
-    {
-        return a.X == b.X && a.Y == b.Y;
-    }
-
-    /// <summary>
     /// Adds (<paramref name="b"/> * <paramref name="c"/>) to <paramref name="a"/>, and returns the result in <paramref name="d"/>.
     /// </summary>
     public static void MulAdd(ref Vector2 a, ref Vector2 b, float c, out Vector2 d)
