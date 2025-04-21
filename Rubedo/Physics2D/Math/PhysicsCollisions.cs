@@ -4,14 +4,10 @@ using Rubedo.Lib;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Dynamics.Shapes;
 using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 
 namespace Rubedo.Physics2D.Math;
 
-internal static class PhysicsCollisions
+public static class PhysicsCollisions
 {
     #region Collide
     public static bool Collide(Shape a, Shape b, Manifold m)

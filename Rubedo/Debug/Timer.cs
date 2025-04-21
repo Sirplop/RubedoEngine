@@ -1,51 +1,52 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 
 namespace Rubedo.Debug;
 
 /// <summary>
-/// Wrapper for <see cref="Stopwatch"/> that supplies useful functions for constructing performance timers.
+/// A slightly-better stopwatch, fit for crude performance metrics.
 /// </summary>
 public class Timer
 {
-    private Stopwatch _timer;
+    private long startTimestamp;
+    private long endTimestamp;
+
+    private const double TICKS_PER_MILL = 1d / System.TimeSpan.TicksPerMillisecond;
 
     private readonly List<(string, double)> info = new List<(string, double)>();
 
-    public Timer()
-    {
-        _timer = new Stopwatch();
-    }
+    public Timer() { }
 
     public void Start()
     {
-        if (_timer.IsRunning)
-            _timer.Restart();
-        else
-            _timer.Start();
+        info.Clear();
+        startTimestamp = System.DateTime.Now.Ticks;
     }
     public void Step()
     {
-        _timer.Stop();
-        info.Add(("", _timer.Elapsed.TotalMilliseconds));
-        _timer.Restart();
+        endTimestamp = System.DateTime.Now.Ticks;
+        double time = GetTime();
+        info.Add(("", time));
+        startTimestamp = System.DateTime.Now.Ticks;
     }
     public void Step(string value)
     {
-        _timer.Stop();
-        info.Add((value, _timer.Elapsed.TotalMilliseconds));
-        _timer.Restart();
+        endTimestamp = System.DateTime.Now.Ticks;
+        double time = GetTime();
+        info.Add((value, time));
+        startTimestamp = System.DateTime.Now.Ticks;
     }
     public void Stop()
     {
-        _timer.Stop();
-        info.Add(("", _timer.Elapsed.TotalMilliseconds));
+        endTimestamp = System.DateTime.Now.Ticks;
+        double time = GetTime();
+        info.Add(("", time));
     }
     public void Stop(string value)
     {
-        info.Add((value, _timer.Elapsed.TotalMilliseconds));
-        _timer.Stop();
+        endTimestamp = System.DateTime.Now.Ticks;
+        double time = GetTime();
+        info.Add((value, time));
     }
 
     public void Reset()
@@ -71,5 +72,10 @@ public class Timer
                 stringBuilder.Append(separator);
         }
         return stringBuilder.ToString();
+    }
+
+    private double GetTime()
+    {
+        return (endTimestamp - startTimestamp) * TICKS_PER_MILL;
     }
 }

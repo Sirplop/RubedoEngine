@@ -1,13 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Rubedo.Render;
-using Rubedo.Physics2D;
-using Rubedo.Debug;
-using Rubedo.Object;
 using System.Diagnostics;
-using System;
 using PhysicsEngine2D;
-using Rubedo.Debug.Benchmarks;
 
 namespace Rubedo;
 
@@ -59,8 +54,6 @@ public class RubedoEngine : Game
 
         IsMouseVisible = true;
         IsFixedTimeStep = false;
-
-        //BenchmarkRun.RunBenchmark();
     }
 
     protected override void Initialize()

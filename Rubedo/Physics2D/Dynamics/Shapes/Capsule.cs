@@ -1,10 +1,7 @@
-﻿using Microsoft.Diagnostics.Runtime.Utilities;
-using Microsoft.Xna.Framework;
-using Rubedo.Lib;
+﻿using Microsoft.Xna.Framework;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics.Shapes;
-using Rubedo.Physics2D.Math;
 using System;
 using System.Runtime.CompilerServices;
 

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rubedo", "Rubedo\Rubedo.csproj", "{FFE5EF14-0843-44F9-8DAE-11729ED9FC71}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "..\RubedoTest\Test.csproj", "{49EABBDF-9542-4923-B802-B6E44545C86D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rubedo.Benchmark", "Rubedo.Benchmark\Rubedo.Benchmark.csproj", "{2286F2E1-0214-4695-ABCD-85B1A94293B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{FFE5EF14-0843-44F9-8DAE-11729ED9FC71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFE5EF14-0843-44F9-8DAE-11729ED9FC71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFE5EF14-0843-44F9-8DAE-11729ED9FC71}.Release|Any CPU.Build.0 = Release|Any CPU
-		{49EABBDF-9542-4923-B802-B6E44545C86D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{49EABBDF-9542-4923-B802-B6E44545C86D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{49EABBDF-9542-4923-B802-B6E44545C86D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{49EABBDF-9542-4923-B802-B6E44545C86D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2286F2E1-0214-4695-ABCD-85B1A94293B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2286F2E1-0214-4695-ABCD-85B1A94293B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2286F2E1-0214-4695-ABCD-85B1A94293B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2286F2E1-0214-4695-ABCD-85B1A94293B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
