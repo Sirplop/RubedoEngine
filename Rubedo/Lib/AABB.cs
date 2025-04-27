@@ -1,10 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo.Lib;
 using Rubedo.Physics2D.Math;
 using System;
-using Math = System.Math;
 
-namespace PhysicsEngine2D;
+namespace Rubedo.Lib;
 
 /// <summary>
 /// Axis Aligned bounding box struct that represents the position of an object within a coordinate system.
@@ -14,7 +12,7 @@ public struct AABB : IEquatable<AABB>
     public Vector2 min;
     public Vector2 max;
 
-    public float Area => Math.Abs((max.Y - min.Y) * (max.X - min.X));
+    public float Area => System.Math.Abs((max.Y - min.Y) * (max.X - min.X));
 
     public void Set(in Vector2 min, in Vector2 max)
     {
@@ -33,8 +31,13 @@ public struct AABB : IEquatable<AABB>
     }
     public AABB(float left, float bottom, float right, float top)
     {
-        this.min = new Vector2(left, bottom);
-        this.max = new Vector2(right, top);
+        min = new Vector2(left, bottom);
+        max = new Vector2(right, top);
+    }
+    public AABB(int left, int bottom, int right, int top)
+    {
+        min = new Vector2(left, bottom);
+        max = new Vector2(right, top);
     }
 
     public readonly bool Contains(ref AABB bounds)
@@ -116,7 +119,7 @@ public struct AABB : IEquatable<AABB>
         return true;
     }
 
-    public readonly bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance = Rubedo.Physics2D.Math.Ray2D.TMAX)
+    public readonly bool Raycast(Ray2D ray, float distance = Ray2D.TMAX)
     {
         float tminX = (min.X - ray.origin.X) / ray.direction.X;
         float tmaxX = (max.X - ray.origin.X) / ray.direction.X;
@@ -124,8 +127,8 @@ public struct AABB : IEquatable<AABB>
         float tminY = (min.Y - ray.origin.Y) / ray.direction.Y;
         float tmaxY = (max.Y - ray.origin.Y) / ray.direction.Y;
 
-        float tmin = Math.Max(Math.Min(tminX, tmaxX), Math.Min(tminY, tmaxY));
-        float tmax = Math.Min(Math.Max(tminX, tmaxX), Math.Max(tminY, tmaxY));
+        float tmin = System.Math.Max(System.Math.Min(tminX, tmaxX), System.Math.Min(tminY, tmaxY));
+        float tmax = System.Math.Min(System.Math.Max(tminX, tmaxX), System.Math.Max(tminY, tmaxY));
 
         if (tmax < 0)
             return false;

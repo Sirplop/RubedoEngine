@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using Rubedo.Object;
 using Rubedo.Internal;
-using Rubedo.Render;
+using Rubedo.UI;
+using Rubedo.Rendering;
 
 namespace Rubedo;
 
@@ -38,6 +39,7 @@ public class GameState
             Entities.Remove(obj);
         }
         Entities.UpdateLists();
+        GUI.Root.Clear();
     }
 
     public virtual void LoadContent()

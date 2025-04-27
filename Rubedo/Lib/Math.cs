@@ -23,12 +23,20 @@ public static class Math
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Clamp(in float val, in float min, in float max)
     {
-        return MathF.Max(MathF.Min(val, max), min);
+        if (val < min)
+            return min;
+        if (val > max)
+            return max;
+        return val;
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Clamp(int val, int min, int max)
     {
-        return System.Math.Max(System.Math.Min(val, max), min);
+        if (val < min)
+            return min;
+        if (val > max)
+            return max;
+        return val;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

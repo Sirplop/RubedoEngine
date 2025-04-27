@@ -6,7 +6,7 @@ using Rubedo.Physics2D.Collision.Broadphase;
 using Rubedo.Physics2D.Constraints;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
-using Rubedo.Render;
+using Rubedo.Rendering;
 using System.Collections.Generic;
 
 namespace PhysicsEngine2D;
@@ -186,8 +186,5 @@ public class PhysicsWorld
                 }
             }
         }
-        Vector2 mouse = RubedoEngine.Input.MouseWorldPosition();
-        RubedoEngine.Instance.Camera.GetExtents(out Vector2 min, out _);
-        shapes.DrawLine(mouse, new Vector2(mouse.X, min.Y), Color.DarkRed);
     }
 }

@@ -6,7 +6,7 @@ using Rubedo.Physics2D;
 using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
-using Rubedo.Render;
+using Rubedo.Rendering;
 
 namespace Rubedo.Tests;
 

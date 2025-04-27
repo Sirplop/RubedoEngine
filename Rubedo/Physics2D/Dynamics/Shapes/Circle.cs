@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics.Shapes;
-using Rubedo.Physics2D.Math;
 using System;
 
 namespace PhysicsEngine2D;
@@ -59,7 +59,7 @@ public class Circle : Shape
         }
         else
         {
-            d = (float)Math.Sqrt(d);
+            d = (float)System.Math.Sqrt(d);
             t = (-b - d) / 2;
         }
 

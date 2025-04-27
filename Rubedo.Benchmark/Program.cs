@@ -1,4 +1,4 @@
-﻿using Rubedo.Benchmarks;
+﻿using Rubedo.Benchmark;
 
 namespace Rubedo;
 

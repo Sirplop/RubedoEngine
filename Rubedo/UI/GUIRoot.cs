@@ -1,0 +1,68 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Lib;
+using Rubedo.Object;
+using System;
+using System.Collections.Generic;
+
+namespace Rubedo.UI;
+
+/// <summary>
+/// The root component for all UI. Updates and layouts are propogated from this. Should (probably) only ever have one.
+/// </summary>
+public class GUIRoot : UIComponent
+{
+    public GUIRoot() : base()
+    {
+
+    }
+    /// <summary>
+    /// Called before updates, but after input updates.
+    /// </summary>
+    /// <param name="processInput"></param>
+    public void UpdateStart(bool processInput)
+    {
+        UpdateSetup();
+        if (processInput)
+            UpdateInput();
+        Update();
+    }
+
+    public override void UpdateLayout()
+    {
+        // The GUIRoot manages itself.
+
+        _clip = new Rectangle(0, 0, RubedoEngine.Instance.Screen.Width, RubedoEngine.Instance.Screen.Height);
+        SetAnchorAndOffset(Anchor.TopLeft, Vector2.Zero);
+        Height = RubedoEngine.Instance.Screen.Height;
+        Width = RubedoEngine.Instance.Screen.Width;
+        _isLayoutDirty = false; //this doesn't create
+
+        foreach (UIComponent c in _children)
+        {
+            c.UpdateSizes();
+            c.UpdateClipIfDirty();
+            c.UpdateLayout();
+        }
+    }
+    /// <summary>
+    /// Called after updates.
+    /// </summary>
+    public void UpdateEnd()
+    {
+        UpdateLayout();
+    }
+
+    public override void Draw()
+    {
+        foreach (var c in _children)
+            c.Draw();
+    }
+
+    public void Clear()
+    {
+        for (int i = 0; i < _children.Count; i++)
+            _children[i].Parent = null;
+        _children.Clear();
+    }
+}

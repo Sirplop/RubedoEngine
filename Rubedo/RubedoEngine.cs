@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-using Rubedo.Render;
 using System.Diagnostics;
 using PhysicsEngine2D;
+using Rubedo.UI;
+using Rubedo.Debug;
+using Rubedo.Rendering;
 
 namespace Rubedo;
 
@@ -37,8 +39,7 @@ public class RubedoEngine : Game
     public PhysicsWorld World => _physicsWorld;
     public static InputManager Input => Instance._inputManager;
 
-    public Stopwatch physicsWatch;
-    public Stopwatch physicsPhaseWatch;
+    public Timer _physicsTimer;
 
     public RubedoEngine()
     {
@@ -63,8 +64,10 @@ public class RubedoEngine : Game
         _camera = new Camera(_screen);
         _camera.SetZoom(1);
 
-        physicsWatch = Stopwatch.StartNew();
-        physicsPhaseWatch = Stopwatch.StartNew();
+        GUI.Setup(this);
+        GUI.Root = new GUIRoot();
+
+        _physicsTimer = new Timer();
 
         base.Initialize(); //this calls LoadContent, so it must happen last.
     }
@@ -80,15 +83,18 @@ public class RubedoEngine : Game
         if (IsActive)
             _inputManager.Update();
 
+        GUI.Root?.UpdateStart(IsActive && GUI.DoUIInput);
+
         _stateManager.Update();
-        physicsWatch.Restart();
-        physicsWatch.Start();
+        _physicsTimer.Start();
         if (physicsOn || stepPhysics)
         {
             _physicsWorld.Update(deltaTime);
             stepPhysics = false;
         }
-        physicsWatch.Stop();
+        _physicsTimer.Stop();
+
+        GUI.Root?.UpdateEnd();
 
         base.Update(gameTime);
     }
@@ -103,6 +109,7 @@ public class RubedoEngine : Game
         _renderer.End();
         _screen.Unset();
         _screen.Preset(_renderer, SamplerState.PointClamp);
+        GUI.Root.Draw();
 
         base.Draw(gameTime);
     }

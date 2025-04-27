@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics.Shapes;

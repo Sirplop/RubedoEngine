@@ -110,7 +110,7 @@ public static class PhysicsCollisions
             m.normal = Vector2.UnitY;
         }
 
-        m.Update(1, contact);
+        m.Update(contact);
         return true;
     }
     public static bool CircleToBox(in Manifold m, Circle circle, Box box)
@@ -131,108 +131,6 @@ public static class PhysicsCollisions
     public static bool CircleToPolygon(Manifold m, Circle circle, Polygon poly)
     {
         return CircleToPolygon(m, circle.transform.Position, circle.radius * Lib.Math.Max(circle.transform.Scale), poly);
-    }
-
-    public static bool CircleToPolygonV1(Manifold m, Vector2 circPos, float radius, Polygon poly)
-    {
-        m.contactCount = 0;
-
-        poly.TransformVertices();
-        poly.TransformNormals();
-
-        Vector2 axis;
-        float axisDepth;
-        float depth = float.MaxValue;
-        float minA, maxA, minB, maxB;
-        for (int i = 0; i < poly.VertexCount; i++)
-        {
-            ProjectPolygon(poly, ref poly.transformedNormals[i], out minA, out maxA);
-            ProjectCircle(ref circPos, radius, ref poly.transformedNormals[i], out minB, out maxB);
-
-            if (minA >= maxB || minB >= maxA)
-                return false;
-
-            axisDepth = MathF.Min(maxB - minA, maxA - minB);
-
-            if (axisDepth < depth)
-            {
-                depth = axisDepth;
-                m.normal = poly.transformedNormals[i];
-            }
-        }
-
-        ShapeUtility.GetClosestPointOnPolygon(poly, circPos, out _, out axis);
-
-        ProjectPolygon(poly, ref axis, out minA, out maxA);
-        ProjectCircle(ref circPos, radius, ref axis, out minB, out maxB);
-
-        if (minA >= maxB || minB >= maxA)
-            return false;
-
-        axisDepth = MathF.Min(maxB - minA, maxA - minB);
-
-        if (axisDepth < depth)
-        {
-            depth = axisDepth;
-            m.normal = axis;
-        }
-
-        Vector2 direction = poly.transform.Position - circPos;
-
-        if (Vector2.Dot(direction, m.normal) < 0f)
-            m.normal = -m.normal;
-
-        //get contact point on closest edge.
-        axisDepth = float.MaxValue;
-        Vector2 point = Vector2.Zero;
-        for (int i = 0; i < poly.VertexCount; i++)
-        {
-            ShapeUtility.ClosestPointOnLine(ref poly.transformedVertices[i],
-                    ref poly.transformedVertices[(i + 1) % poly.VertexCount], ref circPos, out Vector2 a);
-            Vector2.DistanceSquared(ref circPos, ref a, out float dist);
-            if (dist < axisDepth)
-            {
-                axisDepth = dist;
-                point = a;
-            }
-        }
-        if (axisDepth >= radius * radius)
-            return false;
-
-        Contact c = new Contact(point);
-
-        c.penetration = depth;
-        m.Update(1, c);
-        return true;
-    }
-
-    private static void ProjectPolygon(Polygon poly, ref Vector2 axis, out float min, out float max)
-    {
-        min = float.MaxValue;
-        max = float.MinValue;
-
-        for (int i = 0; i < poly.VertexCount; i++)
-        {
-            Vector2.Dot(ref poly.transformedVertices[i], ref axis, out float projection);
-
-            if (projection < min) min = projection;
-            if (projection > max) max = projection;
-        }
-    }
-    private static void ProjectCircle(ref Vector2 pos, float radius, ref Vector2 axis, out float min, out float max)
-    {
-        Vector2.Multiply(ref axis, radius, out Vector2 dir);
-
-        Vector2.Add(ref pos, ref dir, out Vector2 p1);
-        Vector2.Subtract(ref pos, ref dir, out Vector2 p2);
-
-        Vector2.Dot(ref p1, ref axis, out min);
-        Vector2.Dot(ref p2, ref axis, out max);
-
-        if (min > max)
-        {
-            (max, min) = (min, max);
-        }
     }
     
     public static bool CircleToPolygon(Manifold m, Vector2 circPos, float radius, Polygon poly)
@@ -272,7 +170,7 @@ public static class PhysicsCollisions
             MathV.MulAdd(ref circPos, ref m.normal, radius, out Vector2 pos);
             Contact c = new Contact(pos);
             c.penetration = MathF.Sqrt(distanceSquared) + radius;
-            m.Update(1, c);
+            m.Update(c);
             return true;
         }
 
@@ -285,7 +183,7 @@ public static class PhysicsCollisions
             MathV.MulAdd(ref circPos, ref m.normal, radius, out Vector2 pos);
             Contact c = new Contact(pos);
             c.penetration = radius - MathF.Sqrt(distanceSquared);
-            m.Update(1, c);
+            m.Update(c);
             return true;
         }
         return false;
@@ -360,7 +258,7 @@ public static class PhysicsCollisions
             }
             MathV.Normalize(ref m.normal);
             MathV.Left(ref m.normal, out m.normal);
-            m.Update(1, contact);
+            m.Update(contact);
             return true;
         }
         
@@ -424,7 +322,7 @@ public static class PhysicsCollisions
             MathV.MulSub(ref center, ref m.normal, radius, out Vector2 pos);
             Contact c = new Contact(pos);
             c.penetration = dist + radius;
-            m.Update(1, c);
+            m.Update(c);
             return true;
         }
 
@@ -449,7 +347,7 @@ public static class PhysicsCollisions
                 MathV.MulAdd(ref center, ref m.normal, radius, out Vector2 pos);
                 Contact c = new Contact(pos);
                 c.penetration = radius - MathF.Sqrt(dist);
-                m.Update(1, c);
+                m.Update(c);
                 return true;
             }
             return false;
@@ -519,9 +417,11 @@ public static class PhysicsCollisions
         }
         if (cp == 0)
             return false;
+        else if (cp == 1)
+            m.Update(contacts[0]);
+        else
+            m.Update(contacts[0], contacts[1]);
 
-        m.contactCount = cp;
-        m.Update(cp, contacts);
         return cp > 0;
     }
     #endregion
@@ -650,9 +550,14 @@ public static class PhysicsCollisions
                 ++cp;
             }
         }
+        if (cp == 0)
+            return false;
+        else if (cp == 1)
+            m.Update(contacts[0]);
+        else
+            m.Update(contacts[0], contacts[1]);
 
         m.contactCount = cp;
-        m.Update(cp, contacts);
         return true;
     }
 

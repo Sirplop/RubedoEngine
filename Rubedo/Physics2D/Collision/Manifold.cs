@@ -58,7 +58,7 @@ public class Manifold : IEquatable<Manifold>
         normal = default;
     }
 
-    public void Update(int numNewContacts, Contact c)
+    public void Update(Contact c)
     {
         Contact cOld = contacts[0];
 
@@ -69,7 +69,29 @@ public class Manifold : IEquatable<Manifold>
         }
         contacts[0] = c;
 
-        contactCount = numNewContacts;
+        contactCount = 1;
+    }
+
+    public void Update(Contact c1, Contact c2)
+    {
+        Contact cOld = contacts[0];
+
+        if (cOld != null)
+        {
+            c1.accumFriction = cOld.accumFriction;
+            c1.accumImpulse = cOld.accumImpulse;
+        }
+        contacts[0] = c1;
+
+        cOld = contacts[1];
+        if (cOld != null)
+        {
+            c2.accumFriction = cOld.accumFriction;
+            c2.accumImpulse = cOld.accumImpulse;
+        }
+        contacts[1] = c2;
+
+        contactCount = 2;
     }
 
     public void Update(int numNewContacts, params Contact[] newContacts)

@@ -3,7 +3,7 @@
 /// <summary>
 /// Required for a <see cref="Transform"/> to be attached to something.
 /// </summary>
-internal interface ITransformable 
+public interface ITransformable 
 {
-    internal void TransformChanged();
+    public void TransformChanged();
 }

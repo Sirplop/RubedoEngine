@@ -10,8 +10,28 @@ namespace Rubedo.Lib;
 public static class MathV
 {
     /// <summary>
+    /// Adds the <paramref name="scalar"/> to each component of vector <paramref name="a"/>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddScalar(ref Vector2 a, float scalar, out Vector2 b)
+    {
+        b.X = a.X + scalar;
+        b.Y = a.Y + scalar;
+    }
+    /// <summary>
+    /// Subtracts the <paramref name="scalar"/> to each component of vector <paramref name="a"/>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void SubScalar(ref Vector2 a, float scalar, out Vector2 b)
+    {
+        b.X = a.X - scalar;
+        b.Y = a.Y - scalar;
+    }
+
+    /// <summary>
     /// Adds (<paramref name="b"/> * <paramref name="c"/>) to <paramref name="a"/>, and returns the result in <paramref name="d"/>.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void MulAdd(ref Vector2 a, ref Vector2 b, float c, out Vector2 d)
     {
         d.X = a.X + (b.X * c);
@@ -20,6 +40,7 @@ public static class MathV
     /// <summary>
     /// Subtracts (<paramref name="b"/> * <paramref name="c"/>) from <paramref name="a"/>, and returns the result in <paramref name="d"/>.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void MulSub(ref Vector2 a, ref Vector2 b, float c, out Vector2 d)
     {
         d.X = a.X - (b.X * c);
@@ -32,6 +53,7 @@ public static class MathV
     /// <param name="aScale">The value <paramref name="a"/> is multiplied by.</param>
     /// <param name="b">The vector b.</param>
     /// <param name="bScale">The value <paramref name="b"/> is multiplied by.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void MulAdd2(ref Vector2 a, float aScale, ref Vector2 b, float bScale, out Vector2 c)
     {
         c.X = (a.X * aScale) + (b.X * bScale);
@@ -44,6 +66,7 @@ public static class MathV
     /// <param name="aScale">The value <paramref name="a"/> is multiplied by.</param>
     /// <param name="b">The vector b.</param>
     /// <param name="bScale">The value <paramref name="b"/> is multiplied by.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void MulSub2(ref Vector2 a, float aScale, ref Vector2 b, float bScale, out Vector2 c)
     {
         c.X = (a.X * aScale) + (b.X * bScale);
@@ -194,6 +217,7 @@ public static class MathV
     /// <summary>
     /// Rotates <paramref name="v"/> by <paramref name="delta"/> degrees.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 Rotate(in Vector2 v, float delta)
     {
         delta = Math.ToRadians(delta);
@@ -207,6 +231,7 @@ public static class MathV
     /// <summary>
     /// Rotates <paramref name="v"/> by <paramref name="delta"/> degrees.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Rotate(ref Vector2 v, float delta, out Vector2 o)
     {
         delta = Math.ToRadians(delta);
@@ -218,6 +243,7 @@ public static class MathV
     /// <summary>
     /// Rotates the vector (<paramref name="x"/>, <paramref name="y"/>) by <paramref name="delta"/> degrees.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Rotate(float x, float y, float delta, out float z, out float w)
     {
         delta = Math.ToRadians(delta);
@@ -229,6 +255,7 @@ public static class MathV
     /// <summary>
     /// Rotates <paramref name="v"/> by <paramref name="delta"/> radians.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2 RotateRadians(in Vector2 v, float delta, float scaleX = 1, float scaleY = 1)
     {
         float sin = MathF.Sin(delta);
@@ -241,6 +268,7 @@ public static class MathV
     /// <summary>
     /// Rotates <paramref name="v"/> by <paramref name="delta"/> radians.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RotateRadians(ref Vector2 v, float delta, out Vector2 o)
     {
         float sin = MathF.Sin(delta);
@@ -251,11 +279,37 @@ public static class MathV
     /// <summary>
     /// Rotates the vector (<paramref name="x"/>, <paramref name="y"/>) by <paramref name="delta"/> radians.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RotateRadians(float x, float y, float delta, out float z, out float w)
     {
         float sin = MathF.Sin(delta);
         float cos = MathF.Cos(delta);
         z = x * cos - y * sin;
         w = x * sin + y * cos;
+    }
+
+    /// <summary>
+    /// Creates a vector of the largest components of the two given vectors.
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="c"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Maximize(ref Vector2 a, ref Vector2 b, out Vector2 c)
+    {
+        c.X = a.X > b.X ? a.X : b.X;
+        c.Y = a.Y > b.Y ? a.Y : b.Y;
+    }
+    /// <summary>
+    /// Creates a vector of the smallest components of the two given vectors.
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="c"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Minimize(ref Vector2 a, ref Vector2 b, out Vector2 c)
+    {
+        c.X = a.X < b.X ? a.X : b.X;
+        c.Y = a.Y < b.Y ? a.Y : b.Y;
     }
 }

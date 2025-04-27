@@ -1,5 +1,5 @@
 ﻿using Rubedo.Object;
-using Rubedo.Render;
+using Rubedo.Rendering;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Components;

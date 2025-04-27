@@ -3,10 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Object;
 using System;
 
-namespace Rubedo.Render;
+namespace Rubedo.Rendering;
 
 /// <summary>
-/// I am SpriteBatchWrapper, and this is my summary.
+/// Wrapper for a <see cref="SpriteBatch"/> to work with a <see cref="Camera"/>.
 /// </summary>
 public sealed class Renderer : IDisposable
 {

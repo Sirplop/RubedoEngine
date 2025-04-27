@@ -3,7 +3,7 @@ using Rubedo.Internal;
 using Microsoft.Xna.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using Rubedo.Render;
+using Rubedo.Rendering;
 
 namespace Rubedo.Object;
 

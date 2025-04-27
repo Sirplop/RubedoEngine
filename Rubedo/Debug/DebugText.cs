@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Components;
-using Rubedo.Render;
+using Rubedo.Rendering;
 using System.Collections.Generic;
 
 namespace Rubedo.Debug;

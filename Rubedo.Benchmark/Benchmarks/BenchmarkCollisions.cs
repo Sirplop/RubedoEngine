@@ -46,15 +46,15 @@ public class BenchmarkCollisions
         Collider p2 = Collider.CreateUnitShape(Physics2D.Collision.Shapes.ShapeType.Polygon, 4);
 
         poly1 = new Polygon(onesTransform, ((Polygon)p1.shape).vertices);
-        poly2 = new Polygon(cap2Transform, ((Polygon)p2.shape).vertices);
+        poly2 = new Polygon(twosTransform, ((Polygon)p2.shape).vertices);
     }
 
-    [Benchmark]
+    //[Benchmark]
     public void BenchCircleCircle()
     {
         PhysicsCollisions.CircleToCircle(manifold, circle1, circle2);
     }
-    [Benchmark]
+   // [Benchmark]
     public void BenchCircleCapsule()
     {
         PhysicsCollisions.CircleToCapsule(manifold, circle1, capsule2);
@@ -64,12 +64,12 @@ public class BenchmarkCollisions
     {
         PhysicsCollisions.CircleToBox(manifold, circle1, box2);
     }
-    [Benchmark]
+   // [Benchmark]
     public void BenchCirclePoly()
     {
         PhysicsCollisions.CircleToPolygon(manifold, circle1, poly2);
     }
-    [Benchmark]
+   // [Benchmark]
     public void BenchCapsuleCapsule()
     {
         PhysicsCollisions.CapsuleToCapsule(manifold, capsule1, capsule2);
@@ -79,7 +79,7 @@ public class BenchmarkCollisions
     {
         PhysicsCollisions.CapsuleToBox(manifold, capsule1, box2);
     }
-    [Benchmark]
+ //   [Benchmark]
     public void BenchCapsulePoly()
     {
         PhysicsCollisions.CapsuleToPolygon(manifold, capsule1, poly2);

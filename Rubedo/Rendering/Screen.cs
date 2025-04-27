@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace Rubedo.Render;
+namespace Rubedo.Rendering;
 
 /// <summary>
 /// I am Screen, and this is my summary.

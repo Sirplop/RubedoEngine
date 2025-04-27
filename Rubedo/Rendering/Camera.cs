@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Rubedo.Render;
+namespace Rubedo.Rendering;
 
 public sealed class Camera
 {
@@ -91,7 +91,7 @@ public sealed class Camera
 
     public float GetZFromHeight(float height)
     {
-        return (0.5f * height) / MathF.Tan(0.5f * fov);
+        return 0.5f * height / MathF.Tan(0.5f * fov);
     }
     public float GetHeightFromZ()
     {
@@ -100,7 +100,7 @@ public sealed class Camera
 
     public void MoveZ(float amount)
     {
-        this.z = Lib.Math.Clamp(z + amount, MIN_Z, MAX_Z);
+        z = Lib.Math.Clamp(z + amount, MIN_Z, MAX_Z);
         _needsProjMatrixUpdate = true;
     }
     public void ResetZ()
@@ -148,9 +148,9 @@ public sealed class Camera
     public void GetExtents(out float left, out float right, out float top, out float bottom)
     {
         GetExtents(out float width, out float height);
-        left = position.X - (width * 0.5f);
+        left = position.X - width * 0.5f;
         right = left + width;
-        bottom = position.Y - (height * 0.5f);
+        bottom = position.Y - height * 0.5f;
         top = bottom + height;
     }
     public void GetExtents(out Vector2 min, out Vector2 max)
@@ -162,27 +162,26 @@ public sealed class Camera
 
     public Vector2 ScreenToWorldPoint(Vector2 screenPoint)
     {
-        RubedoEngine.Instance.Camera.GetExtents(out Vector2 min, out Vector2 max);
+        GetExtents(out Vector2 min, out Vector2 max);
         int viewWidth = RubedoEngine.Instance.Screen.Width;
         int viewHeight = RubedoEngine.Instance.Screen.Height;
 
         float posX = MathHelper.Lerp(min.X, max.X, screenPoint.X / viewWidth);
-        float posY = MathHelper.Lerp(min.Y, max.Y, 1 - (screenPoint.Y / viewHeight));
+        float posY = MathHelper.Lerp(min.Y, max.Y, 1 - screenPoint.Y / viewHeight);
 
         return new Vector2(posX, posY);
     }
-    /// <summary>
-    /// NOT YET IMPLEMENTED
-    /// </summary>
-    [Obsolete]
+
     public Vector2 WorldToScreenPoint(Vector2 worldPoint)
     {
-        RubedoEngine.Instance.Camera.GetExtents(out Vector2 min, out Vector2 max);
+        GetExtents(out Vector2 min, out Vector2 max);
         int viewWidth = RubedoEngine.Instance.Screen.Width;
         int viewHeight = RubedoEngine.Instance.Screen.Height;
+        float worldWidth = max.X - min.X;
+        float worldHeight = max.Y - min.Y;
 
-        float posX = 0;
-        float posY = 0;
+        float posX = MathHelper.Lerp(0, viewWidth, (worldPoint.X - min.X) / worldWidth);
+        float posY = MathHelper.Lerp(0, viewHeight, 1 - (worldPoint.Y - min.Y) / worldHeight);
 
         return new Vector2(posX, posY);
     }

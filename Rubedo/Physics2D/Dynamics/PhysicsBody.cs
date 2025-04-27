@@ -63,30 +63,32 @@ public class PhysicsBody : Component
         isStatic = true;
     }
 
-    public void IntegrateForces(float dt)
+    internal void IntegrateForces(float dt)
     {
         if (_invMass == 0)
             return;
 
-        velocity += dt * (_invMass * force);
+        MathV.MulAdd(ref velocity, ref force, dt * _invMass, out velocity);
         angularVelocity += dt * torque * _invInertia;
 
-        velocity *= 1f / (1f + dt * material.linearDamping);
+        Vector2.Multiply(ref velocity, 1f / (1f + dt * material.linearDamping), out velocity);
         angularVelocity *= 1f / (1f + dt * material.angularDamping);
 
         //apply gravity after so we don't have any weird drag.
-        velocity += dt * PhysicsWorld.gravity * gravityScale;
+        MathV.MulAdd(ref velocity, ref PhysicsWorld.gravity, gravityScale * dt, out velocity);
 
         force = Vector2.Zero;
         torque = 0;
     }
 
-    public void IntegrateVelocity(float dt)
+    internal void IntegrateVelocity(float dt)
     {
         if (_invMass == 0)
             return;
 
-        Entity.transform.Position += velocity * dt;
+        Vector2 pos = Entity.transform.Position;
+        MathV.MulAdd(ref pos, ref velocity, dt, out pos);
+        Entity.transform.SetPosition(ref pos);
         Entity.transform.Rotation += angularVelocity * dt;
     }
 
@@ -103,19 +105,16 @@ public class PhysicsBody : Component
         RubedoEngine.Instance.World.RemoveBody(this);
     }
 
-    internal void ApplyImpulse(ref Vector2 impulse, ref Vector2 contactRadius, bool negate)
+    internal void ApplyImpulseA(ref Vector2 impulse, ref Vector2 contactRadius)
     {
-        if (negate)
-        {
-            MathV.MulSub(ref velocity, ref impulse, invMass, out velocity);
-            MathV.Cross(ref contactRadius, ref impulse, out float lambda);
-            angularVelocity += invInertia * -lambda;
-        }
-        else
-        {
-            MathV.MulAdd(ref velocity, ref impulse, invMass, out velocity);
-            MathV.Cross(ref contactRadius, ref impulse, out float lambda);
-            angularVelocity += invInertia * lambda;
-        }
+        MathV.MulSub(ref velocity, ref impulse, invMass, out velocity);
+        MathV.Cross(ref contactRadius, ref impulse, out float lambda);
+        angularVelocity -= invInertia * lambda;
+    }
+    internal void ApplyImpulseB(ref Vector2 impulse, ref Vector2 contactRadius)
+    {
+        MathV.MulAdd(ref velocity, ref impulse, invMass, out velocity);
+        MathV.Cross(ref contactRadius, ref impulse, out float lambda);
+        angularVelocity += invInertia * lambda;
     }
 }

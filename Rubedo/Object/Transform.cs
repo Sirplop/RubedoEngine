@@ -259,6 +259,49 @@ public class Transform
         _worldPositionDirty = false;
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetPositionX(float X)
+    {
+        if (X == _position.X)
+            return;
+
+        _position.X = X;
+        if (_parent != null)
+            LocalPosition = WorldToLocalTransform.TransformPoint(_position);
+        else
+            LocalPosition = _position;
+
+        _worldPositionDirty = false;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetPositionY(float Y)
+    {
+        if (Y == _position.Y)
+            return;
+
+        _position.Y = Y;
+        if (_parent != null)
+            LocalPosition = WorldToLocalTransform.TransformPoint(_position);
+        else
+            LocalPosition = _position;
+
+        _worldPositionDirty = false;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetPosition(float X, float Y)
+    {
+        if (X == _position.X && Y == _position.Y)
+            return;
+
+        _position.X = X;
+        _position.Y = Y;
+        if (_parent != null)
+            LocalPosition = WorldToLocalTransform.TransformPoint(_position);
+        else
+            LocalPosition = _position;
+
+        _worldPositionDirty = false;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetRotation(float radians)
     {
         _rotation = radians;

@@ -85,8 +85,8 @@ public static class ContactConstraintSolver
             //Accumulated impulses
             MathV.MulAdd2(ref m.normal, c.accumImpulse, ref m.tangent, c.accumFriction, out Vector2 p);
 
-            m.A.ApplyImpulse(ref p, ref c.ra, true);
-            m.B.ApplyImpulse(ref p, ref c.rb, false);
+            m.A.ApplyImpulseA(ref p, ref c.ra);
+            m.B.ApplyImpulseB(ref p, ref c.rb);
         }
     }
     public static void ApplyImpulse(Manifold m)
@@ -122,8 +122,8 @@ public static class ContactConstraintSolver
             Vector2.Multiply(ref m.tangent, lambda, out rv);
 
             //apply impulses
-            m.A.ApplyImpulse(ref rv, ref c.ra, true);
-            m.B.ApplyImpulse(ref rv, ref c.rb, false);
+            m.A.ApplyImpulseA(ref rv, ref c.ra);
+            m.B.ApplyImpulseB(ref rv, ref c.rb);
         }
 
         //solve penetration
@@ -147,8 +147,8 @@ public static class ContactConstraintSolver
             Vector2.Multiply(ref m.normal, lambda, out rv);
 
             //apply impulses
-            m.A.ApplyImpulse(ref rv, ref c.ra, true);
-            m.B.ApplyImpulse(ref rv, ref c.rb, false);
+            m.A.ApplyImpulseA(ref rv, ref c.ra);
+            m.B.ApplyImpulseB(ref rv, ref c.rb);
         }
     }
 

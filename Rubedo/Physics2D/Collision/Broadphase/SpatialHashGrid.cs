@@ -3,7 +3,6 @@ using PhysicsEngine2D;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
-using Rubedo.Render;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -181,7 +180,7 @@ internal class SpatialHashGrid : IBroadphase
     {
         cells.Clear();
     }
-    public void DebugDraw(Render.Shapes shapes)
+    public void DebugDraw(Rendering.Shapes shapes)
     {
         for (int x = Lib.Math.FloorToInt(GridBounds.min.X); x <= Lib.Math.CeilToInt(GridBounds.max.X); x++)
         {
@@ -195,7 +194,7 @@ internal class SpatialHashGrid : IBroadphase
     }
 
 
-    void DebugDrawCellDetails(Render.Shapes shapes, float x, float y, int cellCount)
+    void DebugDrawCellDetails(Rendering.Shapes shapes, float x, float y, int cellCount)
     {
         shapes.DrawBox(new Vector2(x * cellSize, y * cellSize), new Vector2((x + 1) * cellSize, (y + 1) * cellSize), Color.DarkBlue);
 

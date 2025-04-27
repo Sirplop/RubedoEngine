@@ -1,14 +1,13 @@
 ﻿using Rubedo.Object;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Rubedo.Render;
 using System;
+using Rubedo.Rendering;
 
 namespace Rubedo.Components;
 
 public class Sprite : Component
 {
-
     protected Texture2D _texture;
     protected Color _color = Color.White;
     protected int layer = 0;
@@ -30,7 +29,11 @@ public class Sprite : Component
         }
     }
     private Vector2 _pixelPivot;
-    public Color Color => _color;
+    public Color Color
+    {
+        get { return _color; }
+        set => SetColor(value);
+    }
 
     public float Width => _texture.Width;
     public float Height => _texture.Height;
@@ -67,5 +70,25 @@ public class Sprite : Component
             PixelPivot,
             compTransform.Scale,
             SpriteEffects.None, 0f);
+    }
+
+    [Obsolete]
+    public bool Test(Vector2 point)
+    {
+        Color[] T = new Color[1];
+        Vector2 pos = compTransform.Position;
+        int x = Lib.Math.FloorToInt(point.X) - Lib.Math.FloorToInt(pos.X) + _texture.Width / 2;
+        int y = Lib.Math.FloorToInt(point.Y) - Lib.Math.FloorToInt(pos.Y) + _texture.Height / 2;
+        if (x < 0 || y < 0)
+            return false;
+        if (x > _texture.Width || y > _texture.Height)
+            return false;
+
+        x = Math.Min(x, _texture.Width - 1);
+        y = Math.Min(y, _texture.Height - 1);
+        Rectangle rect = new Rectangle(x, y, 1, 1);
+        _texture.GetData(0, rect, T, 0, 1);
+
+        return T[0].A != 0;
     }
 }

@@ -3,10 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
 using System;
-using System.Reflection;
-using static System.Formats.Asn1.AsnWriter;
 
-namespace Rubedo.Render;
+namespace Rubedo.Rendering;
 
 /// <summary>
 /// Draw primitive shapes for testing.
@@ -31,19 +29,19 @@ public sealed class Shapes : IDisposable
     {
         this.game = game ?? throw new ArgumentNullException("game");
 
-        this.effect = new BasicEffect(this.game.GraphicsDevice);
-        this.effect.FogEnabled = false;
-        this.effect.LightingEnabled = false;
-        this.effect.TextureEnabled = false;
-        this.effect.VertexColorEnabled = true;
-        this.effect.PreferPerPixelLighting = false;
+        effect = new BasicEffect(this.game.GraphicsDevice);
+        effect.FogEnabled = false;
+        effect.LightingEnabled = false;
+        effect.TextureEnabled = false;
+        effect.VertexColorEnabled = true;
+        effect.PreferPerPixelLighting = false;
 
-        this.vertices = new VertexPositionColor[1024];
-        this.indices = new int[this.vertices.Length * 3];
+        vertices = new VertexPositionColor[1024];
+        indices = new int[vertices.Length * 3];
 
-        this.shapeCount = 0;
-        this.vertexCount = 0;
-        this.indexCount = 0;
+        shapeCount = 0;
+        vertexCount = 0;
+        indexCount = 0;
 
         started = false;
         isDisposed = false;
@@ -51,35 +49,35 @@ public sealed class Shapes : IDisposable
 
     ~Shapes()
     {
-        this.Dispose(false);
+        Dispose(false);
     }
 
     public void Dispose()
     {
-        this.Dispose(true);
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
     private void Dispose(bool disposing)
     {
-        if (this.isDisposed)
+        if (isDisposed)
         {
             return;
         }
 
         if (disposing)
         {
-            this.effect?.Dispose();
-            this.effect = null;
+            effect?.Dispose();
+            effect = null;
         }
 
-        this.isDisposed = true;
+        isDisposed = true;
     }
 
     public void Begin(Camera camera)
     {
         this.camera = camera;
-        if (this.started)
+        if (started)
         {
             throw new Exception("Batch was already started.\n" +
                                 "Batch must call \"End\" before new batching can start.");
@@ -102,65 +100,65 @@ public sealed class Shapes : IDisposable
     }
     public void End()
     {
-        if (!this.started)
+        if (!started)
         {
             throw new Exception("Batch was not started.\n" +
                                 "Batch must call \"Begin\" before ending the batch.");
         }
 
-        this.Flush();
-        this.started = false;
+        Flush();
+        started = false;
     }
     private void Flush()
     {
-        if (this.shapeCount == 0)
+        if (shapeCount == 0)
         {
             return;
         }
 
-        GraphicsDevice device = this.game.GraphicsDevice;
-        int primitiveCount = this.indexCount / 3;
+        GraphicsDevice device = game.GraphicsDevice;
+        int primitiveCount = indexCount / 3;
 
-        EffectPassCollection passes = this.effect.CurrentTechnique.Passes;
+        EffectPassCollection passes = effect.CurrentTechnique.Passes;
         for (int i = 0; i < passes.Count; i++)
         {
             EffectPass pass = passes[i];
             pass.Apply();
 
-            device.DrawUserIndexedPrimitives<VertexPositionColor>(
+            device.DrawUserIndexedPrimitives(
                 PrimitiveType.TriangleList,
-                this.vertices,
+                vertices,
                 0,
-                this.vertexCount,
-                this.indices,
+                vertexCount,
+                indices,
                 0,
                 primitiveCount);
         }
 
-        this.shapeCount = 0;
-        this.vertexCount = 0;
-        this.indexCount = 0;
+        shapeCount = 0;
+        vertexCount = 0;
+        indexCount = 0;
     }
     public void EnsureStarted()
     {
-        if (!this.started)
+        if (!started)
         {
             throw new Exception("Shape batching must be started first.");
         }
     }
     private void EnsureSpace(int shapeVertexCount, int shapeIndexCount)
     {
-        int maxVertexCount = this.vertices.Length;
-        int maxIndexCount = this.indices.Length;
+        int maxVertexCount = vertices.Length;
+        int maxIndexCount = indices.Length;
 
         if (shapeVertexCount > maxVertexCount || shapeIndexCount > maxIndexCount)
         {
             throw new Exception("Max vertex or index count reached for one draw.");
         }
 
-        if (this.vertexCount + shapeVertexCount > maxVertexCount || this.indexCount + shapeIndexCount > maxIndexCount)
+        if (vertexCount + shapeVertexCount > maxVertexCount || indexCount + shapeIndexCount > maxIndexCount)
         {
-            this.Flush();
+            Flush();
         }
     }
     #region Box
@@ -171,31 +169,31 @@ public sealed class Shapes : IDisposable
             throw new ArgumentOutOfRangeException("colors array must have exactly 4 items.");
         }
 
-        this.EnsureStarted();
+        EnsureStarted();
 
         int shapeVertexCount = 4;
         int shapeIndexCount = 6;
 
-        this.EnsureSpace(shapeVertexCount, shapeIndexCount);
+        EnsureSpace(shapeVertexCount, shapeIndexCount);
 
         Vector3 a = new Vector3(min.X, max.Y, 0f);
         Vector3 b = new Vector3(max.X, max.Y, 0f);
         Vector3 c = new Vector3(max.X, min.Y, 0f);
         Vector3 d = new Vector3(min.X, min.Y, 0f);
 
-        this.indices[this.indexCount++] = 0 + this.vertexCount;
-        this.indices[this.indexCount++] = 1 + this.vertexCount;
-        this.indices[this.indexCount++] = 2 + this.vertexCount;
-        this.indices[this.indexCount++] = 0 + this.vertexCount;
-        this.indices[this.indexCount++] = 2 + this.vertexCount;
-        this.indices[this.indexCount++] = 3 + this.vertexCount;
+        indices[indexCount++] = 0 + vertexCount;
+        indices[indexCount++] = 1 + vertexCount;
+        indices[indexCount++] = 2 + vertexCount;
+        indices[indexCount++] = 0 + vertexCount;
+        indices[indexCount++] = 2 + vertexCount;
+        indices[indexCount++] = 3 + vertexCount;
 
-        this.vertices[this.vertexCount++] = new VertexPositionColor(a, colors[0]);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(b, colors[1]);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(c, colors[2]);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(d, colors[3]);
+        vertices[vertexCount++] = new VertexPositionColor(a, colors[0]);
+        vertices[vertexCount++] = new VertexPositionColor(b, colors[1]);
+        vertices[vertexCount++] = new VertexPositionColor(c, colors[2]);
+        vertices[vertexCount++] = new VertexPositionColor(d, colors[3]);
 
-        this.shapeCount++;
+        shapeCount++;
     }
 
     public void DrawBoxFill(Transform transform, float width, float height, Color color)
@@ -204,12 +202,12 @@ public sealed class Shapes : IDisposable
     }
     public void DrawBoxFill(Vector2 center, float width, float height, float rotation, Vector2 scale, Color color)
     {
-        this.EnsureStarted();
+        EnsureStarted();
 
         int shapeVertexCount = 4;
         int shapeIndexCount = 6;
 
-        this.EnsureSpace(shapeVertexCount, shapeIndexCount);
+        EnsureSpace(shapeVertexCount, shapeIndexCount);
 
         float left = -width * 0.5f;
         float right = left + width;
@@ -264,55 +262,55 @@ public sealed class Shapes : IDisposable
         dx = rx4 + center.X;
         dy = ry4 + center.Y;
 
-        this.indices[this.indexCount++] = 0 + this.vertexCount;
-        this.indices[this.indexCount++] = 1 + this.vertexCount;
-        this.indices[this.indexCount++] = 2 + this.vertexCount;
-        this.indices[this.indexCount++] = 0 + this.vertexCount;
-        this.indices[this.indexCount++] = 2 + this.vertexCount;
-        this.indices[this.indexCount++] = 3 + this.vertexCount;
+        indices[indexCount++] = 0 + vertexCount;
+        indices[indexCount++] = 1 + vertexCount;
+        indices[indexCount++] = 2 + vertexCount;
+        indices[indexCount++] = 0 + vertexCount;
+        indices[indexCount++] = 2 + vertexCount;
+        indices[indexCount++] = 3 + vertexCount;
 
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(ax, ay, 0f), color);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(bx, by, 0f), color);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(cx, cy, 0f), color);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(dx, dy, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(ax, ay, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(bx, by, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(cx, cy, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(dx, dy, 0f), color);
 
-        this.shapeCount++;
+        shapeCount++;
     }
     #endregion
     #region Quad
     public void DrawQuadFill(float ax, float ay, float bx, float by, float cx, float cy, float dx, float dy, Color color)
     {
-        this.EnsureStarted();
+        EnsureStarted();
 
         const int shapeVertexCount = 4;
         const int shapeIndexCount = 6;
 
-        this.EnsureSpace(shapeVertexCount, shapeIndexCount);
+        EnsureSpace(shapeVertexCount, shapeIndexCount);
 
-        this.indices[this.indexCount++] = 0 + this.vertexCount;
-        this.indices[this.indexCount++] = 1 + this.vertexCount;
-        this.indices[this.indexCount++] = 2 + this.vertexCount;
-        this.indices[this.indexCount++] = 0 + this.vertexCount;
-        this.indices[this.indexCount++] = 2 + this.vertexCount;
-        this.indices[this.indexCount++] = 3 + this.vertexCount;
+        indices[indexCount++] = 0 + vertexCount;
+        indices[indexCount++] = 1 + vertexCount;
+        indices[indexCount++] = 2 + vertexCount;
+        indices[indexCount++] = 0 + vertexCount;
+        indices[indexCount++] = 2 + vertexCount;
+        indices[indexCount++] = 3 + vertexCount;
 
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(ax, ay, 0f), color);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(bx, by, 0f), color);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(cx, cy, 0f), color);
-        this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(dx, dy, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(ax, ay, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(bx, by, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(cx, cy, 0f), color);
+        vertices[vertexCount++] = new VertexPositionColor(new Vector3(dx, dy, 0f), color);
 
-        this.shapeCount++;
+        shapeCount++;
     }
 
     public void DrawQuadFill(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Color color)
     {
-        this.DrawQuadFill(a.X, a.Y, b.X, b.Y, c.X, c.Y, d.X, d.Y, color);
+        DrawQuadFill(a.X, a.Y, b.X, b.Y, c.X, c.Y, d.X, d.Y, color);
     }
     #endregion
     #region Circle
     public void DrawCircleFill(Transform transform, float radius, int points, Color color)
     {
-        this.EnsureStarted();
+        EnsureStarted();
 
         const int MinCirclePoints = 3;
         const int MaxCirclePoints = 64;
@@ -323,9 +321,9 @@ public sealed class Shapes : IDisposable
         int shapeTriangleCount = shapeVertexCount - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
         int shapeIndexCount = shapeTriangleCount * 3;       // The indices count will just be 3 times the triangle count.
 
-        this.EnsureSpace(shapeVertexCount, shapeIndexCount);
+        EnsureSpace(shapeVertexCount, shapeIndexCount);
 
-        float angle = MathHelper.TwoPi / (float)shapeVertexCount;
+        float angle = MathHelper.TwoPi / shapeVertexCount;
         float sin = MathF.Sin(angle);
         float cos = MathF.Cos(angle);
 
@@ -334,9 +332,9 @@ public sealed class Shapes : IDisposable
         // Indicies;
         for (int i = 0; i < shapeTriangleCount; i++)
         {
-            this.indices[this.indexCount++] = 0 + this.vertexCount;
-            this.indices[this.indexCount++] = index + this.vertexCount;
-            this.indices[this.indexCount++] = index + 1 + this.vertexCount;
+            indices[indexCount++] = 0 + vertexCount;
+            indices[indexCount++] = index + vertexCount;
+            indices[indexCount++] = index + 1 + vertexCount;
 
             index++;
         }
@@ -349,7 +347,7 @@ public sealed class Shapes : IDisposable
         // Save all remaining vertices.
         for (int i = 0; i < shapeVertexCount; i++)
         {
-            this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(ax + pos.X, ay + pos.Y, 0f), color);
+            vertices[vertexCount++] = new VertexPositionColor(new Vector3(ax + pos.X, ay + pos.Y, 0f), color);
 
             float bx = ax * cos - ay * sin;
             float by = ax * sin + ay * cos;
@@ -358,24 +356,24 @@ public sealed class Shapes : IDisposable
             ay = by;
         }
 
-        this.shapeCount++;
+        shapeCount++;
     }
     #endregion
     #region Capsule
     public void DrawCapsuleFill(Transform transform, float radius, Vector2 start, Vector2 end, int pointsPerCap, Color color)
     {
-        this.EnsureStarted();
+        EnsureStarted();
 
         const int MinElipsePoints = 3;
         const int MaxElipsePoints = 64;
 
         int shapeVertexCount = Lib.Math.Clamp(pointsPerCap, MinElipsePoints, MaxElipsePoints) * 2;    // The vertex count will just be the number of points requested by the user.
-        int shapeTriangleCount = (shapeVertexCount) - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
-        int shapeIndexCount = (shapeTriangleCount) * 3;       // The indices count will just be 3 times the triangle count.
+        int shapeTriangleCount = shapeVertexCount - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
+        int shapeIndexCount = shapeTriangleCount * 3;       // The indices count will just be 3 times the triangle count.
 
-        this.EnsureSpace(shapeVertexCount, shapeIndexCount);
+        EnsureSpace(shapeVertexCount, shapeIndexCount);
 
-        float deltaAngle = MathHelper.Pi / ((shapeVertexCount * 0.5f) - 1);
+        float deltaAngle = MathHelper.Pi / (shapeVertexCount * 0.5f - 1);
         float angle = MathHelper.Pi;
 
         int index = 1;
@@ -383,9 +381,9 @@ public sealed class Shapes : IDisposable
         // Indicies;
         for (int i = 0; i < shapeTriangleCount; i++)
         {
-            this.indices[this.indexCount++] = 0 + this.vertexCount;
-            this.indices[this.indexCount++] = index + this.vertexCount;
-            this.indices[this.indexCount++] = index + 1 + this.vertexCount;
+            indices[indexCount++] = 0 + vertexCount;
+            indices[indexCount++] = index + vertexCount;
+            indices[indexCount++] = index + 1 + vertexCount;
 
             index++;
         }
@@ -402,7 +400,7 @@ public sealed class Shapes : IDisposable
             Vector2 val = matrix.TransformPoint(x, y) + start;
             angle += deltaAngle;
 
-            this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(val, 0f), color);
+            vertices[vertexCount++] = new VertexPositionColor(new Vector3(val, 0f), color);
         }
         angle = 0;
         for (int i = 0; i < shapeVertexCount / 2; i++)
@@ -412,37 +410,37 @@ public sealed class Shapes : IDisposable
             Vector2 val = matrix.TransformPoint(x, y) + end;
             angle += deltaAngle;
 
-            this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(val, 0f), color);
+            vertices[vertexCount++] = new VertexPositionColor(new Vector3(val, 0f), color);
         }
 
-        this.shapeCount++;
+        shapeCount++;
     }
     #endregion
     #region Polygon
     public void DrawPolygonFill(Vector2[] vertices, int[] triangles, Transform transform, Color color)
     {
-        this.EnsureStarted();
-        this.EnsureSpace(vertices.Length, indices.Length);
+        EnsureStarted();
+        EnsureSpace(vertices.Length, indices.Length);
 
         for (int i = 0; i < triangles.Length; i++)
         {
-            this.indices[this.indexCount++] = this.vertexCount + triangles[i];
+            indices[indexCount++] = vertexCount + triangles[i];
         }
         Matrix2D matrix = transform.LocalToWorldTransform;
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector2 v = vertices[i];
             v = matrix.TransformPoint(v);
-            this.vertices[this.vertexCount++] = new VertexPositionColor(new Vector3(v.X, v.Y, 0f), color);
+            this.vertices[vertexCount++] = new VertexPositionColor(new Vector3(v.X, v.Y, 0f), color);
         }
 
-        this.shapeCount++;
+        shapeCount++;
     }
     #endregion
     #region Line
     public void DrawLine(Vector2 a, Vector2 b, Color color)
     {
-        this.DrawLine(a.X, a.Y, b.X, b.Y, color);
+        DrawLine(a.X, a.Y, b.X, b.Y, color);
     }
     public void DrawLine(float x1, float y1, float x2, float y2, Color color)
     {
@@ -451,9 +449,9 @@ public sealed class Shapes : IDisposable
 
         // If we are using the world camera then we need to adjust the "thickness" of the line
         //  so no matter how far we have "zoomed" into the world the line will look the same.
-        if (this.usingCamera)
+        if (usingCamera)
         {
-            thickness /= (float)this.camera.GetZoom();
+            thickness /= camera.GetZoom();
         }
 
         float halfThickness = thickness * 0.5f;
@@ -491,7 +489,7 @@ public sealed class Shapes : IDisposable
         float qdx = x1 + n2x + e2x;
         float qdy = y1 + n2y + e2y;
 
-        this.DrawQuadFill(qax, qay, qbx, qby, qcx, qcy, qdx, qdy, color);
+        DrawQuadFill(qax, qay, qbx, qby, qcx, qcy, qdx, qdy, color);
     }
 
     public void GetLine(float x1, float y1, float x2, float y2, Color color, VertexPositionColor[] vertices, int[] indices, ref int vertexCount, ref int indexCount)
@@ -568,22 +566,22 @@ public sealed class Shapes : IDisposable
     #region Hollow Box
     public void DrawTriangle(Vector2 a, Vector2 b, Vector2 c, Color color)
     {
-        this.DrawLine(a, b, color);
-        this.DrawLine(b, c, color);
-        this.DrawLine(c, a, color);
+        DrawLine(a, b, color);
+        DrawLine(b, c, color);
+        DrawLine(c, a, color);
     }
 
     public void DrawBox(Vector2 min, Vector2 max, Color color)
     {
-        this.DrawLine(min.X, max.Y, max.X, max.Y, color);
-        this.DrawLine(max.X, max.Y, max.X, min.Y, color);
-        this.DrawLine(max.X, min.Y, min.X, min.Y, color);
-        this.DrawLine(min.X, min.Y, min.X, max.Y, color);
+        DrawLine(min.X, max.Y, max.X, max.Y, color);
+        DrawLine(max.X, max.Y, max.X, min.Y, color);
+        DrawLine(max.X, min.Y, min.X, min.Y, color);
+        DrawLine(min.X, min.Y, min.X, max.Y, color);
     }
 
     public void DrawBox(Transform transform, float width, float height, Color color)
     {
-        this.DrawBox(transform.Position, width, height, transform.Rotation, transform.Scale, color);
+        DrawBox(transform.Position, width, height, transform.Rotation, transform.Scale, color);
     }
 
     public void DrawBox(float x, float y, float width, float height, Color color)
@@ -591,7 +589,7 @@ public sealed class Shapes : IDisposable
         Vector2 min = new Vector2(x, y);
         Vector2 max = new Vector2(x + width, y + height);
 
-        this.DrawBox(min, max, color);
+        DrawBox(min, max, color);
     }
 
     public void DrawBox(Vector2 center, float width, float height, Color color)
@@ -599,7 +597,7 @@ public sealed class Shapes : IDisposable
         Vector2 min = new Vector2(center.X - width * 0.5f, center.Y - height * 0.5f);
         Vector2 max = new Vector2(min.X + width, min.Y + height);
 
-        this.DrawBox(min, max, color);
+        DrawBox(min, max, color);
     }
 
     public void DrawBox(Vector2 center, float width, float height, float angle, Vector2 scale, Color color)
@@ -646,10 +644,10 @@ public sealed class Shapes : IDisposable
         dx = rx4 + center.X;
         dy = ry4 + center.Y;
 
-        this.DrawLine(ax, ay, bx, by, color);
-        this.DrawLine(bx, by, cx, cy, color);
-        this.DrawLine(cx, cy, dx, dy, color);
-        this.DrawLine(dx, dy, ax, ay, color);
+        DrawLine(ax, ay, bx, by, color);
+        DrawLine(bx, by, cx, cy, color);
+        DrawLine(cx, cy, dx, dy, color);
+        DrawLine(dx, dy, ax, ay, color);
     }
     #endregion
     #region Hollow Circle
@@ -659,7 +657,7 @@ public sealed class Shapes : IDisposable
         const int MaxCirclePoints = 256;
         points = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);
 
-        float angle = MathHelper.TwoPi / (float)points;
+        float angle = MathHelper.TwoPi / points;
 
         // Precalculate the trig. functions.
         float sin = MathF.Sin(angle);
@@ -675,7 +673,7 @@ public sealed class Shapes : IDisposable
             float bx = ax * cos - ay * sin;
             float by = ax * sin + ay * cos;
 
-            this.DrawLine(ax + position.X, ay + position.Y,
+            DrawLine(ax + position.X, ay + position.Y,
                 bx + position.X, by + position.Y, color);
 
             // Save the last transform for the next transform in the loop.
@@ -692,7 +690,7 @@ public sealed class Shapes : IDisposable
 
         points = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);
 
-        float angle = MathHelper.TwoPi / (float)points;
+        float angle = MathHelper.TwoPi / points;
 
         // Precalculate the trig. functions.
         float sin = MathF.Sin(angle);
@@ -709,7 +707,7 @@ public sealed class Shapes : IDisposable
             float bx = ax * cos - ay * sin;
             float by = ax * sin + ay * cos;
 
-            this.DrawLine(ax + pos.X, ay + pos.Y,
+            DrawLine(ax + pos.X, ay + pos.Y,
                 bx + pos.X, by + pos.Y, color);
 
             // Save the last transform for the next transform in the loop.
@@ -726,7 +724,7 @@ public sealed class Shapes : IDisposable
 
         pointsPerCap = (Lib.Math.Clamp(pointsPerCap, MinCirclePoints, MaxCirclePoints) - 1) * 2;
 
-        float angle = MathHelper.Pi / ((pointsPerCap * 0.5f));
+        float angle = MathHelper.Pi / (pointsPerCap * 0.5f);
 
         // Precalculate the trig. functions.
         float sin = -MathF.Sin(angle);
@@ -745,7 +743,7 @@ public sealed class Shapes : IDisposable
             bx = ax * cos - ay * sin;
             by = ax * sin + ay * cos;
 
-            this.DrawLine(
+            DrawLine(
                 matrix.TransformPoint(ax, ay) + start,
                 matrix.TransformPoint(bx, by) + start,
                 color);
@@ -755,7 +753,7 @@ public sealed class Shapes : IDisposable
             ay = by;
         }
 
-        this.DrawLine(
+        DrawLine(
                 matrix.TransformPoint(ax, ay) + start,
                 matrix.TransformPoint(bx, by) + end,
             color);
@@ -765,7 +763,7 @@ public sealed class Shapes : IDisposable
             bx = ax * cos - ay * sin;
             by = ax * sin + ay * cos;
 
-            this.DrawLine(
+            DrawLine(
                 matrix.TransformPoint(ax, ay) + end,
                 matrix.TransformPoint(bx, by) + end,
                 color);
@@ -774,7 +772,7 @@ public sealed class Shapes : IDisposable
             ax = bx;
             ay = by;
         }
-        this.DrawLine(
+        DrawLine(
                 matrix.TransformPoint(ax, ay) + end,
                 matrix.TransformPoint(bx, by) + start,
                 color);
@@ -800,7 +798,7 @@ public sealed class Shapes : IDisposable
             a = matrix.TransformPoint(a);
             b = matrix.TransformPoint(b);
 
-            this.DrawLine(a, b, color);
+            DrawLine(a, b, color);
         }
     }
     #endregion

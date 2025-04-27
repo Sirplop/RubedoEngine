@@ -16,5 +16,5 @@ internal interface IBroadphase
     void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> manifoldSet);
     void Clear();
 
-    void DebugDraw(Render.Shapes shapes);
+    void DebugDraw(Rendering.Shapes shapes);
 }
