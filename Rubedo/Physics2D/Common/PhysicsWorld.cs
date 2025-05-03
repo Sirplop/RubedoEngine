@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo;
-using Rubedo.Debug;
+using Rubedo.EngineDebug;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Collision.Broadphase;
 using Rubedo.Physics2D.Constraints;

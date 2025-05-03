@@ -4,7 +4,7 @@ using Rubedo.Components;
 using Rubedo.Rendering;
 using System.Collections.Generic;
 
-namespace Rubedo.Debug;
+namespace Rubedo.EngineDebug;
 
 public class DebugText
 {

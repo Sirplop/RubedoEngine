@@ -17,7 +17,7 @@ public class Vertical : LayoutGroup
 
         foreach (var c in _children)
         {
-            if (!c.isVisible)
+            if (!c.IsVisible())
                 continue;
             c.UpdateSizes();
             maxWidth = MathF.Max(c.Width, maxWidth);
@@ -35,7 +35,7 @@ public class Vertical : LayoutGroup
 
         foreach (UIComponent c in _children)
         {
-            if (!c.isVisible)
+            if (!c.IsVisible())
                 continue;
             c.Offset = new Vector2(paddingLeft, currentY);
             //c.Width = MathF.Min(c.Width, Width);

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using PhysicsEngine2D;
+using Rubedo.EngineDebug;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
@@ -202,7 +203,7 @@ internal class SpatialHashGrid : IBroadphase
         {
             Vector2 textPosition = new Vector2((float)x * cellSize + 0.5f * cellSize,
                 (float)y * cellSize + 0.5f * cellSize);
-            Debug.DebugText.Instance.DrawText(textPosition, 0.05f, cellCount.ToString(), false);
+            DebugText.Instance.DrawText(textPosition, 0.05f, cellCount.ToString(), false);
         }
     }
 

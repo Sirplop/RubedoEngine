@@ -8,7 +8,7 @@ using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
 using Rubedo.Rendering;
 
-namespace Rubedo.Tests;
+namespace Rubedo.EngineDebug;
 
 /// <summary>
 /// Debug testing for drawing and colliding various collider shapes.

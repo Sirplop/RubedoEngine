@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace Rubedo.Debug;
+namespace Rubedo.EngineDebug;
 
 /// <summary>
 /// A slightly-better stopwatch, fit for crude performance metrics.

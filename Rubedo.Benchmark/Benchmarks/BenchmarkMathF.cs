@@ -1,10 +1,10 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Rubedo.Lib;
 using Random = Rubedo.Lib.Random;
 
 namespace Rubedo.Benchmarks;
 
-public  class BenchmarkMathF
+[MemoryDiagnoser]
+public class BenchmarkMathF
 {
     private const float RUN_COUNT = 100;
 
@@ -29,21 +29,11 @@ public  class BenchmarkMathF
     [Benchmark(Baseline = true)]
     public float ClampFloat()
     {
-        float ret = 0;
-        for (int i = 0; i < RUN_COUNT; i++)
-        {
-            ret = Lib.Math.Clamp(ret, val1, val2);
-        }
-        return ret;
+        return Lib.Math.Clamp(val2, val1, val3);
     }
     [Benchmark]
     public float ClampFloatSystem2()
     {
-        float ret = 0;
-        for (int i = 0; i < RUN_COUNT; i++)
-        {
-            ret = System.Math.Clamp(ret, val1, val2);
-        }
-        return ret;
+        return System.Math.Clamp(val2, val1, val3);
     }
 }

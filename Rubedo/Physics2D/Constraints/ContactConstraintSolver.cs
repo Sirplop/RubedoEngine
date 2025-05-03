@@ -10,8 +10,6 @@ namespace Rubedo.Physics2D.Constraints;
 /// </summary>
 public static class ContactConstraintSolver
 {
-    private static float lambda;
-    private static Vector2 rv;
     public static void PresolveConstraint(Manifold m, float invDT)
     {
         const float PENETRATION_SLOP = 0.01f;
@@ -30,7 +28,7 @@ public static class ContactConstraintSolver
             c.ra = c.position - m.A.position;
             c.rb = c.position - m.B.position;
 
-            RelVel(ref m, ref c, out rv);
+            RelVel(ref m, ref c, out Vector2 rv);
 
             // Restitution * normal velocity at first impact
             Vector2.Dot(ref rv, ref m.normal, out float vn);
@@ -61,11 +59,12 @@ public static class ContactConstraintSolver
             MathV.Cross(ref c.ra, ref m.tangent, out float rt1);
             MathV.Cross(ref c.rb, ref m.tangent, out float rt2);
 
-            c.tangentMass = 1f / (invMassSum + m.A.invInertia * (rt1 * rt1) +
+            //negated here because it's only used negated.
+            c.tangentMass = -1f / (invMassSum + m.A.invInertia * (rt1 * rt1) +
                                          m.B.invInertia * (rt2 * rt2));
 
             // Position error is fed back to the velocity constraint as a bias value
-            float correction = MathF.Min(-c.penetration + PENETRATION_SLOP, 0.0f);//Math.Max(0.0f, c.penetration - PENETRATION_SLOP);
+            float correction = MathF.Min(-c.penetration + PENETRATION_SLOP, 0.0f);
             c.bias = BAUMGARTE * invDT * correction;
 
             // Perfect restitution + baumgarte leads to overshooting
@@ -92,7 +91,8 @@ public static class ContactConstraintSolver
     public static void ApplyImpulse(Manifold m)
     {
         if (m.A.invMass + m.B.invMass == 0) return;
-
+        Vector2 rv;
+        float lambda;
         /*
             In an iterative solver what is applied the last affects the result more.
             So we solve normal impulse after tangential impulse because
@@ -111,12 +111,11 @@ public static class ContactConstraintSolver
 
             // Tangential impulse magnitude
             Vector2.Dot(ref rv, ref m.tangent, out lambda);
-            lambda *= -c.tangentMass;
 
             //accumulate tangential impulse
             float maxPt = c.accumImpulse * m.friction;
             float pt0 = c.accumFriction;
-            c.accumFriction = Lib.Math.Clamp(pt0 + lambda, -maxPt, maxPt);
+            c.accumFriction = Lib.Math.Clamp(pt0 + lambda * c.tangentMass, -maxPt, maxPt);
             lambda = c.accumFriction - pt0;
 
             Vector2.Multiply(ref m.tangent, lambda, out rv);
@@ -154,7 +153,7 @@ public static class ContactConstraintSolver
 
     private static void RelVel(ref Manifold m, ref Contact c, out Vector2 rv)
     {
-        rv.X = m.B.velocity.X - (c.rb.Y * m.B.angularVelocity) - (m.A.velocity.X - (c.ra.Y * m.A.angularVelocity));
-        rv.Y = m.B.velocity.Y + (c.rb.X * m.B.angularVelocity) - (m.A.velocity.Y + (c.ra.X * m.A.angularVelocity));
+        rv.X = m.B.velocity.X - c.rb.Y * m.B.angularVelocity - m.A.velocity.X + c.ra.Y * m.A.angularVelocity;
+        rv.Y = m.B.velocity.Y + c.rb.X * m.B.angularVelocity - m.A.velocity.Y - c.ra.X * m.A.angularVelocity;
     }
 }

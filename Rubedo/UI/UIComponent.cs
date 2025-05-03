@@ -25,16 +25,17 @@ public enum Anchor
 public abstract class UIComponent()
 {
     #region Info
-    public bool isActive = true;
-    public bool isVisible = true;
+    protected bool isVisible = true;
+    protected bool isActive = true;
+    protected bool isParentVisible = true;
+    protected bool isParentActive = true;
 
     public UIComponent? Parent { get; set; } = null;
     protected internal readonly List<UIComponent> _children = new List<UIComponent>();
 
     public ReadOnlyCollection<UIComponent> Children => _children.AsReadOnly();
 
-    public bool IsLayoutDirty => _isLayoutDirty;
-    protected bool _isLayoutDirty = true;
+    protected bool isLayoutDirty = true;
     protected int _parentIndex = -1;
 
     /// <summary>
@@ -46,6 +47,51 @@ public abstract class UIComponent()
     /// </summary>
     private uint _parentLastClipVersion = 0;
 
+    public bool IsVisible()
+    {
+        return isVisible && isParentVisible;
+    }
+    public bool IsActive()
+    {
+        return isActive && isParentActive;
+    }
+    public bool IsActiveAndVisible()
+    {
+        return isVisible && isParentVisible && isActive && isParentActive;
+    }
+
+    public virtual void SetVisible(bool vis)
+    {
+        isVisible = vis;
+        if (Parent == null)
+            isParentVisible = vis;
+        foreach (UIComponent child in Children)
+            child.SetParentVisible(isParentVisible && vis);
+    }
+    public virtual void SetActive(bool active)
+    {
+        isActive = active;
+        if (Parent == null)
+            isParentActive = active;
+        foreach (UIComponent child in Children)
+            child.SetParentActive(isParentActive && active);
+    }
+    protected virtual void SetParentVisible(bool vis)
+    {
+        if (isParentVisible)
+            return; //still the same, don't update anything.
+        isParentVisible = vis;
+        foreach (UIComponent child in Children)
+            child.SetParentVisible(vis && isVisible);
+    }
+    protected virtual void SetParentActive(bool active)
+    {
+        if (isParentActive == active)
+            return; //still the same, don't update anything.
+        isParentActive = active;
+        foreach (UIComponent child in Children)
+            child.SetParentActive(active && isParentActive);
+    }
 
     protected float _width = 100;
     public float Width
@@ -88,6 +134,16 @@ public abstract class UIComponent()
     {
         get => _offset;
         set => SetOffset(value);
+    }
+
+    /// <summary>
+    /// Gets the sum of offsets, aka this component's position on screen.
+    /// </summary>
+    /// <returns></returns>
+    public Vector2 ScreenPosition()
+    {
+        Point clipPoint = Clip.Location;
+        return new Vector2(clipPoint.X, clipPoint.Y);
     }
 
     protected Anchor _anchor;
@@ -184,7 +240,7 @@ public abstract class UIComponent()
 
     public virtual void UpdateClipIfDirty()
     {
-        if (Parent != null && (_isLayoutDirty || _parentLastClipVersion != Parent._clipVersion))
+        if (Parent != null && (isLayoutDirty || _parentLastClipVersion != Parent._clipVersion))
         {
             CreateClipRect();
         }
@@ -193,7 +249,7 @@ public abstract class UIComponent()
     protected virtual void UpdateClip()
     {
         CreateClipRect();
-        _isLayoutDirty = false; 
+        isLayoutDirty = false; 
         _clipVersion++;
         if (Parent != null)
         {
@@ -344,6 +400,9 @@ public abstract class UIComponent()
             _children.Add(component);
         }
 
+        component.SetParentVisible(isParentVisible && isVisible);
+        component.SetParentActive(isParentActive && isActive);
+
         MarkLayoutAsDirty();
         component.MarkLayoutAsDirty();
     }
@@ -357,6 +416,9 @@ public abstract class UIComponent()
             _children[i]._parentIndex -= 1;
         }
 
+        component.SetParentVisible(component.isVisible);
+        component.SetParentActive(component.isActive);
+
         MarkLayoutAsDirty();
         component.MarkLayoutAsDirty();
     }
@@ -366,10 +428,10 @@ public abstract class UIComponent()
     public virtual void UpdateLayout() { }
 
     /// <summary>
-    /// Marks this component, and all parents up to the root, as dirty, so they will update their layouts.
+    /// Marks this component as dirty to update clips and layouts.
     /// </summary>
     public void MarkLayoutAsDirty()
     {
-        _isLayoutDirty = true;
+        isLayoutDirty = true;
     }
 }

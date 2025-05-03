@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
+using Rubedo.Benchmark.Benchmarks;
 using Rubedo.Benchmarks;
 
 namespace Rubedo.Benchmark;
@@ -10,6 +11,6 @@ internal class BenchmarkRun
 {
     public static void RunBenchmark()
     {
-        BenchmarkRunner.Run<BenchmarkCollisions>();
+        BenchmarkRunner.Run<BenchmarkPhysIntegrate>();
     }
 }

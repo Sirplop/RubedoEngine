@@ -3,8 +3,9 @@ using Microsoft.Xna.Framework;
 using System.Diagnostics;
 using PhysicsEngine2D;
 using Rubedo.UI;
-using Rubedo.Debug;
 using Rubedo.Rendering;
+using Rubedo.Input;
+using Rubedo.EngineDebug;
 
 namespace Rubedo;
 
@@ -22,7 +23,6 @@ public class RubedoEngine : Game
     protected Screen _screen;
     protected Camera _camera;
     protected StateManager _stateManager;
-    protected InputManager _inputManager;
     protected PhysicsWorld _physicsWorld;
 
     public static float DeltaTime => Instance.deltaTime;
@@ -37,7 +37,6 @@ public class RubedoEngine : Game
     public Camera Camera => _camera;
     public Screen Screen => _screen;
     public PhysicsWorld World => _physicsWorld;
-    public static InputManager Input => Instance._inputManager;
 
     public Timer _physicsTimer;
 
@@ -48,7 +47,6 @@ public class RubedoEngine : Game
 
         Content.RootDirectory = "Content";
         _stateManager = new StateManager();
-        _inputManager = new InputManager();
         _physicsWorld = new PhysicsWorld();
 
         AssetManager.Initialize(Content);
@@ -81,9 +79,10 @@ public class RubedoEngine : Game
         deltaTime = rawDeltaTime * timeRate;
 
         if (IsActive)
-            _inputManager.Update();
-
-        GUI.Root?.UpdateStart(IsActive && GUI.DoUIInput);
+        {
+            InputManager.Update();
+            GUI.Root?.UpdateStart(GUI.DoUIInput);
+        }
 
         _stateManager.Update();
         _physicsTimer.Start();

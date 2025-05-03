@@ -1,18 +1,36 @@
 ﻿using Microsoft.Xna.Framework;
+using Rubedo.Input;
 using System;
 
 namespace Rubedo.UI.Input;
 
 /// <summary>
-/// TODO: I am Button, and I don't have a summary yet.
+/// A pressable UI component, the base of many.
 /// </summary>
-public class Button : UIComponent
+public class Button : Selectable
 {
-    public bool clicked = false;
+    public bool Clicked => clicked;
+    protected bool clicked = false;
 
-    public event Action OnPressed;
-    public event Action OnHeld;
-    public event Action OnReleased;
+    public float HeldDuration => heldDuration;
+    protected float heldDuration = 0;
+
+    protected bool held = false;
+    protected bool mousePressed = false;
+    protected bool buttonPressed = false;
+
+    /// <summary>
+    /// Called the frame the button is pressed.
+    /// </summary>
+    public event Action<Button> OnPressed;
+    /// <summary>
+    /// Called every frame the button is held. Use <see cref="HeldDuration"/> for how long it's been held.
+    /// </summary>
+    public event Action<Button> OnHeld;
+    /// <summary>
+    /// Called the frame the button is released.
+    /// </summary>
+    public event Action<Button> OnReleased;
 
     public override void UpdateSizes()
     {
@@ -21,7 +39,7 @@ public class Button : UIComponent
 
         foreach (var c in _children)
         {
-            if (!c.isVisible)
+            if (!c.IsVisible())
                 continue;
             c.UpdateSizes();
             maxWidth = MathF.Max(c.Width, maxWidth);
@@ -34,7 +52,7 @@ public class Button : UIComponent
     {
         foreach (var c in _children)
         {
-            if (!c.isVisible)
+            if (!c.IsVisible())
                 continue;
             c.UpdateClipIfDirty();
             c.UpdateLayout();
@@ -42,31 +60,59 @@ public class Button : UIComponent
     }
     public override void UpdateInput()
     {
-        if (Clip.Contains(RubedoEngine.Input.MouseScreenPosition()))
+        base.UpdateInput();
+        if (!buttonPressed && isHovered && NavControls.MouseInteract.Pressed())
         {
-            if (RubedoEngine.Input.MouseDown(InputManager.MouseButtons.Left))
-            {
-                if (!clicked)
-                {
-                    clicked = true;
-                    OnPressed?.Invoke();
-                }
-                else
-                {
-                    OnHeld?.Invoke();
-                }
-            }
-            else if (clicked)
-            {
-                clicked = false;
-                OnReleased?.Invoke();
-            }
-        } else if (clicked)
-        { //we've moved off the button, release everything.
-            clicked = false;
-            OnReleased?.Invoke();
+            clicked = true;
+            mousePressed = true;
+            buttonPressed = false;
+            OnPressed?.Invoke(this);
+            GUI.Root.GrabFocus(this);
+        }
+        else if (IsFocused && !mousePressed && NavControls.ButtonInteract.Pressed())
+        {
+            clicked = true;
+            mousePressed = false;
+            buttonPressed = true;
+            OnPressed?.Invoke(this);
         }
 
+        if (IsFocused)
+        {
+            if (clicked)
+            {
+                heldDuration += RubedoEngine.DeltaTime;
+                if (buttonPressed && NavControls.ButtonInteract.Released())
+                {
+                    heldDuration = 0;
+                    clicked = false;
+                    held = false;
+                    buttonPressed = false;
+                    OnReleased?.Invoke(this);
+                }
+                else if (mousePressed && NavControls.MouseInteract.Released())
+                {
+                    heldDuration = 0;
+                    clicked = false;
+                    held = false;
+                    mousePressed = false;
+                    if (isHovered)
+                        OnReleased?.Invoke(this);
+                }
+                else if (heldDuration > 0)
+                {
+                    OnHeld?.Invoke(this);
+                }
+            }
+        }
+        else if (clicked) //no longer focused, which means we've lost control.
+        {
+            heldDuration = 0;
+            clicked = false;
+            held = false;
+            mousePressed = false;
+            buttonPressed = false;
+        }
         base.UpdateInput();
     }
 }

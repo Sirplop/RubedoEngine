@@ -15,7 +15,7 @@ public class Horizontal : LayoutGroup
 
         foreach (var c in _children)
         {
-            if (!c.isVisible)
+            if (!c.IsVisible())
                 continue;
             c.UpdateSizes();
             maxWidth += c.Width + childPadding;
@@ -33,7 +33,7 @@ public class Horizontal : LayoutGroup
 
         foreach (var c in _children)
         {
-            if (!c.isVisible)
+            if (!c.IsVisible())
                 continue;
             c.Offset = new Vector2(currentX, paddingTop);
             //c.Height = MathF.Min(c.Height, Height);

@@ -94,6 +94,7 @@ public class Manifold : IEquatable<Manifold>
         contactCount = 2;
     }
 
+    [Obsolete]
     public void Update(int numNewContacts, params Contact[] newContacts)
     {
         Contact[] mergedContacts = new Contact[2];

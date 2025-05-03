@@ -12,10 +12,33 @@ namespace Rubedo.UI;
 /// </summary>
 public class GUIRoot : UIComponent
 {
+    public Selectable CurrentFocus => _currentFocus;
+    protected Selectable _currentFocus = null;
+
+
     public GUIRoot() : base()
     {
 
     }
+
+    /// <summary>
+    /// Sets a <see cref="Selectable"/> to be the active focus. May be set to null to remove focus.
+    /// </summary>
+    public void GrabFocus(Selectable? c)
+    {
+        if (CurrentFocus != null)
+            CurrentFocus.IsFocused = false;
+        if (c != null)
+            c.IsFocused = true;
+    }
+    /// <summary>
+    /// Sets the focus directly, used by <see cref="Selectable.IsFocused"/>.
+    /// </summary>
+    internal void GrabFocusInternal(Selectable? c)
+    {
+        _currentFocus = c;
+    }
+
     /// <summary>
     /// Called before updates, but after input updates.
     /// </summary>
@@ -36,7 +59,7 @@ public class GUIRoot : UIComponent
         SetAnchorAndOffset(Anchor.TopLeft, Vector2.Zero);
         Height = RubedoEngine.Instance.Screen.Height;
         Width = RubedoEngine.Instance.Screen.Width;
-        _isLayoutDirty = false; //this doesn't create
+        isLayoutDirty = false; //this doesn't cause layout problems. Or should it? TODO.
 
         foreach (UIComponent c in _children)
         {

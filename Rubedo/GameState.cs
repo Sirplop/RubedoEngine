@@ -4,6 +4,7 @@ using Rubedo.Object;
 using Rubedo.Internal;
 using Rubedo.UI;
 using Rubedo.Rendering;
+using Rubedo.Input;
 
 namespace Rubedo;
 
@@ -13,18 +14,16 @@ namespace Rubedo;
 public class GameState
 {
     public readonly StateManager stateManager;
-    public readonly InputManager inputManager;
 
     protected string _name = "";
 
     protected internal EntityList Entities { get; private set; }
 
     public string Name => _name;
-    public GameState(StateManager sm, InputManager ih)
+    public GameState(StateManager sm)
     {
         Entities = new EntityList(this);
         stateManager = sm;
-        inputManager = ih;
     }
 
     public virtual void Enter()
