@@ -6,7 +6,7 @@ namespace Rubedo.Lib;
 /// <summary>
 /// Extension methods for Vector2.
 /// </summary>
-public static class Vector2Ext
+public static class Vector2Extensions
 {
     /// <summary>
     /// Returns the string representation of this vector in the form [X: 0.00, Y: 0.00]

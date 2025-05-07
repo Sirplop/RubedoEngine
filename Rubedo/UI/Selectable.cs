@@ -14,17 +14,8 @@ public abstract class Selectable : UIComponent
 {
     protected const int NOT_SELECTABLE_INDEX = -1;
 
-    protected readonly static List<Selectable> allSelectables = new List<Selectable>();
     protected readonly static List<Selectable> activeSelectables = new List<Selectable>();
 
-    /// <summary>
-    /// Called every frame while this <see cref="Selectable"/> is hovered over.
-    /// </summary>
-    public event Action<Selectable> OnHover;
-    /// <summary>
-    /// Called the frame this <see cref="Selectable"/> is no longer hovered.
-    /// </summary>
-    public event Action<Selectable> OnHoverLost;
     /// <summary>
     /// Called when this selectable becomes focused.
     /// </summary>
@@ -81,31 +72,44 @@ public abstract class Selectable : UIComponent
     protected int _selectedIndex = NOT_SELECTABLE_INDEX;
     public Selectable()
     {
-        allSelectables.Add(this);
         if (IsActiveAndVisible())
             AddToSelectableList();
     }
 
     public override void UpdateInput()
     {
+        isHovered = Clip.Contains(InputManager.MouseScreenPosition());
+        if (GUI.MouseControlsEnabled && isHovered)
+            GUI.Root.GrabFocus(this);
+
         //focused element navigation controls
         if (IsFocused)
         {
             if (allowUp && NavControls.NavUp.Pressed())
-                Navigate(NavDirection.Up);
+            {
+                if (!GUI.MouseControlsEnabled || isHovered)
+                    Navigate(NavDirection.Up);
+                GUI.MouseControlsEnabled = false;
+            }
             else if (allowDown && NavControls.NavDown.Pressed())
-                Navigate(NavDirection.Down);
+            {
+                if (!GUI.MouseControlsEnabled || isHovered)
+                    Navigate(NavDirection.Down);
+                GUI.MouseControlsEnabled = false;
+            }
             else if (allowLeft && NavControls.NavLeft.Pressed())
-                Navigate(NavDirection.Left);
+            {
+                if (!GUI.MouseControlsEnabled || isHovered)
+                    Navigate(NavDirection.Left);
+                GUI.MouseControlsEnabled = false;
+            }
             else if (allowRight && NavControls.NavRight.Pressed())
-                Navigate(NavDirection.Right);
+            {
+                if (!GUI.MouseControlsEnabled || isHovered)
+                    Navigate(NavDirection.Right);
+                GUI.MouseControlsEnabled = false;
+            }
         }
-
-        isHovered = Clip.Contains(InputManager.MouseScreenPosition()); //TODO: Add controller support for a selector to trigger hovers.
-        if (isHovered)
-            OnHover?.Invoke(this);
-        else
-            OnHoverLost?.Invoke(this);
         base.UpdateInput();
     }
 
@@ -148,6 +152,77 @@ public abstract class Selectable : UIComponent
                     rightNavigation.Insert(index, selectable);
                 break;
         }
+    }
+
+    public void SetNavigation(Selectable selectable, NavDirection direction, int index = 0)
+    {
+        switch (direction)
+        {
+            case NavDirection.Up:
+                upNavigation ??= new List<Selectable>();
+                if (index < upNavigation.Count)
+                    upNavigation[index] = selectable;
+                else if (index == 0) //special case
+                    upNavigation.Add(selectable);
+                    break;
+            case NavDirection.Down:
+                downNavigation ??= new List<Selectable>();
+                if (index < downNavigation.Count)
+                    downNavigation[index] = selectable;
+                else if (index == 0) //special case
+                    downNavigation.Add(selectable);
+                break;
+            case NavDirection.Left:
+                leftNavigation ??= new List<Selectable>();
+                if (index < leftNavigation.Count)
+                    leftNavigation[index] = selectable;
+                else if (index == 0) //special case
+                    leftNavigation.Add(selectable);
+                break;
+            case NavDirection.Right:
+                rightNavigation ??= new List<Selectable>();
+                if (index < rightNavigation.Count)
+                    rightNavigation[index] = selectable;
+                else if (index == 0) //special case
+                    rightNavigation.Add(selectable);
+                break;
+        }
+    }
+
+    public bool RemoveNavigation(Selectable target, NavDirection direction)
+    {
+        switch (direction)
+        {
+            case NavDirection.Up:
+                if (allowUp)
+                {
+                    upNavigation.Remove(target);
+                    return true;
+                }
+                return false;
+            case NavDirection.Down:
+                if (allowDown)
+                {
+                    downNavigation.Remove(target);
+                    return true;
+                }
+                return false;
+            case NavDirection.Left:
+                if (allowLeft)
+                {
+                    leftNavigation.Remove(target);
+                    return true;
+                }
+                return false;
+            case NavDirection.Right:
+                if (allowRight)
+                {
+                    rightNavigation.Remove(target);
+                    return true;
+                }
+                return false;
+        }
+        return false;
     }
 
     /// <summary>
@@ -334,5 +409,12 @@ public abstract class Selectable : UIComponent
             }
         }
         return best;
+    }
+
+    public override void Destroy()
+    {
+        if (_selectedIndex != NOT_SELECTABLE_INDEX)
+            RemoveFromSelectableList();
+        base.Destroy();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FontStashSharp;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Object;
 using System;
@@ -10,6 +11,12 @@ namespace Rubedo.Rendering;
 /// </summary>
 public sealed class Renderer : IDisposable
 {
+    public enum Space
+    {
+        World,
+        Screen
+    }
+
     private bool isDisposed;
     private Game game;
     public SpriteBatch Sprites { get; }
@@ -99,6 +106,7 @@ public sealed class Renderer : IDisposable
 
         Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
+    [Obsolete("Use the FontSystem version")]
     public void DrawString(SpriteFont spriteFont, string text, Vector2 position, Color color, float rotation, float scale, SpriteEffects effects)
     {
         //because we're rendering with +Y coordinates, all sprites are flipped,
@@ -117,5 +125,37 @@ public sealed class Renderer : IDisposable
             Vector2.Zero,
             scale,
             effects, 0);
+    }
+    public void DrawString(SpriteFontBase spriteFont, Space space, string text, Vector2 position, Color color, float rotation, float scale, 
+        SpriteEffects effects = SpriteEffects.None, TextStyle style = TextStyle.None, FontSystemEffect fontEffect = FontSystemEffect.None, int effectAmount = 0)
+    {
+        //if world renderer, because we're rendering with +Y coordinates, all text is flipped,
+        //so we need to invert any SpriteEffects' FlipVertically flags.
+        Vector2 scaleVec;
+        if (space == Space.World)
+        {
+            scaleVec = new Vector2(
+                effects.HasFlag(SpriteEffects.FlipHorizontally) ? -scale : scale,
+                effects.HasFlag(SpriteEffects.FlipVertically) ? scale : -scale
+            );
+        } else
+        {
+            scaleVec = new Vector2(
+                effects.HasFlag(SpriteEffects.FlipHorizontally) ? -scale : scale,
+                effects.HasFlag(SpriteEffects.FlipVertically) ? scale : -scale
+            );
+        }
+
+        Sprites.DrawString(
+            spriteFont,
+            text,
+            position,
+            color,
+            rotation,
+            Vector2.Zero,
+            scaleVec,
+            textStyle: style,
+            effect: fontEffect,
+            effectAmount: effectAmount);
     }
 }

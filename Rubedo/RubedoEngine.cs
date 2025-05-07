@@ -6,6 +6,11 @@ using Rubedo.UI;
 using Rubedo.Rendering;
 using Rubedo.Input;
 using Rubedo.EngineDebug;
+using NLog;
+using NLog.Targets;
+using NLog.Config;
+using Rubedo.Internal.Assets;
+using NLog.Layouts;
 
 namespace Rubedo;
 
@@ -18,6 +23,7 @@ public class RubedoEngine : Game
 
     public static RubedoEngine Instance { get; private set; }
     public static GraphicsDeviceManager Graphics { get; private set; }
+    public static NLog.Logger Logger { get; protected set; }
 
     protected Renderer _renderer;
     protected Screen _screen;
@@ -29,9 +35,9 @@ public class RubedoEngine : Game
     public static float RawDeltaTime => Instance.rawDeltaTime;
     public static double RawTime => Instance.rawTime;
 
-    public float deltaTime { get; private set; }
-    public float rawDeltaTime { get; private set; }
-    public double rawTime { get; private set; }
+    protected float deltaTime;
+    protected float rawDeltaTime;
+    protected double rawTime;
     public float timeRate = 1.0f;
 
     public Camera Camera => _camera;
@@ -45,11 +51,12 @@ public class RubedoEngine : Game
         Instance = this;
         Graphics = new GraphicsDeviceManager(this);
 
-        Content.RootDirectory = "Content";
+        SetupLogger();
+
         _stateManager = new StateManager();
         _physicsWorld = new PhysicsWorld();
 
-        AssetManager.Initialize(Content);
+        AssetManager.Initialize("Content");
 
         IsMouseVisible = true;
         IsFixedTimeStep = false;
@@ -59,6 +66,7 @@ public class RubedoEngine : Game
     {
         _renderer = new Renderer(this);
         _screen = new Screen(this, Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight);
+        //_screen = new Screen(this, 640, 480);
         _camera = new Camera(_screen);
         _camera.SetZoom(1);
 
@@ -106,10 +114,47 @@ public class RubedoEngine : Game
         _renderer.Begin(_camera, SamplerState.PointClamp);
         _stateManager.Draw(_renderer);
         _renderer.End();
+        GUI.Root.Draw();
         _screen.Unset();
         _screen.Preset(_renderer, SamplerState.PointClamp);
-        GUI.Root.Draw();
 
         base.Draw(gameTime);
+    }
+
+    protected override void EndRun()
+    {
+        NLog.LogManager.Shutdown();
+        base.EndRun();
+    }
+
+    /// <summary>
+    /// Creates the rules and config for the NLog logger.
+    /// </summary>
+    protected virtual void SetupLogger()
+    {
+        LoggingConfiguration config = new NLog.Config.LoggingConfiguration();
+
+        // Nicer log output.
+        SimpleLayout layout = new SimpleLayout() { Text = "[${longdate}] [${level:uppercase=true}] ${literal:text=\\:} ${message:withexception=true}" };
+
+        // Targets where to log to: File and Console
+        //FileTarget logfile = new NLog.Targets.FileTarget("logfile") { FileName = "gamelog.txt" };
+#if DEBUG
+        ConsoleTarget logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+        DebuggerTarget logDebugConsole = new NLog.Targets.DebuggerTarget("debugconsole");
+        logconsole.Layout = layout;
+        logDebugConsole.Layout = layout;
+
+        // Rules for mapping loggers to targets            
+        config.AddRule(LogLevel.Debug, LogLevel.Fatal, logconsole);
+        config.AddRule(LogLevel.Debug, LogLevel.Fatal, logDebugConsole);
+#endif
+        //config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+
+        // Apply config           
+        NLog.LogManager.Configuration = config;
+
+        //Load the logger.
+        Logger = NLog.LogManager.GetCurrentClassLogger();
     }
 }

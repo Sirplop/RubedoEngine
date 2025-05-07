@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FontStashSharp;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Lib;
 using Rubedo.Rendering;
@@ -28,10 +29,10 @@ public class Text : Component
         Center
     }
 
-    protected SpriteFont font;
+    protected FontSystem font;
     public string text { get; protected set; }
     public Color color;
-    public float textSize = 1;
+    public int fontSize = 12;
     protected HorizontalAlignment horizontalAlignment = HorizontalAlignment.Left;
     protected VerticalAlignment verticalAlignment = VerticalAlignment.Top;
 
@@ -41,11 +42,11 @@ public class Text : Component
     protected int shadowThickness;
     protected Color shadowColor;
 
-    public Text(SpriteFont font) : this(font, string.Empty, Color.White, true, true) { }
+    public Text(FontSystem font) : this(font, string.Empty, Color.White, true, true) { }
 
-    public Text(SpriteFont font, string text, Color color) : this(font, text, color, true, true) { }
+    public Text(FontSystem font, string text, Color color) : this(font, text, color, true, true) { }
 
-    public Text(SpriteFont font, string text, Color color, bool active, bool visible) : base(active, visible)
+    public Text(FontSystem font, string text, Color color, bool active, bool visible) : base(active, visible)
     {
         this.font = font;
         SetText(text);
@@ -83,7 +84,7 @@ public class Text : Component
 
     protected void UpdateAlignment()
     {
-        Vector2 size = font.MeasureString(text);
+        Vector2 size = TextUtils.MeasureString(font, text, fontSize);
         switch (horizontalAlignment)
         {
             case HorizontalAlignment.Left:
@@ -113,21 +114,21 @@ public class Text : Component
     public override void Draw(Renderer sb)
     {
         Vector2 pos = compTransform.LocalPosition;
-        MathV.MulSub(ref pos, ref alignmentOffset, textSize, out pos);
+        MathV.MulSub(ref pos, ref alignmentOffset, fontSize, out pos);
 
-        float scale = textSize * (Math.Max(compTransform.Scale) / RubedoEngine.Instance.Camera.GetZoom());
-
+        float scale = fontSize * (Math.Max(compTransform.Scale) / RubedoEngine.Instance.Camera.GetZoom());
+        SpriteFontBase fontR = font.GetFont(scale);
         if (doShadow)
         {
             Vector2 shadowPos = new Vector2(shadowThickness, -shadowThickness);
             Vector2.Add(ref pos, ref shadowPos, out shadowPos);
             compTransform.LocalToWorldPosition(ref shadowPos, out shadowPos);
 
-            sb.DrawString(font, text, shadowPos, shadowColor, compTransform.RotationDegrees, scale, SpriteEffects.None);
+            sb.DrawString(fontR, Renderer.Space.World, text, shadowPos, shadowColor, compTransform.RotationDegrees, scale, SpriteEffects.None);
         }
 
         compTransform.LocalToWorldPosition(ref pos, out pos);
 
-        sb.DrawString(font, text, pos, color, compTransform.RotationDegrees, scale, SpriteEffects.None);
+        sb.DrawString(fontR, Renderer.Space.World, text, pos, color, compTransform.RotationDegrees, scale, SpriteEffects.None);
     }
 }

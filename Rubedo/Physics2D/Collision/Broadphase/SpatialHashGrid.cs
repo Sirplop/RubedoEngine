@@ -4,6 +4,7 @@ using Rubedo.EngineDebug;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
+using Rubedo.Rendering;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -201,9 +202,9 @@ internal class SpatialHashGrid : IBroadphase
 
         if (cellCount > 0)
         {
-            Vector2 textPosition = new Vector2((float)x * cellSize + 0.5f * cellSize,
-                (float)y * cellSize + 0.5f * cellSize);
-            DebugText.Instance.DrawText(textPosition, 0.05f, cellCount.ToString(), false);
+            Vector2 textPosition = new Vector2((float)x * cellSize + 0.25f * cellSize,
+                (float)y * cellSize + 0.75f * cellSize);
+            DebugText.Instance.DrawText(textPosition, 0.05f, cellCount.ToString(), 24, Renderer.Space.World);
         }
     }
 

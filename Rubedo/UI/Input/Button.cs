@@ -31,6 +31,10 @@ public class Button : Selectable
     /// Called the frame the button is released.
     /// </summary>
     public event Action<Button> OnReleased;
+    /// <summary>
+    /// Called only when a button press fails, for whatever reason (usually by moving the focus off of the button while holding it down.)
+    /// </summary>
+    public event Action<Button> OnReleaseFailed;
 
     public override void UpdateSizes()
     {
@@ -61,20 +65,32 @@ public class Button : Selectable
     public override void UpdateInput()
     {
         base.UpdateInput();
-        if (!buttonPressed && isHovered && NavControls.MouseInteract.Pressed())
+        if (GUI.MouseControlsEnabled && isHovered)
         {
-            clicked = true;
-            mousePressed = true;
-            buttonPressed = false;
-            OnPressed?.Invoke(this);
             GUI.Root.GrabFocus(this);
-        }
-        else if (IsFocused && !mousePressed && NavControls.ButtonInteract.Pressed())
+            if (NavControls.MouseInteract.Pressed())
+            {
+                clicked = true;
+                mousePressed = true;
+                buttonPressed = false;
+                OnPressed?.Invoke(this);
+            }
+        } else if (!GUI.MouseControlsEnabled && IsFocused && NavControls.ButtonInteract.Pressed())
         {
             clicked = true;
             mousePressed = false;
             buttonPressed = true;
             OnPressed?.Invoke(this);
+        }
+
+        if (mousePressed && !isHovered)
+        { //we've moved off the button, stop doing button stuff.
+            heldDuration = 0;
+            clicked = false;
+            held = false;
+            mousePressed = false;
+            buttonPressed = false;
+            OnReleaseFailed?.Invoke(this);
         }
 
         if (IsFocused)
@@ -96,8 +112,7 @@ public class Button : Selectable
                     clicked = false;
                     held = false;
                     mousePressed = false;
-                    if (isHovered)
-                        OnReleased?.Invoke(this);
+                    OnReleased?.Invoke(this);
                 }
                 else if (heldDuration > 0)
                 {
@@ -112,6 +127,7 @@ public class Button : Selectable
             held = false;
             mousePressed = false;
             buttonPressed = false;
+            OnReleaseFailed?.Invoke(this);
         }
         base.UpdateInput();
     }

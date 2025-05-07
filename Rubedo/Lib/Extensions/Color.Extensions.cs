@@ -1,12 +1,33 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Runtime.CompilerServices;
 
-namespace Rubedo.Lib;
+namespace Rubedo.Lib.Extensions;
 
 /// <summary>
-/// Provides various functions relating to <see cref="Color"/>.
+/// Provides various extensions and functions for <see cref="Color"/>.
 /// </summary>
-public static class MathColor
+public static class ColorExtensions
 {
+    /// <summary>
+    /// Multiplies colors <paramref name="a"/> and <paramref name="b"/> together. Each component scaled separately.
+    /// </summary>
+    public static Color Multiply(this Color a, Color b)
+    {
+        a.Deconstruct(out float aR, out float aG, out float aB, out float aA);
+        b.Deconstruct(out float bR, out float bG, out float bB, out float bA);
+        return new Color(aR * bR, aG * bG, aB * bB, aA * bA);
+    }
+
+    /// <summary>
+    /// Gets the grayscale value of this color.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Grayscale(this Color color)
+    {
+        color.Deconstruct(out float r, out float g, out float b);
+        return 0.299F * r + 0.587F * g + 0.114F * b;
+    }
+
     /// <summary>
     /// Converts an HSV color value to RGB.
     /// h (hue) should be in [0,360), s (saturation) and v (value) in [0,1].

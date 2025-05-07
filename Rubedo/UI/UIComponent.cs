@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
+using Rubedo.Internal;
 using Rubedo.Lib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.UI;
 
@@ -22,8 +24,9 @@ public enum Anchor
 /// <summary>
 /// The base component type of all UI components.
 /// </summary>
-public abstract class UIComponent()
+public abstract class UIComponent : IDestroyable
 {
+
     #region Info
     protected bool isVisible = true;
     protected bool isActive = true;
@@ -187,6 +190,7 @@ public abstract class UIComponent()
     }
 
     private Vector2? _maxSize;
+
     /// <summary>
     /// Limits the size of this component to not go over this value.
     /// </summary>
@@ -201,6 +205,9 @@ public abstract class UIComponent()
             } 
         }
     }
+
+    public bool IsDestroyed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
+
     /// <summary>
     /// Set the position and anchor of this entity.
     /// </summary>
@@ -433,5 +440,20 @@ public abstract class UIComponent()
     public void MarkLayoutAsDirty()
     {
         isLayoutDirty = true;
+    }
+
+    /// <summary>
+    /// Destroys this and all of its children.
+    /// </summary>
+    public virtual void Destroy()
+    {
+        if (!IsDestroyed)
+        {
+            Parent = null;
+            foreach (UIComponent component in _children)
+                component.Destroy();
+            _children.Clear();
+            IsDestroyed = true;
+        }
     }
 }

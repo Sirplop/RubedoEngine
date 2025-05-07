@@ -4,13 +4,16 @@ using Microsoft.Xna.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using Rubedo.Rendering;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.Object;
 
-public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
+public class Entity : IEnumerable<Component>, IEnumerable, ITransformable, IDestroyable
 {
     public GameState State {  get; private set; }
     public ComponentList Components { get; private set; }
+    public bool IsDestroyed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = false;
+
     public bool active = true;
     public bool visible = true;
     public Transform transform;
@@ -24,20 +27,20 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
         Components = new ComponentList(this);
     }
 
-    public virtual void Added(GameState state) 
+    public void Added(GameState state) 
     {
         State = state;
         if (Components != null)
             foreach (var c in Components)
                 c.EntityAdded(state);
     }
-    public virtual void Awake(GameState state)
+    public void Awake(GameState state)
     {
         if (Components != null)
             foreach (var c in Components)
                 c.EntityAwake();
     }
-    public virtual void Removed(GameState state) 
+    public void Removed(GameState state)
     {
         if (Components != null)
             foreach (var c in Components)
@@ -45,7 +48,7 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
         State = null;
     }
 
-    public virtual void Update()
+    public void Update()
     {
         Components.Update();
     }
@@ -53,16 +56,16 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     {
         Components.TransformChanged();
     }
-    public virtual void Draw(Renderer sb)
+    public void Draw(Renderer sb)
     {
         Components.Draw(sb);
     }
 
-    public virtual void Add(Component component)
+    public void Add(Component component)
     {
         Components.Add(component);
     }
-    public virtual void Remove(Component component)
+    public void Remove(Component component)
     {
         Components.Remove(component);
     }
@@ -75,5 +78,22 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     IEnumerator IEnumerable.GetEnumerator()
     {
         return Components.GetEnumerator();
+    }
+
+    /// <summary>
+    /// Destroys this entity and all components attached to it.
+    /// </summary>
+    public void Destroy()
+    {
+        if (IsDestroyed)
+            return;
+        foreach (Component c in Components)
+        {
+            c.Destroy();
+        }
+        this.Components = null;
+        this.transform = null;
+        State.Remove(this);
+        IsDestroyed = true;
     }
 }

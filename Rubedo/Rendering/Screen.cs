@@ -30,6 +30,8 @@ public sealed class Screen : IDisposable
             return _target.Height;
         }
     }
+    public int LetterboxWidth => RubedoEngine.Graphics.PreferredBackBufferWidth - _target.Width;
+    public int LetterboxHeight => RubedoEngine.Graphics.PreferredBackBufferHeight - _target.Height;
 
     public Screen(RubedoEngine game, int width, int height)
     {

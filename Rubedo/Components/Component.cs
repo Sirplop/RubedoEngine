@@ -1,11 +1,14 @@
-﻿using Rubedo.Object;
+﻿using Rubedo.Internal;
+using Rubedo.Object;
 using Rubedo.Rendering;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Components;
 
-public class Component : ITransformable
+public class Component : ITransformable, IDestroyable
 {
+    public bool IsDestroyed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = false;
+
     public Entity Entity { get; protected set; }
     /// <summary>
     /// Short for <see cref="Entity.transform"/>
@@ -15,6 +18,9 @@ public class Component : ITransformable
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Entity.transform;
     }
+    /// <summary>
+    /// This component's local transform.
+    /// </summary>
     public Transform compTransform;
     public bool active;
     public bool visible;
@@ -76,11 +82,23 @@ public class Component : ITransformable
     public virtual void Draw(Renderer sb)  { }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public virtual void OnDestroy() { }
+
+    /// <summary>
     /// Removes this component from its parent entity. Short for calling <see cref="Entity.Remove(Component)"/>
     /// </summary>
     public void RemoveSelf()
     {
         if (Entity != null)
             Entity.Remove(this);
+    }
+
+    public void Destroy()
+    {
+        OnDestroy();
+        this.compTransform = null;
+        IsDestroyed = true;
     }
 }

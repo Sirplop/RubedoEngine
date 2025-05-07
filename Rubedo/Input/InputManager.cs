@@ -42,7 +42,7 @@ public static class InputManager
         _previousMouseState = _currentMouseState;
         _currentMouseState = Mouse.GetState();
     }
-
+    #region Keyboard
     /// <summary>
     /// Returns whether or not the given <paramref name="key"/> is not currently pressed.
     /// </summary>
@@ -78,7 +78,8 @@ public static class InputManager
     {
         return _currentKeyboardState.IsKeyDown(key) && _previousKeyboardState.IsKeyDown(key) && doInput;
     }
-
+    #endregion
+    #region Mouse
     /// <summary>
     /// Returns whether or not the given <paramref name="button"/> is currently pressed.
     /// </summary>
@@ -182,10 +183,21 @@ public static class InputManager
 
     public static Vector2 MouseWorldPosition()
     {
-        return RubedoEngine.Instance.Camera.ScreenToWorldPoint(_currentMouseState.Position.ToVector2());
+        return RubedoEngine.Instance.Camera.ScreenToWorldPoint(MouseScreenPosition());
     }
     public static Vector2 MouseScreenPosition()
     {
-        return _currentMouseState.Position.ToVector2();
+        //need to account for letterboxing.
+        int letterboxWidth = RubedoEngine.Instance.Screen.LetterboxWidth / 2;
+        int letterboxHeight = RubedoEngine.Instance.Screen.LetterboxHeight / 2;
+        Vector2 pos = _currentMouseState.Position.ToVector2();
+        pos.X -= letterboxWidth;
+        pos.Y -= letterboxHeight;
+        return pos;
     }
+    public static Vector2 GetMouseMovement()
+    {
+        return (_currentMouseState.Position - _previousMouseState.Position).ToVector2();
+    }
+    #endregion
 }

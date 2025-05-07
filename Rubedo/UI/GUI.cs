@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Lib;
+using System;
 using System.Collections.Generic;
 
 namespace Rubedo.UI;
@@ -14,6 +15,11 @@ public static class GUI
     /// Set to false to disable UI input processing.
     /// </summary>
     public static bool DoUIInput { get; set; } = true;
+
+    /// <summary>
+    /// Controls when mouse vs keyboard/gamepade controls are used.
+    /// </summary>
+    public static bool MouseControlsEnabled { get; set; } = true;
 
     /// <summary>
     /// SpriteBatch used to draw the UI. We don't use a <see cref="Rendering.Renderer"/> because we're rendering screen coordinates.
@@ -69,8 +75,6 @@ public static class GUI
         if (wasBeginCalled)
             Begin();
     }
-
-
     /// <summary>
     /// Calls begin on the spritebatch with the UI rasterizer state, transform matrix and sampler state.
     /// </summary>

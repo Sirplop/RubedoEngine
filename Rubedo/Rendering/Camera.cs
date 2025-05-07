@@ -180,8 +180,12 @@ public sealed class Camera
         float worldWidth = max.X - min.X;
         float worldHeight = max.Y - min.Y;
 
-        float posX = MathHelper.Lerp(0, viewWidth, (worldPoint.X - min.X) / worldWidth);
-        float posY = MathHelper.Lerp(0, viewHeight, 1 - (worldPoint.Y - min.Y) / worldHeight);
+        //need to account for letterboxing.
+        int subWidth = (RubedoEngine.Instance.GraphicsDevice.Viewport.Width - viewWidth) / 2;
+        int subHeight = (RubedoEngine.Instance.GraphicsDevice.Viewport.Height - viewHeight) / 2;
+
+        float posX = MathHelper.Lerp(0, viewWidth, (worldPoint.X - min.X) / worldWidth) - subWidth;
+        float posY = MathHelper.Lerp(0, viewHeight, 1 - (worldPoint.Y - min.Y) / worldHeight) - subHeight;
 
         return new Vector2(posX, posY);
     }

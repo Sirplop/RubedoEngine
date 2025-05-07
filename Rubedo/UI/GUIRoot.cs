@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Input;
 using Rubedo.Lib;
 using Rubedo.Object;
 using System;
@@ -14,7 +15,7 @@ public class GUIRoot : UIComponent
 {
     public Selectable CurrentFocus => _currentFocus;
     protected Selectable _currentFocus = null;
-
+    private const float MOUSE_DEADZONE = 10f; //squared value
 
     public GUIRoot() : base()
     {
@@ -51,6 +52,22 @@ public class GUIRoot : UIComponent
         Update();
     }
 
+    private float _mouseMove;
+    public override void UpdateInput()
+    {
+        if (!GUI.MouseControlsEnabled)
+        { //check for when the mouse wakes up.
+            Vector2 v = InputManager.GetMouseMovement();
+            _mouseMove += v.LengthSquared();
+            if (_mouseMove > MOUSE_DEADZONE)
+            {
+                GUI.MouseControlsEnabled = true;
+                _mouseMove = 0;
+            }
+        }
+        base.UpdateInput();
+    }
+
     public override void UpdateLayout()
     {
         // The GUIRoot manages itself.
@@ -85,7 +102,7 @@ public class GUIRoot : UIComponent
     public void Clear()
     {
         for (int i = 0; i < _children.Count; i++)
-            _children[i].Parent = null;
+            _children[i].Destroy();
         _children.Clear();
     }
 }

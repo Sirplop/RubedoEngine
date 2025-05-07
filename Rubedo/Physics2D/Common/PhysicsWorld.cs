@@ -14,7 +14,7 @@ namespace PhysicsEngine2D;
 public class PhysicsWorld
 {
     public static Vector2 gravity = new Vector2(0, -9.81f * RubedoEngine.SizeOfMeter);
-    public void ResetGravity() => gravity = new Vector2(0f, -9.81f * RubedoEngine.SizeOfMeter);
+    public static void ResetGravity() => gravity = new Vector2(0f, -9.81f * RubedoEngine.SizeOfMeter);
 
     public static bool bruteForce = false;
     public static bool showContacts = false;
