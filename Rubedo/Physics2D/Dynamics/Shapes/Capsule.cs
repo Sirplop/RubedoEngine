@@ -1,12 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Lib;
 using Rubedo.Object;
-using Rubedo.Physics2D.Collision.Shapes;
-using Rubedo.Physics2D.Dynamics.Shapes;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace PhysicsEngine2D;
+namespace Rubedo.Physics2D.Dynamics.Shapes;
 
 /// <summary>
 /// I am Capsule, and this is my summary.
@@ -57,9 +55,9 @@ public class Capsule : Shape
         return 0.5f * mass * radius * radius + mass * length / 3f;
     }
 
-    public override bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
+    public override bool Raycast(Math.Ray2D ray, float distance, out RaycastResult result)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public void TransformPoints()
@@ -84,7 +82,7 @@ public class Capsule : Shape
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void TransformPoint(ref Vector2 value, ref Vector2 pos, ref float sin, ref float cos, out Vector2 result)
     {
-        result.X = (cos * value.X - sin * value.Y) + pos.X;
-        result.Y = (sin * value.X + cos * value.Y) + pos.Y;
+        result.X = cos * value.X - sin * value.Y + pos.X;
+        result.Y = sin * value.X + cos * value.Y + pos.Y;
     }
 }

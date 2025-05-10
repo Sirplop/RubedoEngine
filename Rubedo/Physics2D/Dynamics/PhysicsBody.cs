@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
-using PhysicsEngine2D;
 using Rubedo.Components;
 using Rubedo.Lib;
+using Rubedo.Physics2D.Common;
 
 namespace Rubedo.Physics2D.Dynamics;
 

@@ -2,13 +2,11 @@
 using Rubedo;
 using Rubedo.Lib;
 using Rubedo.Object;
-using Rubedo.Physics2D.Collision.Shapes;
-using Rubedo.Physics2D.Dynamics.Shapes;
 using Rubedo.Physics2D.Math;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PhysicsEngine2D;
+namespace Rubedo.Physics2D.Dynamics.Shapes;
 
 /// <summary>
 /// Note: Vertices in counter-clockwise winding order.
@@ -113,7 +111,7 @@ public class Polygon : Shape
     public override float GetMomentOfInertia(float mass)
     {
         float area = GetArea();
-        if (area < Rubedo.Lib.Math.EPSILON)
+        if (area < Lib.Math.EPSILON)
             return 0f; // Degenerate polygon
 
         float crossSum = 0f;
@@ -135,7 +133,7 @@ public class Polygon : Shape
         }
 
         crossSum = System.Math.Abs(crossSum);
-        if (crossSum < Rubedo.Lib.Math.EPSILON)
+        if (crossSum < Lib.Math.EPSILON)
             return 0f;  // Nearly degenerate polygon
 
         // Use the standard formula:
@@ -144,11 +142,11 @@ public class Polygon : Shape
         return System.Math.Abs(iPoly);
     }
 
-    public override bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
+    public override bool Raycast(Ray2D ray, float distance, out RaycastResult result)
     {
         result = new RaycastResult();
 
-        float tmin = Rubedo.Physics2D.Math.Ray2D.TMAX;
+        float tmin = Ray2D.TMAX;
         int crossings = 0;
 
         for (int i = 0; i < VertexCount; i++)

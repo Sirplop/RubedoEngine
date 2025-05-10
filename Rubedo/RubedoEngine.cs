@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
-using PhysicsEngine2D;
 using Rubedo.UI;
 using Rubedo.Rendering;
 using Rubedo.Input;
@@ -11,6 +10,7 @@ using NLog.Targets;
 using NLog.Config;
 using Rubedo.Internal.Assets;
 using NLog.Layouts;
+using Rubedo.Physics2D.Common;
 
 namespace Rubedo;
 

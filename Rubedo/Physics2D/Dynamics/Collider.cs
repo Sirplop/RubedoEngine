@@ -3,7 +3,6 @@ using PhysicsEngine2D;
 using Rubedo.Components;
 using System.Collections.Generic;
 using System;
-using Rubedo.Physics2D.Collision.Shapes;
 using Rubedo.Physics2D.Dynamics.Shapes;
 
 namespace Rubedo.Physics2D.Dynamics;

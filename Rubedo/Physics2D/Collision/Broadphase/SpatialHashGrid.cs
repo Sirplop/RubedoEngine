@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using PhysicsEngine2D;
 using Rubedo.EngineDebug;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Dynamics;

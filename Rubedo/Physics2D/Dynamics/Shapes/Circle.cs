@@ -1,11 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Lib;
 using Rubedo.Object;
-using Rubedo.Physics2D.Collision.Shapes;
-using Rubedo.Physics2D.Dynamics.Shapes;
 using System;
 
-namespace PhysicsEngine2D;
+namespace Rubedo.Physics2D.Dynamics.Shapes;
 
 public class Circle : Shape
 {
@@ -20,8 +18,8 @@ public class Circle : Shape
 
     public override AABB GetBoundingBox()
     {
-        Vector2 min = transform.Position - Vector2.One * radius * Rubedo.Lib.Math.Max(transform.Scale);
-        Vector2 max = transform.Position + Vector2.One * radius * Rubedo.Lib.Math.Max(transform.Scale);
+        Vector2 min = transform.Position - Vector2.One * radius * Lib.Math.Max(transform.Scale);
+        Vector2 max = transform.Position + Vector2.One * radius * Lib.Math.Max(transform.Scale);
         return new AABB(min, max);
     }
 
@@ -34,7 +32,7 @@ public class Circle : Shape
         return 0.5f * mass * radius * radius;
     }
 
-    public override bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
+    public override bool Raycast(Math.Ray2D ray, float distance, out RaycastResult result)
     {
         result = new RaycastResult();
 
@@ -53,7 +51,7 @@ public class Circle : Shape
 
         float t;
 
-        if (d < Rubedo.Lib.Math.EPSILON)
+        if (d < Lib.Math.EPSILON)
         {
             t = -b / 2;
         }

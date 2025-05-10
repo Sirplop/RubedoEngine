@@ -1,4 +1,4 @@
-﻿namespace Rubedo.Physics2D.Collision.Shapes;
+﻿namespace Rubedo.Physics2D.Dynamics.Shapes;
 
 /// <summary>
 /// I am ShapeType, and this is my summary.

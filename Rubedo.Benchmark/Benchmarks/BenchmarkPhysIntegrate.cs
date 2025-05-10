@@ -3,6 +3,7 @@ using Rubedo.Physics2D;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Constraints;
 using Rubedo.Physics2D.Dynamics;
+using Rubedo.Physics2D.Dynamics.Shapes;
 using System.Numerics;
 
 namespace Rubedo.Benchmark.Benchmarks;
@@ -14,8 +15,8 @@ public class BenchmarkPhysIntegrate
     public BenchmarkPhysIntegrate()
     {
         PhysicsMaterial mat = new PhysicsMaterial(1, 0.5f, 0.5f);
-        PhysicsBody bodyA = new PhysicsBody(Collider.CreateUnitShape(Physics2D.Collision.Shapes.ShapeType.Polygon, 3), mat, true, true);
-        PhysicsBody bodyB = new PhysicsBody(Collider.CreateUnitShape(Physics2D.Collision.Shapes.ShapeType.Polygon, 3), mat, true, true);
+        PhysicsBody bodyA = new PhysicsBody(Collider.CreateUnitShape(ShapeType.Polygon, 3), mat, true, true);
+        PhysicsBody bodyB = new PhysicsBody(Collider.CreateUnitShape(ShapeType.Polygon, 3), mat, true, true);
 
         m = new Manifold(bodyA, bodyB);
         Contact c = new Contact(Vector2.Zero);

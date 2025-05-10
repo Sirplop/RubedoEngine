@@ -1,15 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo;
 using Rubedo.EngineDebug;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Collision.Broadphase;
 using Rubedo.Physics2D.Constraints;
 using Rubedo.Physics2D.Dynamics;
-using Rubedo.Physics2D.Math;
 using Rubedo.Rendering;
 using System.Collections.Generic;
 
-namespace PhysicsEngine2D;
+namespace Rubedo.Physics2D.Common;
 
 public class PhysicsWorld
 {
@@ -65,20 +63,20 @@ public class PhysicsWorld
 
     public bool Raycast(Vector2 origin, Vector2 direction, out RaycastResult result)
     {
-        return Raycast(origin, direction, Rubedo.Physics2D.Math.Ray2D.TMAX, out result);
+        return Raycast(origin, direction, Math.Ray2D.TMAX, out result);
     }
 
     public bool Raycast(Vector2 origin, Vector2 direction, float distance, out RaycastResult result)
     {
-        return Raycast(new Rubedo.Physics2D.Math.Ray2D(origin, direction), distance, out result);
+        return Raycast(new Math.Ray2D(origin, direction), distance, out result);
     }
 
-    public bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, out RaycastResult result)
+    public bool Raycast(Math.Ray2D ray, out RaycastResult result)
     {
-        return Raycast(ray, Rubedo.Physics2D.Math.Ray2D.TMAX, out result);
+        return Raycast(ray, Math.Ray2D.TMAX, out result);
     }
 
-    public bool Raycast(Rubedo.Physics2D.Math.Ray2D ray, float distance, out RaycastResult result)
+    public bool Raycast(Math.Ray2D ray, float distance, out RaycastResult result)
     {
         return broadphase.Raycast(ray, distance, out result);
     }
@@ -180,7 +178,7 @@ public class PhysicsWorld
                 for (int i = 0; i < m.contactCount; i++)
                 {
                     Contact c = m.contacts[i];
-                    Vector2 lineEnd = c.position + (m.normal * c.penetration);
+                    Vector2 lineEnd = c.position + m.normal * c.penetration;
                     shapes.DrawBox(c.position, contactSize, contactSize, 0, Vector2.One, Color.Red);
                     shapes.DrawLine(c.position, lineEnd, Color.Magenta);
                 }

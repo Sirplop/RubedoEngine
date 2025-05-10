@@ -1,11 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using PhysicsEngine2D;
 using Rubedo.Object;
-using Rubedo.Physics2D.Collision.Shapes;
 using System;
 using System.Collections.Generic;
 
-namespace PhysicsEngine2D;
+namespace Rubedo.Physics2D.Dynamics.Shapes;
 
 /// <summary>
 /// I am Box, and this is my summary.

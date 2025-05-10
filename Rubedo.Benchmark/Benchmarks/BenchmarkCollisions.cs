@@ -1,10 +1,10 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Microsoft.Xna.Framework;
-using PhysicsEngine2D;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Dynamics;
+using Rubedo.Physics2D.Dynamics.Shapes;
 using Rubedo.Physics2D.Math;
 using System.Collections.Generic;
 
@@ -42,8 +42,8 @@ public class BenchmarkCollisions
         box1 = new Box(onesTransform, 1f, 1f);
         box2 = new Box(twosTransform, 1f, 1f);
 
-        Collider p1 = Collider.CreateUnitShape(Physics2D.Collision.Shapes.ShapeType.Polygon, 4);
-        Collider p2 = Collider.CreateUnitShape(Physics2D.Collision.Shapes.ShapeType.Polygon, 4);
+        Collider p1 = Collider.CreateUnitShape(ShapeType.Polygon, 4);
+        Collider p2 = Collider.CreateUnitShape(ShapeType.Polygon, 4);
 
         poly1 = new Polygon(onesTransform, ((Polygon)p1.shape).vertices);
         poly2 = new Polygon(twosTransform, ((Polygon)p2.shape).vertices);

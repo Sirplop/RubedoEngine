@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using PhysicsEngine2D;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Dynamics.Shapes;
@@ -14,59 +13,59 @@ public static class PhysicsCollisions
     {
         switch (a.type)
         {
-            case Collision.Shapes.ShapeType.Circle:
+            case ShapeType.Circle:
                 Circle circle = (Circle)a;
                 switch (b.type)
                 {
-                    case Collision.Shapes.ShapeType.Circle:
+                    case ShapeType.Circle:
                         return CircleToCircle(m, circle, (Circle)b);
-                    case Collision.Shapes.ShapeType.Capsule:
+                    case ShapeType.Capsule:
                         return CircleToCapsule(m, circle, (Capsule)b);
-                    case Collision.Shapes.ShapeType.Box:
+                    case ShapeType.Box:
                         return CircleToBox(m, circle, (Box)b);
-                    case Collision.Shapes.ShapeType.Polygon:
+                    case ShapeType.Polygon:
                         return CircleToPolygon(m, circle, (Polygon)b);
                 }
                 return false;
-            case Collision.Shapes.ShapeType.Capsule:
+            case ShapeType.Capsule:
                 Capsule capsule = (Capsule)a;
                 switch (b.type)
                 {
-                    case Collision.Shapes.ShapeType.Circle:
+                    case ShapeType.Circle:
                         return CapsuleToCircle(m, capsule, (Circle)b);
-                    case Collision.Shapes.ShapeType.Capsule:
+                    case ShapeType.Capsule:
                         return CapsuleToCapsule(m, capsule, (Capsule)b);
-                    case Collision.Shapes.ShapeType.Box:
+                    case ShapeType.Box:
                         return CapsuleToBox(m, capsule, (Box)b);
-                    case Collision.Shapes.ShapeType.Polygon:
+                    case ShapeType.Polygon:
                         return CapsuleToPolygon(m, capsule, (Polygon)b);
                 }
                 return false;
-            case Collision.Shapes.ShapeType.Box:
+            case ShapeType.Box:
                 Box box = (Box)a;
                 switch (b.type)
                 {
-                    case Collision.Shapes.ShapeType.Circle:
+                    case ShapeType.Circle:
                         return BoxToCircle(m, box, (Circle)b);
-                    case Collision.Shapes.ShapeType.Capsule:
+                    case ShapeType.Capsule:
                         return BoxToCapsule(m, box, (Capsule)b);
-                    case Collision.Shapes.ShapeType.Box:
+                    case ShapeType.Box:
                         return BoxToBox(m, box, (Box)b);
-                    case Collision.Shapes.ShapeType.Polygon:
+                    case ShapeType.Polygon:
                         return BoxToPolygon(m, box, (Polygon)b);
                 }
                 return false;
-            case Collision.Shapes.ShapeType.Polygon:
+            case ShapeType.Polygon:
                 Polygon poly = (Polygon)a;
                 switch (b.type)
                 {
-                    case Collision.Shapes.ShapeType.Circle:
+                    case ShapeType.Circle:
                         return PolygonToCircle(m, poly, (Circle)b);
-                    case Collision.Shapes.ShapeType.Capsule:
+                    case ShapeType.Capsule:
                         return PolygonToCapsule(m, poly, (Capsule)b);
-                    case Collision.Shapes.ShapeType.Box:
+                    case ShapeType.Box:
                         return PolygonToBox(m, poly, (Box)b);
-                    case Collision.Shapes.ShapeType.Polygon:
+                    case ShapeType.Polygon:
                         return PolygonToPolygon(m, poly, (Polygon)b);
                 }
                 return false;
