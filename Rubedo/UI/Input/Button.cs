@@ -43,7 +43,7 @@ public class Button : Selectable
 
         foreach (var c in _children)
         {
-            if (!c.IsVisible())
+            if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
             c.UpdateSizes();
             maxWidth = MathF.Max(c.Width, maxWidth);
@@ -51,16 +51,6 @@ public class Button : Selectable
         }
         Width = maxWidth;
         Height = maxHeight;
-    }
-    public override void UpdateLayout()
-    {
-        foreach (var c in _children)
-        {
-            if (!c.IsVisible())
-                continue;
-            c.UpdateClipIfDirty();
-            c.UpdateLayout();
-        }
     }
     public override void UpdateInput()
     {

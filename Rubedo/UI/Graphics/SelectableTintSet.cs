@@ -9,7 +9,7 @@ namespace Rubedo.UI.Graphics;
 /// </summary>
 public class SelectableTintSet : UIComponent
 {
-    public Image target;
+    public IColorable target;
 
     public Color normal = Color.White;
     public Color disabled = Color.DarkGray;
@@ -19,8 +19,9 @@ public class SelectableTintSet : UIComponent
     public float colorMultiplier = 1f;
     private Color transitionTint;
 
-    public SelectableTintSet(Image target, float colorMultiplier = 1f)
+    public SelectableTintSet(IColorable target, float colorMultiplier = 1f)
     {
+        ignoreLayout = true;
         this.target = target;
         this.colorMultiplier = colorMultiplier;
 
@@ -32,7 +33,7 @@ public class SelectableTintSet : UIComponent
         transitionTint = normal;
     }
 
-    public SelectableTintSet(Image target, Color normal, Color disabled, Color pressed, Color focused, float colorMultiplier)
+    public SelectableTintSet(IColorable target, Color normal, Color disabled, Color pressed, Color focused, float colorMultiplier)
     {
         this.target = target;
         this.colorMultiplier = colorMultiplier;
@@ -76,7 +77,7 @@ public class SelectableTintSet : UIComponent
         base.Update();
         if (Parent is Selectable sel)
         {
-            target.Color = GetTintColor(sel, sel is Button b && b.Clicked);
+            target.SetColor(GetTintColor(sel, sel is Button b && b.Clicked));
         }
         else
         {

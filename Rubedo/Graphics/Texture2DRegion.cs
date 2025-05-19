@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Lib;
 using System;
 
 namespace Rubedo.Graphics;
@@ -27,6 +28,8 @@ public class Texture2DRegion
     /// The height of the region.
     /// </summary>
     public int Height { get; }
+
+    public Vector2Int Size => new Vector2Int(Width, Height);
 
     /// <summary>
     /// The bounds of the texture region within the texture.
@@ -60,7 +63,7 @@ public class Texture2DRegion
     /// <summary>
     /// Constructs a new region representing the given rectangle.
     /// </summary>
-    public Texture2DRegion(Texture2D texture, Rectangle region)
+    public Texture2DRegion(Texture2D texture, in Rectangle region)
         : this(texture, region.X, region.Y, region.Width, region.Height) { }
 
     /// <summary>
@@ -82,5 +85,10 @@ public class Texture2DRegion
         TopUV = Bounds.Top / (float)texture.Height;
         RightUV = Bounds.Right / (float)texture.Width;
         BottomUV = Bounds.Bottom / (float)texture.Height;
+    }
+
+    public static implicit operator Texture2DRegion(Texture2D texture)
+    {
+        return new Texture2DRegion(texture);
     }
 }

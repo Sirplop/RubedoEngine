@@ -14,18 +14,27 @@ public class Vertical : LayoutGroup
     {
         float maxWidth = 0;
         float maxHeight = 0;
+        float absMaxWidth = float.MaxValue;
+        float absMaxHeight = float.MaxValue;
+        if (MaxSize.HasValue)
+        {
+            if (MaxSize.Value.X > -1)
+                absMaxWidth = MaxSize.Value.X;
+            if (MaxSize.Value.Y > -1)
+                absMaxHeight = MaxSize.Value.Y;
+        }
 
         foreach (var c in _children)
         {
-            if (!c.IsVisible())
+            if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
             c.UpdateSizes();
             maxWidth = MathF.Max(c.Width, maxWidth);
             maxHeight += c.Height + childPadding;
         }
 
-        Width = maxWidth + paddingLeft + paddingRight;
-        Height = maxHeight + paddingTop + paddingBottom;
+        Width = MathF.Min(maxWidth + paddingLeft + paddingRight, absMaxWidth);
+        Height = MathF.Min(maxHeight + paddingTop + paddingBottom, absMaxHeight);
     }
 
     public override void UpdateLayout()
@@ -35,7 +44,7 @@ public class Vertical : LayoutGroup
 
         foreach (UIComponent c in _children)
         {
-            if (!c.IsVisible())
+            if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
             c.Offset = new Vector2(paddingLeft, currentY);
             //c.Width = MathF.Min(c.Width, Width);
@@ -44,7 +53,7 @@ public class Vertical : LayoutGroup
             c.UpdateClipIfDirty();
             c.UpdateLayout();
 
-            currentY += c.Height;
+            currentY += c.Height + childPadding;
         }
     }
 }

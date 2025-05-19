@@ -3,7 +3,7 @@
 namespace Rubedo.Lib;
 
 /// <summary>
-/// Extension methods for <see cref="Rectangle"/>
+/// Extension methods for <see cref="Rectangle"/>.
 /// </summary>
 public static class RectangleExtensions
 {
@@ -36,5 +36,27 @@ public static class RectangleExtensions
 
         if (result.Width <= 0 || result.Height <= 0)
             result = Rectangle.Empty;
+    }
+
+    /// <summary>
+    /// Gets a rectangle that is relative to the specified source rectangle, with the specified offsets and dimensions.
+    /// </summary>
+    /// <param name="source">The source rectangle.</param>
+    /// <param name="x">The x-coordinate of the relative rectangle, relative to the source rectangle.</param>
+    /// <param name="y">The y-coordinate of the relative rectangle, relative to the source rectangle.</param>
+    /// <param name="width">The width, in pixels, of the relative rectangle.</param>
+    /// <param name="height">The height, in pixels, of the relative rectangle.</param>
+    public static Rectangle GetRelativeRectangle(this Rectangle source, int x, int y, int width, int height)
+    {
+        int absoluteX = source.X + x;
+        int absoluteY = source.Y + y;
+
+        Rectangle relative;
+        relative.X = Lib.Math.Clamp(absoluteX, source.Left, source.Right);
+        relative.Y = Lib.Math.Clamp(absoluteY, source.Top, source.Bottom);
+        relative.Width = System.Math.Max(System.Math.Min(absoluteX + width, source.Right) - relative.X, 0);
+        relative.Height = System.Math.Max(System.Math.Min(absoluteY + height, source.Bottom) - relative.Y, 0);
+
+        return relative;
     }
 }

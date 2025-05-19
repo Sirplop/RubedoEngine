@@ -2,6 +2,7 @@
 using Rubedo.Lib;
 using Rubedo.Physics2D.Collision;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.Physics2D.Constraints;
 
@@ -151,6 +152,7 @@ public static class ContactConstraintSolver
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void RelVel(ref Manifold m, ref Contact c, out Vector2 rv)
     {
         rv.X = m.B.velocity.X - c.rb.Y * m.B.angularVelocity - m.A.velocity.X + c.ra.Y * m.A.angularVelocity;

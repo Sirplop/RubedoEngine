@@ -31,8 +31,17 @@ public class RubedoEngine : Game
     protected StateManager _stateManager;
     protected PhysicsWorld _physicsWorld;
 
+    /// <summary>
+    /// Elapsed time since last frame, in seconds.
+    /// </summary>
     public static float DeltaTime => Instance.deltaTime;
+    /// <summary>
+    /// <see cref="DeltaTime"/> that has not been scaled by the <see cref="timeRate"/>.
+    /// </summary>
     public static float RawDeltaTime => Instance.rawDeltaTime;
+    /// <summary>
+    /// The total elapsed time the game has been running for, in seconds.
+    /// </summary>
     public static double RawTime => Instance.rawTime;
 
     protected float deltaTime;
@@ -82,7 +91,7 @@ public class RubedoEngine : Game
     public bool stepPhysics = false;
     protected override void Update(GameTime gameTime)
     {
-        rawTime = gameTime.TotalGameTime.TotalMilliseconds;
+        rawTime = gameTime.TotalGameTime.TotalSeconds;
         rawDeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         deltaTime = rawDeltaTime * timeRate;
 

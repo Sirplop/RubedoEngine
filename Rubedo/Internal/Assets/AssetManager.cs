@@ -47,11 +47,16 @@ public static class AssetManager
         //TODO: add missing asset things
     }
     /// <summary>
-    /// Create a new font system with the given <paramref name="fontName"/>, which includes the given <paramref name="fontPaths"/>.
+    /// Create a new font system with the given lowercase <paramref name="fontName"/>, which includes the given <paramref name="fontPaths"/>.
     /// </summary>
+    /// <returns>The new font system, or the existing one if it already exists.</returns>
     /// <remarks>The font paths are relative to the content root path.</remarks>
     public static FontSystem CreateNewFontSystem(string fontName, params string[] fontPaths)
     {
+        if (loadedFonts == null)
+            throw new NullReferenceException("Trying to access fonts before assets have been loaded. Don't do that!");
+
+        fontName = fontName.ToLower();
         if (loadedFonts.TryGetValue(fontName, out FontSystem font))
         {
             return font;

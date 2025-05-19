@@ -12,18 +12,27 @@ public class Horizontal : LayoutGroup
     {
         float maxWidth = 0;
         float maxHeight = 0;
+        float absMaxWidth = float.MaxValue;
+        float absMaxHeight = float.MaxValue;
+        if (MaxSize.HasValue)
+        {
+            if (MaxSize.Value.X > -1)
+                absMaxWidth = MaxSize.Value.X;
+            if (MaxSize.Value.Y > -1)
+                absMaxHeight = MaxSize.Value.Y;
+        }
 
         foreach (var c in _children)
         {
-            if (!c.IsVisible())
+            if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
             c.UpdateSizes();
             maxWidth += c.Width + childPadding;
             maxHeight = MathF.Max(c.Height, maxHeight);
         }
 
-        Width = maxWidth + paddingLeft + paddingRight;
-        Height = maxHeight + paddingTop + paddingBottom;
+        Width = MathF.Min(maxWidth + paddingLeft + paddingRight, absMaxWidth);
+        Height = MathF.Min(maxHeight + paddingTop + paddingBottom, absMaxHeight);
     }
 
     public override void UpdateLayout()
@@ -33,7 +42,7 @@ public class Horizontal : LayoutGroup
 
         foreach (var c in _children)
         {
-            if (!c.IsVisible())
+            if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
             c.Offset = new Vector2(currentX, paddingTop);
             //c.Height = MathF.Min(c.Height, Height);

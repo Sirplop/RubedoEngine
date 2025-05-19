@@ -1,10 +1,13 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FontStashSharp;
+using FontStashSharp.RichText;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Input;
 using Rubedo.Lib;
 using Rubedo.Object;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Rubedo.UI;
 
@@ -91,12 +94,6 @@ public class GUIRoot : UIComponent
     public void UpdateEnd()
     {
         UpdateLayout();
-    }
-
-    public override void Draw()
-    {
-        foreach (var c in _children)
-            c.Draw();
     }
 
     public void Clear()

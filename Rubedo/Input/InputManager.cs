@@ -195,6 +195,20 @@ public static class InputManager
         pos.Y -= letterboxHeight;
         return pos;
     }
+    /// <summary>
+    /// Gets the same thing as <see cref="MouseScreenPosition"/>, but inverts the positions according to screenspace.
+    /// </summary>
+    public static Vector2 InverseMouseScreenPosition()
+    {
+        int letterboxWidth = RubedoEngine.Instance.Screen.LetterboxWidth / 2;
+        int letterboxHeight = RubedoEngine.Instance.Screen.LetterboxHeight / 2;
+        Vector2 pos = _currentMouseState.Position.ToVector2();
+        pos.X -= letterboxWidth;
+        pos.Y -= letterboxHeight;
+        pos.X = RubedoEngine.Instance.Screen.Width - pos.X;
+        pos.Y = RubedoEngine.Instance.Screen.Height - pos.Y;
+        return pos;
+    }
     public static Vector2 GetMouseMovement()
     {
         return (_currentMouseState.Position - _previousMouseState.Position).ToVector2();

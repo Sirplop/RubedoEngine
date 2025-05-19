@@ -1,8 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FontStashSharp.RichText;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Lib;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.UI;
 
@@ -32,7 +34,7 @@ public static class GUI
     /// <summary>
     /// Defaults to LinearClamp.
     /// </summary>
-    public static SamplerState GuiSampler { get; set; } = SamplerState.LinearClamp;
+    public static SamplerState GuiSampler { get; set; } = SamplerState.PointClamp;
 
     /// <summary>
     /// Current GUIRoot.
@@ -48,6 +50,29 @@ public static class GUI
         SpriteBatch = new SpriteBatch(game.GraphicsDevice);
     }
 
+    /* //immediate mode scissoring.
+    public static void PushScissor(Rectangle r)
+    {
+        if (!_beginCalled)
+        {
+            Begin();
+            _scissorStack.Push((SpriteBatch.GraphicsDevice.ScissorRectangle, true));
+            SpriteBatch.GraphicsDevice.ScissorRectangle = r;
+        }
+        else
+        {
+            _scissorStack.Push((SpriteBatch.GraphicsDevice.ScissorRectangle, false));
+            SpriteBatch.GraphicsDevice.ScissorRectangle = r;
+        }
+    }
+    public static void PopScissor()
+    {
+        (SpriteBatch.GraphicsDevice.ScissorRectangle, bool wasBeginCalled) = _scissorStack.Pop();
+        if (wasBeginCalled)
+            End();
+    }*/
+
+    //deferred mode scissoring.
     public static void PushScissor(Rectangle r)
     {
         // TODO: Optimize begin call somehow. Maybe there is no drawing between scissor swaps?
@@ -80,7 +105,7 @@ public static class GUI
     /// </summary>
     private static void Begin()
     {
-        SpriteBatch.Begin(rasterizerState: _rasterState, samplerState: GuiSampler);
+        SpriteBatch.Begin(sortMode: SpriteSortMode.Deferred, rasterizerState: _rasterState, samplerState: GuiSampler);
         _beginCalled = true;
     }
     /// <summary>

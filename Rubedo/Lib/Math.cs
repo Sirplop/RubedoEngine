@@ -38,6 +38,11 @@ public static class Math
             return max;
         return val;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Clamp01(float v)
+    {
+        return Clamp(v, 0.0f, 1.0f);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Max(in Vector2 vec)

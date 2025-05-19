@@ -28,6 +28,10 @@ public abstract class UIComponent : IDestroyable
 {
 
     #region Info
+    /// <summary>
+    /// If this element does not care about layout information, and provides none itself.
+    /// </summary>
+    protected bool ignoreLayout = false;
     protected bool isVisible = true;
     protected bool isActive = true;
     protected bool isParentVisible = true;
@@ -49,6 +53,15 @@ public abstract class UIComponent : IDestroyable
     /// Last known parent's clip version. Will update clip if does not match <see cref="_clipVersion"/>.
     /// </summary>
     private uint _parentLastClipVersion = 0;
+
+    /// <summary>
+    /// If this element does not care about layout information, and provides none itself.
+    /// </summary>
+    public bool IgnoresLayout => ignoreLayout;
+    public void SetIgnoresLayout(bool val)
+    {
+        ignoreLayout = val;
+    }
 
     public bool IsVisible()
     {
@@ -104,6 +117,7 @@ public abstract class UIComponent : IDestroyable
         {
             if (_width != value)
             {
+                MarkLayoutAsDirty();
                 _width = value;
                 if (_minSize.HasValue && _minSize.Value.X > -1)
                     _width = MathF.Max(value, _minSize.Value.X);
@@ -120,6 +134,7 @@ public abstract class UIComponent : IDestroyable
         {
             if (_height != value)
             {
+                MarkLayoutAsDirty();
                 _height = value;
                 if (_minSize.HasValue && _minSize.Value.Y > -1)
                     _height = MathF.Max(value, _minSize.Value.Y);
@@ -249,7 +264,7 @@ public abstract class UIComponent : IDestroyable
     {
         if (Parent != null && (isLayoutDirty || _parentLastClipVersion != Parent._clipVersion))
         {
-            CreateClipRect();
+            UpdateClip();
         }
     }
 
@@ -273,7 +288,7 @@ public abstract class UIComponent : IDestroyable
         }
         else
         {
-            Parent?.UpdateClipIfDirty();
+            Parent.UpdateClipIfDirty();
             parentClip = Parent.Clip;
         }
 
@@ -281,10 +296,10 @@ public abstract class UIComponent : IDestroyable
 
         int parent_left = parentClip.X;
         int parent_top = parentClip.Y;
-        int parent_right = parent_left + parentClip.Width;
-        int parent_bottom = parent_top + parentClip.Height;
-        int parent_center_x = parent_left + parentClip.Width / 2;
-        int parent_center_y = parent_top + parentClip.Height / 2;
+        int parent_right = parent_left + (int)Parent.Width; //use actual width and height instead of clip
+        int parent_bottom = parent_top + (int)Parent.Height; //to make anchors properly relative to the parent's full size.
+        int parent_center_x = parent_left + (int)Parent.Width / 2;//parentClip.Width / 2;
+        int parent_center_y = parent_top + (int)Parent.Height / 2;//parentClip.Height / 2;
 
         switch (_anchor)
         {
@@ -350,7 +365,15 @@ public abstract class UIComponent : IDestroyable
     /// <summary>
     /// Layout size updates.
     /// </summary>
-    public virtual void UpdateSizes() { }
+    public virtual void UpdateSizes()
+    {
+        foreach (var c in _children)
+        {
+            if (!c.IsVisible() || c.IgnoresLayout)
+                continue;
+            c.UpdateSizes();
+        }
+    }
     /// <summary>
     /// Input processing.
     /// </summary>
@@ -432,12 +455,21 @@ public abstract class UIComponent : IDestroyable
     /// <summary>
     /// Applies a layout to this component.
     /// </summary>
-    public virtual void UpdateLayout() { }
+    public virtual void UpdateLayout()
+    {
+        foreach (var c in _children)
+        {
+            if (!c.IsVisible() || c.IgnoresLayout)
+                continue;
+            c.UpdateClipIfDirty();
+            c.UpdateLayout();
+        }
+    }
 
     /// <summary>
     /// Marks this component as dirty to update clips and layouts.
     /// </summary>
-    public void MarkLayoutAsDirty()
+    public virtual void MarkLayoutAsDirty()
     {
         isLayoutDirty = true;
     }
