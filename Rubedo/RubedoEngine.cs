@@ -69,6 +69,7 @@ public class RubedoEngine : Game
 
         IsMouseVisible = true;
         IsFixedTimeStep = false;
+        Graphics.SynchronizeWithVerticalRetrace = false; //vsync
     }
 
     protected override void Initialize()
@@ -105,7 +106,7 @@ public class RubedoEngine : Game
         _physicsTimer.Start();
         if (physicsOn || stepPhysics)
         {
-            _physicsWorld.Update(deltaTime);
+            _physicsWorld.Tick(deltaTime);
             stepPhysics = false;
         }
         _physicsTimer.Stop();

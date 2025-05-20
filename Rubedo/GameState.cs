@@ -38,7 +38,7 @@ public class GameState
             Entities.Remove(obj);
         }
         Entities.UpdateLists();
-        GUI.Root.Clear();
+        GUI.Root.DestroyChildren();
     }
 
     public virtual void LoadContent()

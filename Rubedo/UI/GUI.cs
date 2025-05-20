@@ -28,10 +28,6 @@ public static class GUI
     /// </summary>
     public static SpriteBatch SpriteBatch { get; set; } = null!;
     /// <summary>
-    /// FontSystem used in the UI.
-    /// </summary>
-    //public static FontSystem FontSystem { get; set; } = null!;
-    /// <summary>
     /// Defaults to LinearClamp.
     /// </summary>
     public static SamplerState GuiSampler { get; set; } = SamplerState.PointClamp;

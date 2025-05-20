@@ -58,8 +58,16 @@ public class TextLine
         return lines;
     }
 
-
-    public static List<TextLine> GetTextLinesWrap(in string text, in int maxWidth, in FontSystem font, in int fontSize)
+    /// <summary>
+    /// Creates a list of TextLines from the <paramref name="text"/> such that they all fit within the provided <paramref name="maxWidth"/>.
+    /// </summary>
+    /// <param name="text">The text to be split up.</param>
+    /// <param name="maxWidth">The maximum width of each line.</param>
+    /// <param name="font">The font.</param>
+    /// <param name="fontSize">The font size.</param>
+    /// <param name="tight">If true, then each line will have a tight-fitting height. Otherwise all lines have the same height of <paramref name="fontSize"/>.</param>
+    /// <returns></returns>
+    public static List<TextLine> GetTextLinesWrap(in string text, in int maxWidth, in FontSystem font, in int fontSize, bool tight)
     {
         List<TextLine> lines = new List<TextLine>();
         if (string.IsNullOrEmpty(text))
@@ -86,10 +94,14 @@ public class TextLine
                 {
                     currentLine = chars[curStartIndex..(curWordStart - 1)];
                     size = fontR.MeasureString(currentLine);
+                    if (!tight)
+                        size.Y = fontSize;
                     lines.Add(new TextLine(currentLine, size));
                     curStartIndex = curWordStart;
                 } else
                 {
+                    if (!tight)
+                        size.Y = fontSize;
                     lines.Add(new TextLine(currentLine, size));
                     curWordStart = i + 1;
                     curStartIndex = curWordStart;
@@ -106,6 +118,8 @@ public class TextLine
                 {
                     currentLine = chars[curStartIndex..(curWordStart - 1)];
                     size = fontR.MeasureString(currentLine);
+                    if (!tight)
+                        size.Y = fontSize;
                     lines.Add(new TextLine(currentLine, size));
                     curStartIndex = curWordStart;
                 }
@@ -120,12 +134,18 @@ public class TextLine
                 {
                     currentLine = chars[curStartIndex..(curWordStart - 1)];
                     size = fontR.MeasureString(currentLine);
+                    if (!tight)
+                        size.Y = fontSize;
                     lines.Add(new TextLine(currentLine, size));
                     currentLine = chars[curWordStart..(i + 1)];
                     size = fontR.MeasureString(currentLine);
+                    if (!tight)
+                        size.Y = fontSize;
                     lines.Add(new TextLine(currentLine, size));
                 } else //it all fits into one line!
                 {
+                    if (!tight)
+                        size.Y = fontSize;
                     lines.Add(new TextLine(currentLine, size));
                 }
             }

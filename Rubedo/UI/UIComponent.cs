@@ -452,6 +452,7 @@ public abstract class UIComponent : IDestroyable
         MarkLayoutAsDirty();
         component.MarkLayoutAsDirty();
     }
+
     /// <summary>
     /// Applies a layout to this component.
     /// </summary>
@@ -487,5 +488,15 @@ public abstract class UIComponent : IDestroyable
             _children.Clear();
             IsDestroyed = true;
         }
+    }
+
+    /// <summary>
+    /// Destroys all children of this component, but not the component itself.
+    /// </summary>
+    public virtual void DestroyChildren()
+    {
+        for (int i = 0; i < _children.Count; i++)
+            _children[i].Destroy();
+        _children.Clear();
     }
 }

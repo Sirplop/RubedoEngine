@@ -18,12 +18,17 @@ public class PhysicsWorld
     public static bool showContacts = false;
     public static bool drawBroadphase = false;
 
+    public float fixedDeltaTime = 0.02f;
+
     public List<PhysicsBody> bodies = new List<PhysicsBody>();
 
     internal HashSet<Manifold> manifoldSet = new HashSet<Manifold>();
     internal List<Manifold> manifolds = new List<Manifold>();
 
     private IBroadphase broadphase;
+    private double accumulatedDelta = 0;
+
+    public Timer timer;
 
     public int ManifoldCount
     {
@@ -39,6 +44,7 @@ public class PhysicsWorld
     {
         // Switch the collision system here:
         broadphase = new SpatialHashGrid(2);
+        timer = new Timer();
     }
 
     public void AddBody(PhysicsBody b)
@@ -81,12 +87,27 @@ public class PhysicsWorld
         return broadphase.Raycast(ray, distance, out result);
     }
 
-    public void Update(float dt)
+    public void Tick(float dt)
+    {
+        accumulatedDelta += dt;
+
+        // Avoid accumulator death spiral
+        if (accumulatedDelta > 0.1f)
+            accumulatedDelta = 0.1f;
+
+        while (accumulatedDelta > fixedDeltaTime)
+        {
+            Update(fixedDeltaTime);
+            accumulatedDelta -= fixedDeltaTime;
+        }
+    }
+
+    private void Update(float dt)
     {
         if (bodies.Count == 0)
             return; //nothing to update.
 
-        Timer timer = new Timer();
+        timer.Reset();
         int i;
 
         for (i = 0; i < bodies.Count; i++)
@@ -148,8 +169,6 @@ public class PhysicsWorld
         for (i = 0; i < bodies.Count; i++)
             bodies[i].IntegrateVelocity(dt);
         timer.Stop("N.IV: ");
-
-        DebugText.Instance.DrawTextStack(timer.GetAsString(", "));
     }
 
     private void SolveContacts()
@@ -157,7 +176,7 @@ public class PhysicsWorld
         for (int i = manifolds.Count - 1; i >= 0; i--)
         {
             Manifold m = manifolds[i];
-            if (m.A.Entity == null || m.B.Entity == null || !m.SolveContact())
+            if (m.A.Entity.IsDestroyed || m.B.Entity.IsDestroyed || !m.SolveContact())
             {
                 manifolds.RemoveAt(i);
                 manifoldSet.Remove(m);

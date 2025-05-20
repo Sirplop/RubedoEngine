@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using static Rubedo.UI.Layout.Vertical;
 
 namespace Rubedo.UI.Layout;
 
@@ -8,6 +9,29 @@ namespace Rubedo.UI.Layout;
 /// </summary>
 public class Horizontal : LayoutGroup
 {
+    public enum LayoutDirection
+    {
+        Left,
+        Right
+    }
+
+    /// <summary>
+    /// The direction that layout items will be ordered. Defaults to left to right.
+    /// </summary>
+    public LayoutDirection ItemOrdering
+    {
+        get => itemOrder;
+        set
+        {
+            if (itemOrder != value)
+            {
+                itemOrder = value;
+                MarkLayoutAsDirty();
+            }
+        }
+    }
+    protected LayoutDirection itemOrder = LayoutDirection.Right;
+
     public override void UpdateSizes()
     {
         float maxWidth = 0;
@@ -37,6 +61,37 @@ public class Horizontal : LayoutGroup
 
     public override void UpdateLayout()
     {
+        switch (itemOrder)
+        {
+            case LayoutDirection.Left:
+                LayoutLeft();
+                break;
+            case LayoutDirection.Right:
+                LayoutRight();
+                break;
+        }
+    }
+
+    protected virtual void LayoutLeft()
+    {
+        float maxHeight = Height;
+        float currentX = Width - paddingRight;
+
+        foreach (var c in _children)
+        {
+            if (!c.IsVisible() || c.IgnoresLayout)
+                continue;
+
+            currentX -= c.Width + childPadding;
+            c.Offset = new Vector2(currentX, paddingTop);
+
+            maxHeight = MathF.Max(c.Height, maxHeight);
+            c.UpdateClipIfDirty();
+            c.UpdateLayout();
+        }
+    }
+    protected virtual void LayoutRight()
+    {
         float maxHeight = Height;
         float currentX = paddingLeft;
 
@@ -45,7 +100,6 @@ public class Horizontal : LayoutGroup
             if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
             c.Offset = new Vector2(currentX, paddingTop);
-            //c.Height = MathF.Min(c.Height, Height);
 
             maxHeight = MathF.Max(c.Height, maxHeight);
             c.UpdateClipIfDirty();

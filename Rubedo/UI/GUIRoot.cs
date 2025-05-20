@@ -95,11 +95,4 @@ public class GUIRoot : UIComponent
     {
         UpdateLayout();
     }
-
-    public void Clear()
-    {
-        for (int i = 0; i < _children.Count; i++)
-            _children[i].Destroy();
-        _children.Clear();
-    }
 }

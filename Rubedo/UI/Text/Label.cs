@@ -26,7 +26,7 @@ public class Label : UIComponent, IColorable
             _drawBackground = value;
         }
     }
-    private static bool _drawBackground;
+    private static bool _drawBackground = false;
     private static Texture2D testWhite;
 
     public enum HorizontalAlignment
@@ -66,6 +66,20 @@ public class Label : UIComponent, IColorable
     }
     private int _fontSize;
 
+    public bool TightLineHeight
+    {
+        get => _tightLineHeight;
+        set
+        {
+            if (_tightLineHeight != value)
+            {
+                _tightLineHeight = value;
+                MarkLayoutAsDirty();
+            }
+        }
+    }
+    private bool _tightLineHeight = true;
+
     public HorizontalAlignment horizontalAlignment = HorizontalAlignment.Left;
 
     public Color color;
@@ -79,6 +93,7 @@ public class Label : UIComponent, IColorable
     protected List<TextLine> textLines;
 
     public Label(FontSystem font) : this(font, string.Empty, Color.White, 12) { }
+    public Label(FontSystem font, Color color) : this(font, string.Empty, color, 12) { }
     public Label(FontSystem font, string text) : this(font, text, Color.White, 12) { }
     public Label(FontSystem font, string text, Color color) : this(font, text, color, 12) { }
 
@@ -112,7 +127,7 @@ public class Label : UIComponent, IColorable
         if (_isDirty)
         {
             int maxSizeWidth = MaxSize.HasValue ? (int)MaxSize.Value.X : int.MaxValue;
-            textLines = TextLine.GetTextLinesWrap(in _text, maxSizeWidth, in font, in _fontSize);
+            textLines = TextLine.GetTextLinesWrap(in _text, maxSizeWidth, in font, in _fontSize, _tightLineHeight);
             textSize = Vector2.Zero;
             for (int i = 0; i < textLines.Count; i++)
             {

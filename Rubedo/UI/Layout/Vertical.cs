@@ -10,6 +10,28 @@ namespace Rubedo.UI.Layout;
 /// </summary>
 public class Vertical : LayoutGroup
 {
+    public enum LayoutDirection
+    {
+        Up,
+        Down
+    }
+
+    /// <summary>
+    /// The direction that layout items will be ordered. Defaults to top to bottom.
+    /// </summary>
+    public LayoutDirection ItemOrdering {
+        get => itemOrder;
+        set 
+        {
+            if (itemOrder != value)
+            {
+                itemOrder = value;
+                MarkLayoutAsDirty();
+            }
+        }
+    }
+    protected LayoutDirection itemOrder = LayoutDirection.Down;
+
     public override void UpdateSizes()
     {
         float maxWidth = 0;
@@ -39,6 +61,36 @@ public class Vertical : LayoutGroup
 
     public override void UpdateLayout()
     {
+        switch (itemOrder)
+        {
+            case LayoutDirection.Down:
+                LayoutDownwards();
+                break;
+            case LayoutDirection.Up:
+                LayoutUpwards();
+                break;
+        }
+    }
+
+    protected virtual void LayoutUpwards()
+    {
+        float maxWidth = Width;
+        float currentY = Height - paddingBottom;
+
+        foreach (UIComponent c in _children)
+        {
+            if (!c.IsVisible() || c.IgnoresLayout)
+                continue;
+            currentY -= c.Height + childPadding;
+            c.Offset = new Vector2(paddingLeft, currentY);
+
+            maxWidth = MathF.Max(c.Width, maxWidth);
+            c.UpdateClipIfDirty();
+            c.UpdateLayout();
+        }
+    }
+    protected virtual void LayoutDownwards()
+    {
         float maxWidth = Width;
         float currentY = paddingTop;
 
@@ -47,7 +99,6 @@ public class Vertical : LayoutGroup
             if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
             c.Offset = new Vector2(paddingLeft, currentY);
-            //c.Width = MathF.Min(c.Width, Width);
 
             maxWidth = MathF.Max(c.Width, maxWidth);
             c.UpdateClipIfDirty();
