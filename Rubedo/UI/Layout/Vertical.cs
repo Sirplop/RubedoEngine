@@ -81,8 +81,26 @@ public class Vertical : LayoutGroup
         {
             if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
+
             currentY -= c.Height + childPadding;
-            c.Offset = new Vector2(paddingLeft, currentY);
+            switch (c.Anchor)
+            {
+                case Anchor.TopLeft:
+                case Anchor.Top:
+                case Anchor.TopRight:
+                    c.Offset = new Vector2(paddingLeft, currentY);
+                    break;
+                case Anchor.Left:
+                case Anchor.Center:
+                case Anchor.Right:
+                    c.Offset = new Vector2(paddingLeft, currentY - (Height * 0.5f) + (c.Height * 0.5f));
+                    break;
+                case Anchor.BottomLeft:
+                case Anchor.Bottom:
+                case Anchor.BottomRight:
+                    c.Offset = new Vector2(paddingLeft, Height - currentY - c.Height);
+                    break;
+            }
 
             maxWidth = MathF.Max(c.Width, maxWidth);
             c.UpdateClipIfDirty();
@@ -98,7 +116,24 @@ public class Vertical : LayoutGroup
         {
             if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
-            c.Offset = new Vector2(paddingLeft, currentY);
+            switch (c.Anchor)
+            {
+                case Anchor.TopLeft:
+                case Anchor.Top:
+                case Anchor.TopRight:
+                    c.Offset = new Vector2(paddingLeft, currentY);
+                    break;
+                case Anchor.Left:
+                case Anchor.Center:
+                case Anchor.Right:
+                    c.Offset = new Vector2(paddingLeft, currentY - (Height * 0.5f) + (c.Height * 0.5f));
+                    break;
+                case Anchor.BottomLeft:
+                case Anchor.Bottom:
+                case Anchor.BottomRight:
+                    c.Offset = new Vector2(paddingLeft, Height - currentY - c.Height);
+                    break;
+            }
 
             maxWidth = MathF.Max(c.Width, maxWidth);
             c.UpdateClipIfDirty();

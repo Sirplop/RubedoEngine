@@ -1,5 +1,6 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -18,6 +19,11 @@ public static class AssetManager
     /// </summary>
     public static string TexturePath = "textures";
 
+    /// <summary>
+    /// The directory path appended to the root directory for textures.
+    /// </summary>
+    public static string SoundsPath = "sounds";
+
     private static string _rootDirectory = string.Empty;
     /// <summary>
     /// The root directory (relative to <see cref="TitleContainer"/>) that assets will be searched for in.
@@ -34,18 +40,21 @@ public static class AssetManager
         }
     }
     private static readonly string[] supportedTexture2DExtensions = new string[4] { ".png", ".jpg", ".jpeg", ".bmp" };
+    private static readonly string[] supportedAudioExtensions = new string[2] { ".wav", ".ogg" };
 
     private static Dictionary<string, FontSystem> loadedFonts;
     private static Dictionary<string, WeakReference<Texture2D>> loadedTextures;
+    private static Dictionary<string, WeakReference<SoundEffect>> loadedSounds;
 
 
     public static void Initialize(string rootDirectory)
     {
         RootDirectory = rootDirectory;
-        loadedFonts = new Dictionary<string, FontSystem>();
-        loadedTextures = new Dictionary<string, WeakReference<Texture2D>>();
-        //TODO: add missing asset things
+        loadedFonts = new Dictionary<string, FontSystem>(StringComparer.OrdinalIgnoreCase);
+        loadedTextures = new Dictionary<string, WeakReference<Texture2D>>(StringComparer.OrdinalIgnoreCase);
+        loadedSounds = new Dictionary<string, WeakReference<SoundEffect>>(StringComparer.OrdinalIgnoreCase);
     }
+    #region Fonts
     /// <summary>
     /// Create a new font system with the given lowercase <paramref name="fontName"/>, which includes the given <paramref name="fontPaths"/>.
     /// </summary>
@@ -88,7 +97,8 @@ public static class AssetManager
         else
             throw new NullReferenceException($"FontSystem with name '{fontName}' does not exist. Did you misspell it, or forget to create it?");
     }
-
+    #endregion
+    #region Textures
     public static Texture2D LoadTexture(string name)
     {
         Texture2D texture = null;
@@ -117,6 +127,40 @@ public static class AssetManager
             }
             catch { } //TODO: Make a better way to handle this whole thing.
         }
-        throw new ContentLoadException($"Texture at path '{path}' does not exist!");
+        throw new ContentLoadException($"Texture at '{path}' does not exist!");
     }
+    #endregion
+    #region Sounds
+    public static SoundEffect LoadSoundEffect(string name)
+    {
+        SoundEffect effect = null;
+        if (loadedSounds.TryGetValue(name, out WeakReference<SoundEffect> value) && value.TryGetTarget(out effect))
+        {
+            return effect;
+        }
+
+        string path = Path.Combine(RootDirectory, SoundsPath, name);
+        foreach (string extension in supportedAudioExtensions)
+        {
+            try
+            {
+                using (Stream stream = TitleContainer.OpenStream(Path.ChangeExtension(path, extension)))
+                {
+                    if (stream != null)
+                    {
+                        effect = SoundEffect.FromStream(stream);
+                        if (!loadedSounds.ContainsKey(name))
+                            loadedSounds.Add(name, new WeakReference<SoundEffect>(effect));
+                        else
+                            loadedSounds[name] = new WeakReference<SoundEffect>(effect);
+                        return effect;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        throw new ContentLoadException($"Sound at '{path}' does not exist!");
+    }
+    #endregion
 }

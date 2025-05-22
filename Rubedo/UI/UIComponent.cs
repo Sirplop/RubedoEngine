@@ -234,6 +234,51 @@ public abstract class UIComponent : IDestroyable
         SetOffset(offset);
     }
 
+    public void SetScreenOffset(Vector2 offset)
+    {
+        Rendering.Screen screen = RubedoEngine.Instance.Screen;
+        SetRelativeOffset(new Rectangle(screen.LetterboxWidth, screen.LetterboxHeight, screen.Width, screen.Height), offset);
+    }
+    /// <summary>
+    /// Sets this component's offset relative to the height/width of the given rectangle.
+    /// </summary>
+    /// <param name="rect">The rectangle to fit relatively to.</param>
+    /// <param name="offset">The offset, from 0 to 1.</param>
+    /// <remarks>This will account for the component's anchor point.</remarks>
+    public void SetRelativeOffset(in Rectangle rect, Vector2 offset)
+    {
+        switch (_anchor)
+        {
+            case Anchor.TopLeft:
+                SetOffset(new Vector2(offset.X * rect.Width, offset.Y * rect.Height));
+                break;
+            case Anchor.Top:
+                SetOffset(new Vector2((offset.X - 0.5f) * rect.Width, offset.Y * rect.Height));
+                break;
+            case Anchor.TopRight:
+                SetOffset(new Vector2((offset.X - 1f) * rect.Width, offset.Y * rect.Height));
+                break;
+            case Anchor.Left:
+                SetOffset(new Vector2(offset.X * rect.Width, (offset.Y - 0.5f) * rect.Height));
+                break;
+            case Anchor.Center:
+                SetOffset(new Vector2((offset.X - 0.5f) * rect.Width, (offset.Y - 0.5f) * rect.Height));
+                break;
+            case Anchor.Right:
+                SetOffset(new Vector2((offset.X - 1f) * rect.Width, (offset.Y - 0.5f) * rect.Height));
+                break;
+            case Anchor.BottomLeft:
+                SetOffset(new Vector2(offset.X * rect.Width, (offset.Y - 1f) * rect.Height));
+                break;
+            case Anchor.Bottom:
+                SetOffset(new Vector2((offset.X - 0.5f) * rect.Width, (offset.Y - 1) * rect.Height));
+                break;
+            case Anchor.BottomRight:
+                SetOffset(new Vector2((offset.X - 1f) * rect.Width, (offset.Y - 1f) * rect.Height));
+                break;
+        }
+    }
+
     /// <summary>
     /// Set the anchor of this entity.
     /// </summary>
@@ -379,9 +424,12 @@ public abstract class UIComponent : IDestroyable
     /// </summary>
     public virtual void UpdateInput()
     {
-        foreach (var c in _children)
+        for (int i = 0; i < _children.Count; i++)
+        {
+            var c = _children[i];
             if (c.isActive && c.isVisible)
                 c.UpdateInput();
+        }
     }
     /// <summary>
     /// General updates.

@@ -5,7 +5,7 @@ using System;
 namespace Rubedo.Rendering;
 
 /// <summary>
-/// I am Screen, and this is my summary.
+/// The visual area of the screen that the <see cref="Camera"/> is rendered to.
 /// </summary>
 public sealed class Screen : IDisposable
 {

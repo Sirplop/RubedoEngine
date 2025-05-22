@@ -69,7 +69,7 @@ public class RubedoEngine : Game
 
         IsMouseVisible = true;
         IsFixedTimeStep = false;
-        Graphics.SynchronizeWithVerticalRetrace = false; //vsync
+        Graphics.SynchronizeWithVerticalRetrace = true; //vsync
     }
 
     protected override void Initialize()
