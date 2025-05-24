@@ -18,7 +18,7 @@ public struct AABB : IEquatable<AABB>
     {
         this.min = min; this.max = max;
     }
-    public void Set(in Vector2Int min, in Vector2Int max)
+    public void Set(in Point min, in Point max)
     {
         this.min.X = min.X; this.min.Y = min.Y;
         this.max.X = max.X; this.max.Y = max.Y;
@@ -51,7 +51,7 @@ public struct AABB : IEquatable<AABB>
                min.Y <= point.Y &&
                max.Y >= point.Y;
     }
-    public bool Contains(ref Vector2Int point)
+    public bool Contains(ref Point point)
     {
         return min.X <= point.X &&
                max.X >= point.X &&
@@ -102,7 +102,7 @@ public struct AABB : IEquatable<AABB>
             max = new Vector2(MathF.Max(bounds.max.X, point.X), MathF.Max(bounds.max.Y, point.Y))
         };
     }
-    public static void Union(ref AABB bounds, ref Vector2Int point, out AABB bounds2)
+    public static void Union(ref AABB bounds, ref Point point, out AABB bounds2)
     {
         bounds2 = new AABB()
         {

@@ -1,4 +1,6 @@
-﻿namespace Rubedo.Lib;
+﻿using Microsoft.Xna.Framework;
+
+namespace Rubedo.Lib;
 
 /// <summary>
 /// Supplies simple methods for padding and thickness.
@@ -11,7 +13,7 @@ public struct Padding
     public int Bottom { get; set; }
     public readonly int Width => Left + Right;
     public readonly int Height => Top + Bottom;
-    public readonly Vector2Int Size => new Vector2Int(Width, Height);
+    public readonly Point Size => new Point(Width, Height);
 
 
     public Padding(int all) : this(all, all, all, all) { }

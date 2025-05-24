@@ -41,15 +41,15 @@ public class Manifold : IEquatable<Manifold>
 {
     public readonly PhysicsBody A;
     public readonly PhysicsBody B;
-    public Vector2 normal;
+    internal Vector2 normal;
     internal Vector2 tangent;
 
     //We only need two contact points
-    public Contact[] contacts = new Contact[2];
-    public int contactCount;
+    internal Contact[] contacts = new Contact[2];
+    internal int contactCount;
 
-    public float friction;
-    public float restitution;
+    internal float friction;
+    internal float restitution;
 
     public Manifold(PhysicsBody bodyA, PhysicsBody bodyB)
     {

@@ -176,9 +176,10 @@ public class PhysicsWorld
         for (int i = manifolds.Count - 1; i >= 0; i--)
         {
             Manifold m = manifolds[i];
-            if (m.A.Entity.IsDestroyed || m.B.Entity.IsDestroyed || !m.SolveContact())
+            if (!m.SolveContact())
             {
-                manifolds.RemoveAt(i);
+                manifolds[i] = manifolds[manifolds.Count - 1];
+                manifolds.RemoveAt(manifolds.Count - 1); //swap and remove to remove unecessary moves
                 manifoldSet.Remove(m);
             }
         }

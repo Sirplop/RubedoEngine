@@ -55,10 +55,10 @@ internal class SpatialHashGrid : IBroadphase
                 AABB newBounds = bodies[i].bounds;
                 AABB oldBounds = bodies[i].collider.shape.RegisteredBounds;
 
-                Vector2Int o1 = CellCoords(oldBounds.min.X, oldBounds.min.Y);
-                Vector2Int o2 = CellCoords(oldBounds.max.X, oldBounds.max.Y);
-                Vector2Int n1 = CellCoords(newBounds.min.X, newBounds.min.Y);
-                Vector2Int n2 = CellCoords(newBounds.max.X, newBounds.max.Y);
+                Point o1 = CellCoords(oldBounds.min.X, oldBounds.min.Y);
+                Point o2 = CellCoords(oldBounds.max.X, oldBounds.max.Y);
+                Point n1 = CellCoords(newBounds.min.X, newBounds.min.Y);
+                Point n2 = CellCoords(newBounds.max.X, newBounds.max.Y);
 
                 if (o1 == n1 && o2 == n2)
                     continue; //we're in the same cells still.
@@ -97,6 +97,7 @@ internal class SpatialHashGrid : IBroadphase
     private readonly HashSet<Manifold> pairs = new HashSet<Manifold>();
     public void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> manifoldSet)
     {
+        //can we figure out how to remove manifolds we didn't make without so many sets?
         foreach (List<PhysicsBody> body in cells.cells.Values)
         {
             if (body.Count <= 1) //ignore cells with 1 thing in it.
@@ -107,6 +108,8 @@ internal class SpatialHashGrid : IBroadphase
                 {
                     if (body[i].isStatic && body[j].isStatic)
                         continue; //static bodies can't collide.
+                    if (body[i].IsDestroyed || body[j].IsDestroyed)
+                        continue; //can't collide nonexistant things
                     if (body[i].bounds.Overlaps(body[j].bounds))
                     {
                         //TODO: ManifoldPool class, please. Too many allocations.
@@ -119,15 +122,14 @@ internal class SpatialHashGrid : IBroadphase
                 }
             }
         }
-        /*manifoldSet.RemoveWhere(m => !pairs.Contains(m)); //TODO: Investigate better stale manifold removal.
-        manifolds.Clear();
-        manifolds.AddRange(manifoldSet);*/
         for (int i = manifolds.Count - 1; i >= 0; i--)
         {
-            if (!pairs.Contains(manifolds[i]))
+            Manifold m = manifolds[i];
+            if (!pairs.Contains(m))
             {
-                manifoldSet.Remove(manifolds[i]);
-                manifolds.RemoveAt(i);
+                manifoldSet.Remove(m);
+                manifolds[i] = manifolds[manifolds.Count - 1];
+                manifolds.RemoveAt(manifolds.Count - 1); //swap and remove to remove unecessary moves
             }
         }
         pairs.Clear();
@@ -137,8 +139,8 @@ internal class SpatialHashGrid : IBroadphase
     {
         AABB bounds = body.collider.shape.GetBoundingBox();
         body.collider.shape.RegisteredBounds = bounds;
-        Vector2Int p1 = CellCoords(bounds.min.X, bounds.min.Y);
-        Vector2Int p2 = CellCoords(bounds.max.X, bounds.max.Y);
+        Point p1 = CellCoords(bounds.min.X, bounds.min.Y);
+        Point p2 = CellCoords(bounds.max.X, bounds.max.Y);
         
         if (!GridBounds.Contains(ref p1))
             AABB.Union(ref GridBounds, ref p1, out GridBounds);
@@ -158,8 +160,8 @@ internal class SpatialHashGrid : IBroadphase
     public void Remove(PhysicsBody body)
     {
         AABB bounds = body.collider.shape.RegisteredBounds;
-        Vector2Int p1 = CellCoords(bounds.min.X, bounds.min.Y);
-        Vector2Int p2 = CellCoords(bounds.max.X, bounds.max.Y);
+        Point p1 = CellCoords(bounds.min.X, bounds.min.Y);
+        Point p2 = CellCoords(bounds.max.X, bounds.max.Y);
 
         for (int x = p1.X; x <= p2.X; x++)
         {
@@ -212,9 +214,9 @@ internal class SpatialHashGrid : IBroadphase
     /// Gets the cell coordinate for a world-space x,y value
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    Vector2Int CellCoords(float x, float y)
+    Point CellCoords(float x, float y)
     {
-        return new Vector2Int(Lib.Math.FloorToInt(x * invCellSize), Lib.Math.FloorToInt(y * invCellSize));
+        return new Point(Lib.Math.FloorToInt(x * invCellSize), Lib.Math.FloorToInt(y * invCellSize));
     }
     /// <summary>
     /// Gets the cell at the world-space x,y value. If the cell is empty and createCellIfEmpty is true a new cell will be created.
@@ -257,8 +259,7 @@ internal class SpatialHashGrid : IBroadphase
         {
             foreach (List<PhysicsBody> list in cells.Values)
             {
-                if (list.Contains(body))
-                    list.Remove(body);
+                list.Remove(body);
             }
         }
 

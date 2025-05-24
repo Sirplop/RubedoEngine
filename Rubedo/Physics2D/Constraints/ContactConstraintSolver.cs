@@ -16,7 +16,7 @@ public static class ContactConstraintSolver
         const float PENETRATION_SLOP = 0.01f;
         const float BAUMGARTE = 0.2f;
 
-        float invMassSum = m.A.invMass + m.B.invMass;
+        float invMassSum = m.A._invMass + m.B._invMass;
         float e = MathF.Min(m.A.material.restitution, m.B.material.restitution);
         m.friction = (m.A.material.friction + m.B.material.friction) * 0.5f;
         MathV.Right(ref m.normal, out m.tangent);
@@ -54,15 +54,15 @@ public static class ContactConstraintSolver
             MathV.Cross(ref c.ra, ref m.normal, out float rn1);
             MathV.Cross(ref c.rb, ref m.normal, out float rn2);
 
-            c.normalMass = 1f / (invMassSum + m.A.invInertia * (rn1 * rn1) +
-                                        m.B.invInertia * (rn2 * rn2));
+            c.normalMass = 1f / (invMassSum + m.A._invInertia * (rn1 * rn1) +
+                                        m.B._invInertia * (rn2 * rn2));
 
             MathV.Cross(ref c.ra, ref m.tangent, out float rt1);
             MathV.Cross(ref c.rb, ref m.tangent, out float rt2);
 
             //negated here because it's only used negated.
-            c.tangentMass = -1f / (invMassSum + m.A.invInertia * (rt1 * rt1) +
-                                         m.B.invInertia * (rt2 * rt2));
+            c.tangentMass = -1f / (invMassSum + m.A._invInertia * (rt1 * rt1) +
+                                         m.B._invInertia * (rt2 * rt2));
 
             // Position error is fed back to the velocity constraint as a bias value
             float correction = MathF.Min(-c.penetration + PENETRATION_SLOP, 0.0f);
@@ -91,7 +91,7 @@ public static class ContactConstraintSolver
     }
     public static void ApplyImpulse(Manifold m)
     {
-        if (m.A.invMass + m.B.invMass == 0) return;
+        if (m.A._invMass + m.B._invMass == 0) return;
         Vector2 rv;
         float lambda;
         /*

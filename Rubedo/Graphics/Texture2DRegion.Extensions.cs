@@ -29,6 +29,15 @@ public static class Texture2DRegionExtensions
         return new Texture2DRegion(source.Texture, region);
     }
 
+    /// <summary>
+    /// Constructs a new NineSlice from the given region, with the given pixel padding on all edges.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <param name="top"></param>
+    /// <param name="bottom"></param>
+    /// <returns></returns>
     public static NineSlice CreateNineSlice(this Texture2DRegion source, int left, int right, int top, int bottom)
     {
         ArgumentNullException.ThrowIfNull(source);

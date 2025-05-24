@@ -29,7 +29,7 @@ public class Texture2DRegion
     /// </summary>
     public int Height { get; }
 
-    public Vector2Int Size => new Vector2Int(Width, Height);
+    public Point Size => new Point(Width, Height);
 
     /// <summary>
     /// The bounds of the texture region within the texture.

@@ -2,6 +2,7 @@
 using Rubedo.Components;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Common;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.Physics2D.Dynamics;
 
@@ -18,13 +19,13 @@ public class PhysicsBody : Component
 
     public AABB bounds;
 
-    public float mass => _mass;
+    public float Mass => _mass;
     internal float _mass;
-    public float invMass => _invMass;
+    public float InvMass => _invMass;
     internal float _invMass;
-    public float inertia => _inertia;
+    public float Inertia => _inertia;
     internal float _inertia;
-    public float invInertia => _invInertia;
+    public float InvInertia => _invInertia;
     internal float _invInertia;
 
     public PhysicsMaterial material;
@@ -33,9 +34,6 @@ public class PhysicsBody : Component
     public float gravityScale = 1;
 
     public readonly Collider collider; //TODO: Handle linked colliders better.
-
-    // For use in broadphase
-    public object data;
 
     public Vector2 position => compTransform.Position;
 
@@ -105,16 +103,18 @@ public class PhysicsBody : Component
         RubedoEngine.Instance.World.RemoveBody(this);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void ApplyImpulseA(ref Vector2 impulse, ref Vector2 contactRadius)
     {
-        MathV.MulSub(ref velocity, ref impulse, invMass, out velocity);
+        MathV.MulSub(ref velocity, ref impulse, in _invMass, out velocity);
         MathV.Cross(ref contactRadius, ref impulse, out float lambda);
-        angularVelocity -= invInertia * lambda;
+        angularVelocity -= _invInertia * lambda;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void ApplyImpulseB(ref Vector2 impulse, ref Vector2 contactRadius)
     {
-        MathV.MulAdd(ref velocity, ref impulse, invMass, out velocity);
+        MathV.MulAdd(ref velocity, ref impulse, in _invMass, out velocity);
         MathV.Cross(ref contactRadius, ref impulse, out float lambda);
-        angularVelocity += invInertia * lambda;
+        angularVelocity += _invInertia * lambda;
     }
 }

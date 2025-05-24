@@ -13,7 +13,7 @@ public static class MathV
     /// Adds the <paramref name="scalar"/> to each component of vector <paramref name="a"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void AddScalar(ref Vector2 a, float scalar, out Vector2 b)
+    public static void AddScalar(ref Vector2 a, in float scalar, out Vector2 b)
     {
         b.X = a.X + scalar;
         b.Y = a.Y + scalar;
@@ -22,7 +22,7 @@ public static class MathV
     /// Subtracts the <paramref name="scalar"/> to each component of vector <paramref name="a"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void SubScalar(ref Vector2 a, float scalar, out Vector2 b)
+    public static void SubScalar(ref Vector2 a, in float scalar, out Vector2 b)
     {
         b.X = a.X - scalar;
         b.Y = a.Y - scalar;
@@ -32,7 +32,7 @@ public static class MathV
     /// Adds (<paramref name="b"/> * <paramref name="c"/>) to <paramref name="a"/>, and returns the result in <paramref name="d"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void MulAdd(ref Vector2 a, ref Vector2 b, float c, out Vector2 d)
+    public static void MulAdd(ref Vector2 a, ref Vector2 b, in float c, out Vector2 d)
     {
         d.X = a.X + (b.X * c);
         d.Y = a.Y + (b.Y * c);
@@ -41,7 +41,7 @@ public static class MathV
     /// Subtracts (<paramref name="b"/> * <paramref name="c"/>) from <paramref name="a"/>, and returns the result in <paramref name="d"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void MulSub(ref Vector2 a, ref Vector2 b, float c, out Vector2 d)
+    public static void MulSub(ref Vector2 a, ref Vector2 b, in float c, out Vector2 d)
     {
         d.X = a.X - (b.X * c);
         d.Y = a.Y - (b.Y * c);
@@ -54,7 +54,7 @@ public static class MathV
     /// <param name="b">The vector b.</param>
     /// <param name="bScale">The value <paramref name="b"/> is multiplied by.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void MulAdd2(ref Vector2 a, float aScale, ref Vector2 b, float bScale, out Vector2 c)
+    public static void MulAdd2(ref Vector2 a, in float aScale, ref Vector2 b, in float bScale, out Vector2 c)
     {
         c.X = (a.X * aScale) + (b.X * bScale);
         c.Y = (a.Y * aScale) + (b.Y * bScale);
@@ -67,7 +67,7 @@ public static class MathV
     /// <param name="b">The vector b.</param>
     /// <param name="bScale">The value <paramref name="b"/> is multiplied by.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void MulSub2(ref Vector2 a, float aScale, ref Vector2 b, float bScale, out Vector2 c)
+    public static void MulSub2(ref Vector2 a, in float aScale, ref Vector2 b, in float bScale, out Vector2 c)
     {
         c.X = (a.X * aScale) + (b.X * bScale);
         c.Y = (a.Y * aScale) + (b.Y * bScale);

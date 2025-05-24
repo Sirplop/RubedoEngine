@@ -28,6 +28,9 @@ public class BenchmarkPhysIntegrate
         c2.accumFriction = 50f;
         c2.accumImpulse = 50f;
         m.Update(c, c2);
+
+        ContactConstraintSolver.PresolveConstraint(m, 1 / 60f);
+        ContactConstraintSolver.WarmStart(m);
     }
 
     [Benchmark]

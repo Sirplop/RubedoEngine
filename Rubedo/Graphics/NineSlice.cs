@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Lib;
 using Rubedo.UI.Input;
 using System;
-using System.Drawing;
 
 namespace Rubedo.Graphics;
 
@@ -60,8 +60,8 @@ public class NineSlice
 
         _slices = slices;
 
-        Vector2Int topLeft = slices[TOP_LEFT].Size;
-        Vector2Int bottomRight = slices[BOTTOM_RIGHT].Size;
+        Point topLeft = slices[TOP_LEFT].Size;
+        Point bottomRight = slices[BOTTOM_RIGHT].Size;
         Padding = new Padding(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y);
     }
 }
