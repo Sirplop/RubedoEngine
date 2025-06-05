@@ -8,6 +8,16 @@ namespace Rubedo.Lib;
 public static class RectangleExtensions
 {
     /// <summary>
+    /// Gets the ratio of width / height.
+    /// </summary>
+    /// <param name="rectangle"></param>
+    /// <returns></returns>
+    public static float AspectRatio(this Rectangle rectangle)
+    {
+        return rectangle.Width / (float)rectangle.Height;
+    }
+
+    /// <summary>
     /// Clips the specified rectangle against the specified clipping rectangle.
     /// </summary>
     /// <param name="rectangle">The rectangle to clip.</param>

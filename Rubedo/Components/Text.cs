@@ -11,11 +11,6 @@ namespace Rubedo.Components;
 /// </summary>
 public class Text : Component
 {
-
-    /*
-     *  Text is, without adjustment, aligned to the bottom left.
-     */
-
     public enum HorizontalAlignment
     {
         Left,
@@ -33,6 +28,7 @@ public class Text : Component
     public string text { get; protected set; }
     public Color color;
     public int fontSize = 12;
+    public int layerDepth = 0;
     protected HorizontalAlignment horizontalAlignment = HorizontalAlignment.Left;
     protected VerticalAlignment verticalAlignment = VerticalAlignment.Top;
 
@@ -42,11 +38,8 @@ public class Text : Component
     protected int shadowThickness;
     protected Color shadowColor;
 
-    public Text(FontSystem font) : this(font, string.Empty, Color.White, true, true) { }
-
-    public Text(FontSystem font, string text, Color color) : this(font, text, color, true, true) { }
-
-    public Text(FontSystem font, string text, Color color, bool active, bool visible) : base(active, visible)
+    public Text(FontSystem font) : this(font, string.Empty, Color.White) { }
+    public Text(FontSystem font, string text, Color color) : base()
     {
         this.font = font;
         SetText(text);
@@ -116,19 +109,10 @@ public class Text : Component
         Vector2 pos = compTransform.LocalPosition;
         MathV.MulSub(ref pos, ref alignmentOffset, fontSize, out pos);
 
-        float scale = fontSize * (Math.Max(compTransform.Scale) / RubedoEngine.Instance.Camera.GetZoom());
-        SpriteFontBase fontR = font.GetFont(scale);
-        if (doShadow)
-        {
-            Vector2 shadowPos = new Vector2(shadowThickness, -shadowThickness);
-            Vector2.Add(ref pos, ref shadowPos, out shadowPos);
-            compTransform.LocalToWorldPosition(ref shadowPos, out shadowPos);
-
-            sb.DrawString(fontR, Renderer.Space.World, text, shadowPos, shadowColor, compTransform.RotationDegrees, scale, SpriteEffects.None);
-        }
+        SpriteFontBase fontR = font.GetFont(fontSize);
 
         compTransform.LocalToWorldPosition(ref pos, out pos);
 
-        sb.DrawString(fontR, Renderer.Space.World, text, pos, color, compTransform.RotationDegrees, scale, SpriteEffects.None);
+        sb.DrawString(fontR, Renderer.Space.World, text, pos, color, compTransform.RotationDegrees, 0.05f, layerDepth, SpriteEffects.None);
     }
 }

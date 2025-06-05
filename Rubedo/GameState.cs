@@ -17,7 +17,7 @@ public class GameState
 
     protected string _name = "";
 
-    protected internal EntityList Entities { get; private set; }
+    protected internal EntityList Entities { get; private set; } //should probably get moved into the statemanager.
 
     public string Name => _name;
     public GameState(StateManager sm)
@@ -60,7 +60,7 @@ public class GameState
     {
         foreach (Entity obj in Entities)
         {
-            if (obj.visible)
+            if (obj._visible)
                 obj.Draw(sb);
         }
     }

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Rubedo.Components;
 
-public class Component : ITransformable, IDestroyable
+public abstract class Component : ITransformable, IDestroyable
 {
     public bool IsDestroyed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = false;
 
@@ -22,15 +22,41 @@ public class Component : ITransformable, IDestroyable
     /// This component's local transform.
     /// </summary>
     public Transform compTransform;
-    public bool active;
-    public bool visible;
+    public bool Active
+    {
+        get => Entity._active && _active;
+        set
+        {
+            if (_active != value)
+            {
+                bool reallyActive = Active;
+                _active = value;
+                if (Active != reallyActive) //double check that the activation state actually changed.
+                {
+                    if (_active)
+                        OnEnable();
+                    else
+                        OnDisable();
+                }
+            }
+        }
+    }
+    internal bool _active = true;
+    public bool Visible
+    {
+        get => Entity._visible && _visible;
+        set
+        {
+            if (_visible != value)
+                _visible = value;
+        }
+    }
+    internal bool _visible = true;
 
-    public Component(bool active, bool visible)
+    public Component()
     {
         compTransform = new Transform();
         compTransform.attached = this;
-        this.active = active;
-        this.visible = visible;
     }
 
     /// <summary>
@@ -66,6 +92,16 @@ public class Component : ITransformable, IDestroyable
     {
         this.Entity = null;
     }
+
+    /// <summary>
+    /// Called when this component is activated, or when its parent entity is activated.
+    /// </summary>
+    public virtual void OnEnable() { }
+
+    /// <summary>
+    /// Called when this component is deactivated, or when its parent entity is deactivated.
+    /// </summary>
+    public virtual void OnDisable() { }
 
     /// <summary>
     /// Called every frame while <see cref="Entity.active"/> and <see cref="active"/> are both true.

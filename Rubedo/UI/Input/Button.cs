@@ -87,7 +87,7 @@ public class Button : Selectable
         {
             if (clicked)
             {
-                heldDuration += RubedoEngine.DeltaTime;
+                heldDuration += Time.DeltaTime;
                 if (buttonPressed && NavControls.ButtonInteract.Released())
                 {
                     heldDuration = 0;

@@ -22,8 +22,11 @@ public sealed class Shapes : IDisposable
     private int indexCount;
     private int vertexCount;
 
-    private Camera camera;
-    private bool usingCamera = false;
+    private NeoCamera camera;
+
+    public const int CIRCLE_SEGMENTS = 32;
+    public const int CAPSULE_SEGMENTS = 40;
+    public const int CAPSULE_HALF_SEGMENTS = CAPSULE_SEGMENTS / 2;
 
     public Shapes(RubedoEngine game)
     {
@@ -74,7 +77,7 @@ public sealed class Shapes : IDisposable
         isDisposed = true;
     }
 
-    public void Begin(Camera camera)
+    public void Begin(NeoCamera camera)
     {
         this.camera = camera;
         if (started)
@@ -82,19 +85,9 @@ public sealed class Shapes : IDisposable
             throw new Exception("Batch was already started.\n" +
                                 "Batch must call \"End\" before new batching can start.");
         }
-        if (camera is null)
-        {
-            effect.View = Matrix.Identity;
-            effect.Projection = Matrix.CreateOrthographicOffCenter(0, game.GraphicsDevice.Viewport.Width, 0, game.GraphicsDevice.Viewport.Height, 0, 1.0f);
-            usingCamera = false;
-        }
-        else
-        {
-            effect.View = camera.View;
-            effect.Projection = camera.Projection;
-            effect.World = camera.TransformMatrix;
-            usingCamera = true;
-        }
+        effect.View = camera.View;
+        effect.Projection = camera.GetProjection();
+        effect.World = Matrix.Identity;
 
         started = true;
     }
@@ -308,22 +301,17 @@ public sealed class Shapes : IDisposable
     }
     #endregion
     #region Circle
-    public void DrawCircleFill(Transform transform, float radius, int points, Color color)
+    public void DrawCircleFill(Transform transform, float radius, Color color)
     {
         EnsureStarted();
-
-        const int MinCirclePoints = 3;
-        const int MaxCirclePoints = 64;
-
         radius = radius * Lib.Math.Max(transform.Scale);
 
-        int shapeVertexCount = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);    // The vertex count will just be the number of points requested by the user.
-        int shapeTriangleCount = shapeVertexCount - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
+        int shapeTriangleCount = CIRCLE_SEGMENTS - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
         int shapeIndexCount = shapeTriangleCount * 3;       // The indices count will just be 3 times the triangle count.
 
-        EnsureSpace(shapeVertexCount, shapeIndexCount);
+        EnsureSpace(CIRCLE_SEGMENTS, shapeIndexCount);
 
-        float angle = MathHelper.TwoPi / shapeVertexCount;
+        float angle = MathHelper.TwoPi / CIRCLE_SEGMENTS;
         float sin = MathF.Sin(angle);
         float cos = MathF.Cos(angle);
 
@@ -345,7 +333,7 @@ public sealed class Shapes : IDisposable
         float ay = 0f;
         Vector2 pos = transform.Position;
         // Save all remaining vertices.
-        for (int i = 0; i < shapeVertexCount; i++)
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++)
         {
             vertices[vertexCount++] = new VertexPositionColor(new Vector3(ax + pos.X, ay + pos.Y, 0f), color);
 
@@ -360,20 +348,16 @@ public sealed class Shapes : IDisposable
     }
     #endregion
     #region Capsule
-    public void DrawCapsuleFill(Transform transform, float radius, Vector2 start, Vector2 end, int pointsPerCap, Color color)
+    public void DrawCapsuleFill(Transform transform, float radius, Vector2 start, Vector2 end, Color color)
     {
         EnsureStarted();
 
-        const int MinElipsePoints = 3;
-        const int MaxElipsePoints = 64;
-
-        int shapeVertexCount = Lib.Math.Clamp(pointsPerCap, MinElipsePoints, MaxElipsePoints) * 2;    // The vertex count will just be the number of points requested by the user.
-        int shapeTriangleCount = shapeVertexCount - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
+        int shapeTriangleCount = CAPSULE_SEGMENTS - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
         int shapeIndexCount = shapeTriangleCount * 3;       // The indices count will just be 3 times the triangle count.
 
-        EnsureSpace(shapeVertexCount, shapeIndexCount);
+        EnsureSpace(CAPSULE_SEGMENTS, shapeIndexCount);
 
-        float deltaAngle = MathHelper.Pi / (shapeVertexCount * 0.5f - 1);
+        float deltaAngle = MathHelper.Pi / (CAPSULE_SEGMENTS * 0.5f - 1);
         float angle = MathHelper.Pi;
 
         int index = 1;
@@ -393,7 +377,7 @@ public sealed class Shapes : IDisposable
 
         // Vertices;
         // Save all remaining vertices.
-        for (int i = 0; i < shapeVertexCount / 2; i++)
+        for (int i = 0; i < CAPSULE_HALF_SEGMENTS; i++)
         {
             float x = MathF.Cos(angle) * radius;
             float y = MathF.Sin(angle) * radius;
@@ -403,7 +387,7 @@ public sealed class Shapes : IDisposable
             vertices[vertexCount++] = new VertexPositionColor(new Vector3(val, 0f), color);
         }
         angle = 0;
-        for (int i = 0; i < shapeVertexCount / 2; i++)
+        for (int i = 0; i < CAPSULE_HALF_SEGMENTS; i++)
         {
             float x = MathF.Cos(angle) * radius;
             float y = MathF.Sin(angle) * radius;
@@ -449,10 +433,9 @@ public sealed class Shapes : IDisposable
 
         // If we are using the world camera then we need to adjust the "thickness" of the line
         //  so no matter how far we have "zoomed" into the world the line will look the same.
-        if (usingCamera)
-        {
-            thickness /= camera.GetZoom();
-        }
+
+        thickness /= 1f / camera.Z;
+
 
         float halfThickness = thickness * 0.5f;
 
@@ -651,13 +634,9 @@ public sealed class Shapes : IDisposable
     }
     #endregion
     #region Hollow Circle
-    public void DrawCircle(Vector2 position, float radius, int points, Color color)
+    public void DrawCircle(Vector2 position, float radius, Color color)
     {
-        const int MinCirclePoints = 3;
-        const int MaxCirclePoints = 256;
-        points = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);
-
-        float angle = MathHelper.TwoPi / points;
+        float angle = MathHelper.TwoPi / CIRCLE_SEGMENTS;
 
         // Precalculate the trig. functions.
         float sin = MathF.Sin(angle);
@@ -667,7 +646,7 @@ public sealed class Shapes : IDisposable
         float ax = radius;
         float ay = 0f;
 
-        for (int i = 0; i < points; i++)
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++)
         {
             // Perform a 2D rotation transform to get the next point on the circle.
             float bx = ax * cos - ay * sin;
@@ -681,16 +660,11 @@ public sealed class Shapes : IDisposable
             ay = by;
         }
     }
-    public void DrawCircle(Transform transform, float radius, int points, Color color)
+    public void DrawCircle(Transform transform, float radius, Color color)
     {
-        const int MinCirclePoints = 3;
-        const int MaxCirclePoints = 256;
-
         radius *= Lib.Math.Max(transform.Scale);
 
-        points = Lib.Math.Clamp(points, MinCirclePoints, MaxCirclePoints);
-
-        float angle = MathHelper.TwoPi / points;
+        float angle = MathHelper.TwoPi / CIRCLE_SEGMENTS;
 
         // Precalculate the trig. functions.
         float sin = MathF.Sin(angle);
@@ -701,7 +675,7 @@ public sealed class Shapes : IDisposable
         float ay = 0f;
 
         Vector2 pos = transform.Position;
-        for (int i = 0; i < points; i++)
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++)
         {
             // Perform a 2D rotation transform to get the next point on the circle.
             float bx = ax * cos - ay * sin;
@@ -717,14 +691,9 @@ public sealed class Shapes : IDisposable
     }
     #endregion
     #region Hollow Capsule
-    public void DrawCapsule(Transform transform, float radius, Vector2 start, Vector2 end, int pointsPerCap, Color color)
+    public void DrawCapsule(Transform transform, float radius, Vector2 start, Vector2 end, Color color)
     {
-        const int MinCirclePoints = 3;
-        const int MaxCirclePoints = 64;
-
-        pointsPerCap = (Lib.Math.Clamp(pointsPerCap, MinCirclePoints, MaxCirclePoints) - 1) * 2;
-
-        float angle = MathHelper.Pi / (pointsPerCap * 0.5f);
+        float angle = MathHelper.Pi / (CAPSULE_SEGMENTS * 0.5f);
 
         // Precalculate the trig. functions.
         float sin = -MathF.Sin(angle);
@@ -737,7 +706,7 @@ public sealed class Shapes : IDisposable
         float bx = 0, by = 0;
         Matrix2D matrix = Matrix2D.CreateRotation(transform.Rotation);
 
-        for (int i = 0; i < pointsPerCap / 2; i++)
+        for (int i = 0; i < CAPSULE_HALF_SEGMENTS; i++)
         {
             // Perform a 2D rotation transform to get the next point on the circle.
             bx = ax * cos - ay * sin;
@@ -757,7 +726,7 @@ public sealed class Shapes : IDisposable
                 matrix.TransformPoint(ax, ay) + start,
                 matrix.TransformPoint(bx, by) + end,
             color);
-        for (int i = 0; i < pointsPerCap / 2; i++)
+        for (int i = 0; i < CAPSULE_HALF_SEGMENTS; i++)
         {
             // Perform a 2D rotation transform to get the next point on the circle.
             bx = ax * cos - ay * sin;

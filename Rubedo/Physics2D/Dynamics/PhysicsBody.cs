@@ -40,7 +40,7 @@ public class PhysicsBody : Component
     public Vector2 LinearVelocity { get => velocity; internal set => velocity = value; }
     public float AngularVelocity { get => angularVelocity; internal set => angularVelocity = value; }
 
-    public PhysicsBody(Collider collider, PhysicsMaterial material, bool active, bool visible) : base(active, visible)
+    public PhysicsBody(Collider collider, PhysicsMaterial material) : base()
     {
         this.material = material;
         this.collider = collider;

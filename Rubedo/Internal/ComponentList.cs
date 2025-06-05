@@ -158,7 +158,7 @@ public class ComponentList : IEnumerable<Component>
     {
         LockState = LockStates.Locked;
         foreach (var component in components)
-            if (component.active)
+            if (component._active)
                 component.Update();
         LockState = LockStates.Open;
     }
@@ -174,7 +174,7 @@ public class ComponentList : IEnumerable<Component>
     {
         LockState = LockStates.NotAllowed;
         foreach (var component in components)
-            if (component.visible)
+            if (component._visible)
                 component.Draw(sb);
         LockState = LockStates.Open;
     }

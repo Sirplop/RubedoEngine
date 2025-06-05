@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Lib;
+using Rubedo.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -27,6 +28,12 @@ public static class GUI
     /// SpriteBatch used to draw the UI. We don't use a <see cref="Rendering.Renderer"/> because we're rendering screen coordinates.
     /// </summary>
     public static SpriteBatch SpriteBatch { get; set; } = null!;
+
+    /// <summary>
+    /// The camera that renders the UI.
+    /// </summary>
+    public static NeoCamera UICamera { get; set; }
+
     /// <summary>
     /// Defaults to LinearClamp.
     /// </summary>
@@ -41,9 +48,10 @@ public static class GUI
     private static bool _beginCalled = false;
     private static readonly Stack<(Rectangle, bool)> _scissorStack = new Stack<(Rectangle, bool)>();
 
-    public static void Setup(Game game)
+    public static void Setup(Game game, NeoCamera camera)
     {
         SpriteBatch = new SpriteBatch(game.GraphicsDevice);
+        UICamera = camera;
     }
 
     /* //immediate mode scissoring.

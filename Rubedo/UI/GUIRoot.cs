@@ -1,28 +1,31 @@
-﻿using FontStashSharp;
-using FontStashSharp.RichText;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
 using Rubedo.Input;
-using Rubedo.Lib;
-using Rubedo.Object;
+using Rubedo.Rendering.Viewports;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Rubedo.UI;
 
 /// <summary>
 /// The root component for all UI. Updates and layouts are propogated from this. Should (probably) only ever have one.
 /// </summary>
-public class GUIRoot : UIComponent
+public class GUIRoot : UIComponent, IDisposable
 {
+    private bool _disposed;
+
     public Selectable CurrentFocus => _currentFocus;
     protected Selectable _currentFocus = null;
     private const float MOUSE_DEADZONE = 10f; //squared value
 
     public GUIRoot() : base()
     {
+        _disposed = false;
+    }
 
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -75,11 +78,19 @@ public class GUIRoot : UIComponent
     {
         // The GUIRoot manages itself.
 
-        _clip = new Rectangle(0, 0, RubedoEngine.Instance.Screen.Width, RubedoEngine.Instance.Screen.Height);
+        Rectangle curClip = RubedoEngine.Graphics.GraphicsDevice.Viewport.Bounds;
+        if (curClip != _clip)
+        {
+            _clip = curClip;
+            _clipVersion++;
+        }
+        else
+        {
+            isLayoutDirty = false;
+        }
         SetAnchorAndOffset(Anchor.TopLeft, Vector2.Zero);
-        Height = RubedoEngine.Instance.Screen.Height;
-        Width = RubedoEngine.Instance.Screen.Width;
-        isLayoutDirty = false; //this doesn't cause layout problems. Or should it? TODO.
+        Height = curClip.Height;
+        Width = curClip.Width;
 
         foreach (UIComponent c in _children)
         {
@@ -88,11 +99,19 @@ public class GUIRoot : UIComponent
             c.UpdateLayout();
         }
     }
+
     /// <summary>
     /// Called after updates.
     /// </summary>
     public void UpdateEnd()
     {
         UpdateLayout();
+    }
+
+    public override void Draw()
+    {
+        GUI.UICamera.SetViewport();
+        base.Draw();
+        GUI.UICamera.ResetViewport();
     }
 }

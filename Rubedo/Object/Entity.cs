@@ -8,15 +8,43 @@ using System.Runtime.CompilerServices;
 
 namespace Rubedo.Object;
 
-public class Entity : IEnumerable<Component>, IEnumerable, ITransformable, IDestroyable
+public sealed class Entity : IEnumerable<Component>, IEnumerable, ITransformable, IDestroyable
 {
     public GameState State {  get; private set; }
     public ComponentList Components { get; private set; }
     public bool IsDestroyed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = false;
 
-    public bool active = true;
-    public bool visible = true;
+    public bool Active
+    {
+        get => _active;
+        set
+        {
+            if (_active != value)
+            {
+                _active = value;
+                if (_active)
+                    OnEnable();
+                else
+                    OnDisable();
+            }
+        }
+    }
+    internal bool _active = true;
+    public bool Visible
+    {
+        get => _visible;
+        set
+        {
+            if (_visible != value)
+                _visible = value;
+        }
+    }
+    internal bool _visible = true;
+
     public Transform transform;
+
+    internal bool _hasAwakened = false;
+
     public Entity() : this(Vector2.Zero, 0, Vector2.One) { }
     public Entity(Vector2 position) : this(position, 0, Vector2.One) { }
     public Entity(Vector2 position, float rotation) : this(position, rotation, Vector2.One) { }
@@ -27,20 +55,38 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable, IDest
         Components = new ComponentList(this);
     }
 
-    public void Added(GameState state) 
+    internal void Added(GameState state) 
     {
         State = state;
         if (Components != null)
             foreach (var c in Components)
                 c.EntityAdded(state);
     }
-    public void Awake(GameState state)
+    internal void Awake(GameState state)
     {
+        if (_hasAwakened)
+            return;
+        _hasAwakened = true;
         if (Components != null)
             foreach (var c in Components)
                 c.EntityAwake();
     }
-    public void Removed(GameState state)
+
+    internal void OnEnable()
+    {
+        if (Components != null)
+            foreach (var c in Components)
+                c.OnEnable();
+    }
+
+    internal void OnDisable()
+    {
+        if (Components != null)
+            foreach (var c in Components)
+                c.OnDisable();
+    }
+
+    internal void Removed(GameState state)
     {
         if (Components != null)
             foreach (var c in Components)
@@ -48,26 +94,30 @@ public class Entity : IEnumerable<Component>, IEnumerable, ITransformable, IDest
         State = null;
     }
 
-    public void Update()
+    internal void Update()
     {
-        Components.Update();
+        if (_active)
+            Components.Update();
     }
     void ITransformable.TransformChanged()
     {
         Components.TransformChanged();
     }
-    public void Draw(Renderer sb)
+    internal void Draw(Renderer sb)
     {
-        Components.Draw(sb);
+        if (_visible)
+            Components.Draw(sb);
     }
 
-    public void Add(Component component)
+    public Entity Add(Component component)
     {
         Components.Add(component);
+        return this;
     }
-    public void Remove(Component component)
+    public Entity Remove(Component component)
     {
         Components.Remove(component);
+        return this;
     }
 
     public IEnumerator<Component> GetEnumerator()

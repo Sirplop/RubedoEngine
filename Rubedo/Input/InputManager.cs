@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Rubedo.Rendering;
 
 namespace Rubedo.Input;
 
@@ -183,32 +184,29 @@ public static class InputManager
 
     public static Vector2 MouseWorldPosition()
     {
-        return RubedoEngine.Instance.Camera.ScreenToWorldPoint(MouseScreenPosition());
+        return RubedoEngine.Instance.Camera.ScreenToWorld(_currentMouseState.Position.ToVector2());
     }
     public static Vector2 MouseScreenPosition()
     {
-        //need to account for letterboxing.
-        int letterboxWidth = RubedoEngine.Instance.Screen.LetterboxWidth / 2;
-        int letterboxHeight = RubedoEngine.Instance.Screen.LetterboxHeight / 2;
+        return _currentMouseState.Position.ToVector2() + RubedoEngine.Instance.Camera.XY;
+        /*
+        Screen screen = RubedoEngine.Instance.Screen;
+        int paddingWidth = screen.PaddingWidth;
+        int paddingHeight = screen.PaddingHeight;
+        Rectangle bounds = RubedoEngine.Instance.Window.ClientBounds;
+        bounds.Width -= paddingWidth * 2;
+        bounds.Height -= paddingHeight * 2;
         Vector2 pos = _currentMouseState.Position.ToVector2();
-        pos.X -= letterboxWidth;
-        pos.Y -= letterboxHeight;
-        return pos;
+        pos.X -= paddingWidth;
+        pos.Y -= paddingHeight;
+        pos.X = Lib.Math.Mix(0, screen.Width, pos.X / bounds.Width);
+        pos.Y = Lib.Math.Mix(0, screen.Height, pos.Y / bounds.Height);
+        return pos;*/
     }
     /// <summary>
-    /// Gets the same thing as <see cref="MouseScreenPosition"/>, but inverts the positions according to screenspace.
+    /// Position-agnostic screen-space movement vector for the mouse.
     /// </summary>
-    public static Vector2 InverseMouseScreenPosition()
-    {
-        int letterboxWidth = RubedoEngine.Instance.Screen.LetterboxWidth / 2;
-        int letterboxHeight = RubedoEngine.Instance.Screen.LetterboxHeight / 2;
-        Vector2 pos = _currentMouseState.Position.ToVector2();
-        pos.X -= letterboxWidth;
-        pos.Y -= letterboxHeight;
-        pos.X = RubedoEngine.Instance.Screen.Width - pos.X;
-        pos.Y = RubedoEngine.Instance.Screen.Height - pos.Y;
-        return pos;
-    }
+    /// <returns></returns>
     public static Vector2 GetMouseMovement()
     {
         return (_currentMouseState.Position - _previousMouseState.Position).ToVector2();

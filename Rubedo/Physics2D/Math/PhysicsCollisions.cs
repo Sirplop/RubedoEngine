@@ -18,13 +18,13 @@ public static class PhysicsCollisions
                 switch (b.type)
                 {
                     case ShapeType.Circle:
-                        return CircleToCircle(m, circle, (Circle)b);
+                        return CircleToCircle(ref m, circle, (Circle)b);
                     case ShapeType.Capsule:
-                        return CircleToCapsule(m, circle, (Capsule)b);
+                        return CircleToCapsule(ref m, circle, (Capsule)b);
                     case ShapeType.Box:
-                        return CircleToBox(m, circle, (Box)b);
+                        return CircleToBox(ref m, circle, (Box)b);
                     case ShapeType.Polygon:
-                        return CircleToPolygon(m, circle, (Polygon)b);
+                        return CircleToPolygon(ref m, circle, (Polygon)b);
                 }
                 return false;
             case ShapeType.Capsule:
@@ -32,13 +32,13 @@ public static class PhysicsCollisions
                 switch (b.type)
                 {
                     case ShapeType.Circle:
-                        return CapsuleToCircle(m, capsule, (Circle)b);
+                        return CapsuleToCircle(ref m, capsule, (Circle)b);
                     case ShapeType.Capsule:
-                        return CapsuleToCapsule(m, capsule, (Capsule)b);
+                        return CapsuleToCapsule(ref m, capsule, (Capsule)b);
                     case ShapeType.Box:
-                        return CapsuleToBox(m, capsule, (Box)b);
+                        return CapsuleToBox(ref m, capsule, (Box)b);
                     case ShapeType.Polygon:
-                        return CapsuleToPolygon(m, capsule, (Polygon)b);
+                        return CapsuleToPolygon(ref m, capsule, (Polygon)b);
                 }
                 return false;
             case ShapeType.Box:
@@ -46,13 +46,13 @@ public static class PhysicsCollisions
                 switch (b.type)
                 {
                     case ShapeType.Circle:
-                        return BoxToCircle(m, box, (Circle)b);
+                        return BoxToCircle(ref m, box, (Circle)b);
                     case ShapeType.Capsule:
-                        return BoxToCapsule(m, box, (Capsule)b);
+                        return BoxToCapsule(ref m, box, (Capsule)b);
                     case ShapeType.Box:
-                        return BoxToBox(m, box, (Box)b);
+                        return BoxToBox(ref m, box, (Box)b);
                     case ShapeType.Polygon:
-                        return BoxToPolygon(m, box, (Polygon)b);
+                        return BoxToPolygon(ref m, box, (Polygon)b);
                 }
                 return false;
             case ShapeType.Polygon:
@@ -60,13 +60,13 @@ public static class PhysicsCollisions
                 switch (b.type)
                 {
                     case ShapeType.Circle:
-                        return PolygonToCircle(m, poly, (Circle)b);
+                        return PolygonToCircle(ref m, poly, (Circle)b);
                     case ShapeType.Capsule:
-                        return PolygonToCapsule(m, poly, (Capsule)b);
+                        return PolygonToCapsule(ref m, poly, (Capsule)b);
                     case ShapeType.Box:
-                        return PolygonToBox(m, poly, (Box)b);
+                        return PolygonToBox(ref m, poly, (Box)b);
                     case ShapeType.Polygon:
-                        return PolygonToPolygon(m, poly, (Polygon)b);
+                        return PolygonToPolygon(ref m, poly, (Polygon)b);
                 }
                 return false;
         }
@@ -75,12 +75,12 @@ public static class PhysicsCollisions
     #endregion
 
     #region Circle
-    public static bool CircleToCircle(Manifold m, Circle circleA, Circle circleB)
+    public static bool CircleToCircle(ref Manifold m, Circle circleA, Circle circleB)
     {
-        return CircleToCircle(m, circleA.transform.Position, circleA.radius * Lib.Math.Max(circleA.transform.Scale),
+        return CircleToCircle(ref m, circleA.transform.Position, circleA.radius * Lib.Math.Max(circleA.transform.Scale),
             circleB.transform.Position, circleB.radius * Lib.Math.Max(circleB.transform.Scale));
     }
-    public static bool CircleToCircle(Manifold m, Vector2 circPos1, float circRad1, Vector2 circPos2, float circRad2)
+    public static bool CircleToCircle(ref Manifold m, Vector2 circPos1, float circRad1, Vector2 circPos2, float circRad2)
     {
         m.contactCount = 0;
 
@@ -112,12 +112,12 @@ public static class PhysicsCollisions
         m.Update(contact);
         return true;
     }
-    public static bool CircleToBox(in Manifold m, Circle circle, Box box)
+    public static bool CircleToBox(ref Manifold m, Circle circle, Box box)
     {
         //TODO: make a fast as fuq version for unrotated boxes.
-        return CircleToPolygon(m, circle, box);
+        return CircleToPolygon(ref m, circle, box);
     }
-    public static bool CircleToCapsule(Manifold m, Circle circle, Capsule capsule)
+    public static bool CircleToCapsule(ref Manifold m, Circle circle, Capsule capsule)
     {
         //we pick the "most relevant circle" to do collision with.
         //Basically, we find the closest point to our shape on the capsule line
@@ -125,14 +125,14 @@ public static class PhysicsCollisions
         Vector2 circlePos = circle.transform.Position;
         capsule.TransformPoints();
         ShapeUtility.ClosestPointOnLine(ref capsule.transStart, ref capsule.transEnd, ref circlePos, out Vector2 closestPoint);
-        return CircleToCircle(m, circlePos, circle.radius * Lib.Math.Max(circle.transform.Scale), closestPoint, capsule.transRadius);
+        return CircleToCircle(ref m, circlePos, circle.radius * Lib.Math.Max(circle.transform.Scale), closestPoint, capsule.transRadius);
     }
-    public static bool CircleToPolygon(Manifold m, Circle circle, Polygon poly)
+    public static bool CircleToPolygon(ref Manifold m, Circle circle, Polygon poly)
     {
-        return CircleToPolygon(m, circle.transform.Position, circle.radius * Lib.Math.Max(circle.transform.Scale), poly);
+        return CircleToPolygon(ref m, circle.transform.Position, circle.radius * Lib.Math.Max(circle.transform.Scale), poly);
     }
     
-    public static bool CircleToPolygon(Manifold m, Vector2 circPos, float radius, Polygon poly)
+    public static bool CircleToPolygon(ref Manifold m, Vector2 circPos, float radius, Polygon poly)
     {
         m.contactCount = 0;
         poly.TransformVertices();
@@ -190,17 +190,17 @@ public static class PhysicsCollisions
 
     #endregion
     #region Capsule
-    public static bool CapsuleToCircle(Manifold m, Capsule capsule, Circle circle)
+    public static bool CapsuleToCircle(ref Manifold m, Capsule capsule, Circle circle)
     {
-        bool ret = CircleToCapsule(m, circle, capsule);
+        bool ret = CircleToCapsule(ref m, circle, capsule);
         m.normal = -m.normal;
         return ret;
     }
-    public static bool CapsuleToBox(Manifold m, Capsule capsule, Box box)
+    public static bool CapsuleToBox(ref Manifold m, Capsule capsule, Box box)
     {
-        return CapsuleToPolygon(m, capsule, box);
+        return CapsuleToPolygon(ref m, capsule, box);
     }
-    public static bool CapsuleToCapsule(in Manifold m, in Capsule capsule1, in Capsule capsule2)
+    public static bool CapsuleToCapsule(ref Manifold m, in Capsule capsule1, in Capsule capsule2)
     {
         m.contactCount = 0;
 
@@ -261,9 +261,9 @@ public static class PhysicsCollisions
             return true;
         }
         
-        return CircleToCircle(m, bestA, capsule1.transRadius, bestB, capsule2.transRadius);
+        return CircleToCircle(ref m, bestA, capsule1.transRadius, bestB, capsule2.transRadius);
     }
-    public static bool CapsuleToPolygon(in Manifold m, in Capsule capsule, in Polygon poly)
+    public static bool CapsuleToPolygon(ref Manifold m, in Capsule capsule, in Polygon poly)
     {
         m.contactCount = 0;
         capsule.TransformPoints();
@@ -425,51 +425,51 @@ public static class PhysicsCollisions
     }
     #endregion
     #region Box
-    public static bool BoxToCircle(Manifold m, Box a, Circle b)
+    public static bool BoxToCircle(ref Manifold m, Box a, Circle b)
     {
         //Just switching the input so that we can pass it to the function above
-        bool ret = CircleToBox(m, b, a);
+        bool ret = CircleToBox(ref m, b, a);
         //Make sure that normal always points from A to B
         m.normal = -m.normal;
         return ret;
     }
-    public static bool BoxToCapsule(Manifold m, Box a, Capsule b)
+    public static bool BoxToCapsule(ref Manifold m, Box a, Capsule b)
     {
-        return PolygonToCapsule(m, a, b);
+        return PolygonToCapsule(ref m, a, b);
     }
-    public static bool BoxToBox(Manifold m, Box a, Box b)
+    public static bool BoxToBox(ref Manifold m, Box a, Box b)
     {
         //TODO: Make a fast as fuq version for unrotated boxes.
-        return PolygonToPolygon(m, a, b);
+        return PolygonToPolygon(ref m, a, b);
     }
-    public static bool BoxToPolygon(Manifold m, Box a, Polygon b)
+    public static bool BoxToPolygon(ref Manifold m, Box a, Polygon b)
     {
-        return PolygonToPolygon(m, a, b);
+        return PolygonToPolygon(ref m, a, b);
     }
     #endregion
     #region Polygon
-    public static bool PolygonToCircle(Manifold m, Polygon a, Circle b)
+    public static bool PolygonToCircle(ref Manifold m, Polygon a, Circle b)
     {
         //Just switching the input so that we can pass it to the function above
-        bool ret = CircleToPolygon(m, b, a);
+        bool ret = CircleToPolygon(ref m, b, a);
         //Make sure that normal always points from A to B
         m.normal = -m.normal;
         return ret;
     }
-    public static bool PolygonToCapsule(Manifold m, Polygon a, Capsule b)
+    public static bool PolygonToCapsule(ref Manifold m, Polygon a, Capsule b)
     {
         //Just switching the input so that we can pass it to the function above
-        bool ret = CapsuleToPolygon(m, b, a);
+        bool ret = CapsuleToPolygon(ref m, b, a);
         //Make sure that normal always points from A to B
         m.normal = -m.normal;
         return ret;
     }
-    public static bool PolygonToBox(Manifold m, Polygon a, Box b)
+    public static bool PolygonToBox(ref Manifold m, Polygon a, Box b)
     {
-        return PolygonToPolygon(m, a, b);
+        return PolygonToPolygon(ref m, a, b);
     }
 
-    public static bool PolygonToPolygon(Manifold m, Polygon polyA, Polygon polyB)
+    public static bool PolygonToPolygon(ref Manifold m, Polygon polyA, Polygon polyB)
     {
         m.contactCount = 0;
         //make sure out polygons are updated.

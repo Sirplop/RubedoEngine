@@ -44,9 +44,8 @@ public class EntityList : IEnumerable<Entity>
             for (int i = 0; i < toAdd.Count; i++)
             {
                 var entity = toAdd[i];
-                if (!current.Contains(entity))
+                if (current.Add(entity))
                 {
-                    current.Add(entity);
                     entities.Add(entity);
 
                     if (State != null)
@@ -62,9 +61,8 @@ public class EntityList : IEnumerable<Entity>
             for (int i = 0; i < toRemove.Count; i++)
             {
                 var entity = toRemove[i];
-                if (entities.Contains(entity))
+                if (current.Remove(entity))
                 {
-                    current.Remove(entity);
                     entities.Remove(entity);
 
                     if (State != null)
@@ -84,16 +82,19 @@ public class EntityList : IEnumerable<Entity>
             toAdd.Clear();
             adding.Clear();
 
-            foreach (var entity in toAwake)
+            for (int i = 0; i < toAwake.Count; i++)
+            {
+                var entity = toAwake[i];
                 if (entity.State == State)
                     entity.Awake(State);
+            }
             toAwake.Clear();
         }
     }
     internal void Update()
     {
         foreach (var entity in entities)
-            if (entity.active)
+            if (entity._active)
                 entity.Update();
     }
 

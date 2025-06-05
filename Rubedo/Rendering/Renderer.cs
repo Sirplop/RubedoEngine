@@ -1,15 +1,17 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics;
 using Rubedo.Object;
 using System;
+using System.Collections.Generic;
 
 namespace Rubedo.Rendering;
 
 /// <summary>
-/// Wrapper for a <see cref="SpriteBatch"/> to work with a <see cref="Camera"/>.
+/// Game renderer, wrapping <see cref="SpriteBatch"/>, using <see cref="NeoCamera"/>s to render onto the screen.
 /// </summary>
-public sealed class Renderer : IDisposable
+public class Renderer : IDisposable
 {
     public enum Space
     {
@@ -17,56 +19,100 @@ public sealed class Renderer : IDisposable
         Screen
     }
 
-    private bool isDisposed;
-    private Game game;
+    private bool _isDisposed;
+    private Game _game;
+    private BasicEffect _effect;
+    private List<NeoCamera> _cameras;
+
     public SpriteBatch Sprites { get; }
-    private BasicEffect effect;
 
     public Renderer(Game game)
     {
-        if (game is null)
-        {
-            throw new ArgumentNullException(nameof(game));
-        }
-        this.game = game;
-        isDisposed = false;
+        ArgumentNullException.ThrowIfNull(game);
+        this._game = game;
+        _cameras = new List<NeoCamera>();
+        _isDisposed = false;
         Sprites = new SpriteBatch(game.GraphicsDevice);
-        effect = new BasicEffect(game.GraphicsDevice);
-        effect.FogEnabled = false;
-        effect.TextureEnabled = true;
-        effect.VertexColorEnabled = true;
-        effect.World = Matrix.Identity;
-        effect.Projection = Matrix.Identity;
-        effect.View = Matrix.Identity;
+        _effect = new BasicEffect(game.GraphicsDevice);
+        _effect.FogEnabled = false;
+        _effect.TextureEnabled = true;
+        _effect.VertexColorEnabled = true;
+        _effect.World = Matrix.Identity;
+        _effect.Projection = Matrix.Identity;
+        _effect.View = Matrix.Identity;
+    }
+
+    public void AddCamera(NeoCamera camera)
+    {
+        if (_cameras.Count == 0)
+        {
+            _cameras.Add(camera);
+            return;
+        }
+        for (int i = 0; i < _cameras.Count; i++)
+        {
+            if (_cameras[i].Order >= camera.Order)
+            {
+                _cameras.Insert(i, camera);
+                return;
+            }
+        }
+        _cameras.Add(camera); //larger than all other camera orders
+    }
+    public void RemoveCamera(NeoCamera camera)
+    {
+        for (int i = 0; i < _cameras.Count; i++)
+        {
+            if (_cameras[i] == camera)
+            {
+                _cameras.RemoveAt(i);
+                return;
+            }
+        }
     }
 
     public void Dispose()
     {
-        if (isDisposed)
+        if (_isDisposed)
             return;
-        effect?.Dispose();
+        _effect?.Dispose();
         Sprites?.Dispose();
-        isDisposed = true;
+        _isDisposed = true;
     }
 
-    public void Begin(Camera camera, SamplerState sampler)
+    public void Begin(NeoCamera camera, SamplerState sampler)
     {
-        if (camera is null)
-        {
-            effect.View = Matrix.Identity;
-            effect.Projection = Matrix.CreateOrthographicOffCenter(0, game.GraphicsDevice.Viewport.Width, 0, game.GraphicsDevice.Viewport.Height, 0, 1.0f);
-            effect.World = Matrix.Identity;
-        } else {
-            effect.View = camera.View;
-            effect.Projection = camera.Projection;
-            effect.World = camera.TransformMatrix;
-        }
+        ArgumentNullException.ThrowIfNull(camera);
 
-        Sprites.Begin(blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: effect);
+        _effect.View = camera.View;
+        _effect.Projection = camera.GetProjection();
+        _effect.World = Matrix.Identity;
+
+        Sprites.Begin(sortMode: SpriteSortMode.FrontToBack, blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: _effect);
     }
     public void End()
     {
         Sprites.End();
+    }
+
+    public void Draw(Texture2DRegion texture, Vector2 position, Vector2 origin, Color color)
+    {
+        Sprites.Draw(texture, position, color, 0, origin, Vector2.One, SpriteEffects.FlipVertically, 0);
+    }
+    public void Draw(Texture2DRegion texture, Transform transform, Color color)
+    {
+        Sprites.Draw(texture, transform.Position, color, 0, Vector2.Zero, Vector2.One, SpriteEffects.FlipVertically, 0);
+    }
+    public void Draw(Texture2DRegion texture, Transform transform, Rectangle? sourceRectangle, Color color, Vector2 origin, SpriteEffects effects, float layerDepth)
+    {
+        //because we're rendering with +Y coordinates, all sprites are flipped,
+        //so we need to invert any SpriteEffects' FlipVertically flags.
+        if (effects.HasFlag(SpriteEffects.FlipVertically))
+            effects &= ~SpriteEffects.FlipVertically;
+        else
+            effects |= SpriteEffects.FlipVertically;
+
+        Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale, effects, layerDepth, sourceRectangle);
     }
 
     public void Draw(Texture2D texture, Vector2 position, Vector2 origin, Color color)
@@ -75,7 +121,7 @@ public sealed class Renderer : IDisposable
     }
     public void Draw(Texture2D texture, Transform transform, Color color)
     {
-        Sprites.Draw(texture, transform.Position, null, color, transform.RotationDegrees, Vector2.Zero, transform.Scale, SpriteEffects.FlipVertically, 0);
+        Sprites.Draw(texture, transform.Position, null, color, transform.Rotation, Vector2.Zero, transform.Scale, SpriteEffects.FlipVertically, 0);
     }
 
     public void Draw(Texture2D texture, Transform transform, Rectangle? sourceRectangle, Color color, Vector2 origin, SpriteEffects effects, float layerDepth)
@@ -87,7 +133,7 @@ public sealed class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.RotationDegrees, origin, transform.Scale, effects, layerDepth);
+        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale, effects, layerDepth);
     }
 
     public void Draw(Texture2D texture, Rectangle? sourceRectangle, Rectangle destinationRectangle, Color color)
@@ -106,45 +152,13 @@ public sealed class Renderer : IDisposable
 
         Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
-    [Obsolete("Use the FontSystem version")]
-    public void DrawString(SpriteFont spriteFont, string text, Vector2 position, Color color, float rotation, float scale, SpriteEffects effects)
-    {
-        //because we're rendering with +Y coordinates, all sprites are flipped,
-        //so we need to invert any SpriteEffects' FlipVertically flags.
-        if (effects.HasFlag(SpriteEffects.FlipVertically))
-            effects &= ~SpriteEffects.FlipVertically;
-        else
-            effects |= SpriteEffects.FlipVertically;
-
-        Sprites.DrawString(
-            spriteFont,
-            text,
-            position,
-            color,
-            rotation,
-            Vector2.Zero,
-            scale,
-            effects, 0);
-    }
-    public void DrawString(SpriteFontBase spriteFont, Space space, string text, Vector2 position, Color color, float rotation, float scale, 
+    public void DrawString(SpriteFontBase spriteFont, Space space, string text, Vector2 position, Color color, float rotation, float scale, int layerDepth = 0,
         SpriteEffects effects = SpriteEffects.None, TextStyle style = TextStyle.None, FontSystemEffect fontEffect = FontSystemEffect.None, int effectAmount = 0)
     {
-        //if world renderer, because we're rendering with +Y coordinates, all text is flipped,
-        //so we need to invert any SpriteEffects' FlipVertically flags.
-        Vector2 scaleVec;
-        if (space == Space.World)
-        {
-            scaleVec = new Vector2(
-                effects.HasFlag(SpriteEffects.FlipHorizontally) ? -scale : scale,
-                effects.HasFlag(SpriteEffects.FlipVertically) ? scale : -scale
-            );
-        } else
-        {
-            scaleVec = new Vector2(
-                effects.HasFlag(SpriteEffects.FlipHorizontally) ? -scale : scale,
-                effects.HasFlag(SpriteEffects.FlipVertically) ? scale : -scale
-            );
-        }
+        Vector2 scaleVec = new Vector2(
+            effects.HasFlag(SpriteEffects.FlipHorizontally) ? -scale : scale,
+            effects.HasFlag(SpriteEffects.FlipVertically) ? scale : -scale
+        );
 
         Sprites.DrawString(
             spriteFont,
@@ -154,6 +168,7 @@ public sealed class Renderer : IDisposable
             rotation,
             Vector2.Zero,
             scaleVec,
+            layerDepth,
             textStyle: style,
             effect: fontEffect,
             effectAmount: effectAmount);

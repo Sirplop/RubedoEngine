@@ -233,12 +233,6 @@ public abstract class UIComponent : IDestroyable
         SetAnchor(anchor);
         SetOffset(offset);
     }
-
-    public void SetScreenOffset(Vector2 offset)
-    {
-        Rendering.Screen screen = RubedoEngine.Instance.Screen;
-        SetRelativeOffset(new Rectangle(screen.LetterboxWidth, screen.LetterboxHeight, screen.Width, screen.Height), offset);
-    }
     /// <summary>
     /// Sets this component's offset relative to the height/width of the given rectangle.
     /// </summary>

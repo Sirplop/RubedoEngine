@@ -18,12 +18,12 @@ public class Collider : Component
 
     public readonly Shape shape;
 
-    protected Collider(float radius) : base(true, true)
+    protected Collider(float radius) : base()
     {
         shape = new Circle(compTransform, radius);
     }
     
-    protected Collider(ShapeType type, float r1, float r2) : base(true, true)
+    protected Collider(ShapeType type, float r1, float r2) : base()
     {
         switch (type)
         {
@@ -37,7 +37,7 @@ public class Collider : Component
                 throw new ArgumentException("Given ShapeType does not belong in this constructor!");
         }
     }
-    protected Collider(List<Vector2> vertices) : base(true, true)
+    protected Collider(List<Vector2> vertices) : base()
     {
         shape = new Polygon(compTransform, vertices);
     }

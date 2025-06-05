@@ -4,14 +4,14 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Rubedo.Rendering;
 using Rubedo.Internal.Assets;
+using Rubedo.Graphics;
 
 namespace Rubedo.Components;
 
 public class Sprite : Component
 {
-    protected Texture2D _texture;
+    protected Texture2DRegion _texture;
     protected Color _color = Color.White;
-    protected int layer = 0;
     protected Vector2 _pivot;
     public Vector2 Pivot
     {
@@ -39,17 +39,16 @@ public class Sprite : Component
     public float Width => _texture.Width;
     public float Height => _texture.Height;
 
-    public Vector2 HalfWH => _halfWH;
-    protected Vector2 _halfWH;
+    public float layer = 0;
 
-    public Sprite(string texture) : this(AssetManager.LoadTexture(texture), true, true) { }
-    public Sprite(string texture, bool active, bool visible) : this(AssetManager.LoadTexture(texture), active, visible) { }
-    public Sprite(Texture2D texture) : this(texture, true, true) { }
-    public Sprite(Texture2D texture, bool active, bool visible) : base(active, visible)
+    public Sprite(string texture) : this(AssetManager.LoadTexture(texture), 0) { }
+    public Sprite(string texture, float layer) : this(AssetManager.LoadTexture(texture), layer) { }
+    public Sprite(Texture2D texture) : this(texture, 0) { }
+    public Sprite(Texture2D texture, float layer) : base()
     {
         _texture = texture ?? throw new NullReferenceException("Sprite texture cannot be null!");
+        this.layer = layer;
         Pivot = new Vector2(0.5f, 0.5f);
-        _halfWH = new Vector2(Width * 0.5f, Height * 0.5f);
     }
 
     public void SetColor(Color color)
@@ -59,20 +58,19 @@ public class Sprite : Component
 
     public override void Draw(Renderer sb)
     {
-        if (!visible)
+        if (!Visible)
             return;
 
         sb.Draw(
             _texture,
-            compTransform.Position,
+            compTransform,
             null,
             _color,
-            compTransform.Rotation,
             PixelPivot,
-            compTransform.Scale,
-            SpriteEffects.None, 0f);
+            SpriteEffects.None, layer);
     }
 
+    /*
     [Obsolete]
     public bool Test(Vector2 point)
     {
@@ -91,5 +89,5 @@ public class Sprite : Component
         _texture.GetData(0, rect, T, 0, 1);
 
         return T[0].A != 0;
-    }
+    }*/
 }
