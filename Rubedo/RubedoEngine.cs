@@ -25,13 +25,13 @@ public class RubedoEngine : Game
     public static RubedoEngine Instance { get; private set; }
     public static GraphicsDeviceManager Graphics { get; private set; }
     public static NLog.Logger Logger { get; protected set; }
+    public static StateManager StateManager => Instance._stateManager;
+    public static GameState CurrentState => Instance._stateManager.CurrentState();
 
     protected internal Renderer _renderer;
-    protected NeoCamera _camera;
     protected StateManager _stateManager;
     protected PhysicsWorld _physicsWorld;
 
-    public NeoCamera Camera => _camera;
     public PhysicsWorld World => _physicsWorld;
 
     public Timer _physicsTimer;
@@ -57,9 +57,8 @@ public class RubedoEngine : Game
     protected override void Initialize()
     {
         _renderer = new Renderer(this);
-        _camera = new NeoCamera(new PixelViewport(GraphicsDevice, Window, 500, 500), 0);
 
-        GUI.Setup(this, _camera);
+        GUI.Setup(this);
         GUI.Root = new GUIRoot();
 
         _physicsTimer = new Timer();
@@ -96,13 +95,8 @@ public class RubedoEngine : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        _camera.SetViewport();
         GraphicsDevice.Clear(Color.Black);
-        _renderer.Begin(_camera, SamplerState.PointClamp);
         _stateManager.Draw(_renderer);
-        _renderer.End();
-        _camera.ResetViewport();
-        GUI.Root.Draw();
 
         base.Draw(gameTime);
     }

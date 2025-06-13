@@ -170,15 +170,6 @@ public class ComponentList : IEnumerable<Component>
         LockState = LockStates.Open;
     }
 
-    internal void Draw(Renderer sb)
-    {
-        LockState = LockStates.NotAllowed;
-        foreach (var component in components)
-            if (component._visible)
-                component.Draw(sb);
-        LockState = LockStates.Open;
-    }
-
     public IEnumerator<Component> GetEnumerator()
     {
         return current.GetEnumerator();

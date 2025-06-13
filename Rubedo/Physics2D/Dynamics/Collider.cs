@@ -3,6 +3,7 @@ using Rubedo.Components;
 using System.Collections.Generic;
 using System;
 using Rubedo.Physics2D.Dynamics.Shapes;
+using Rubedo.Object;
 
 namespace Rubedo.Physics2D.Dynamics;
 
@@ -20,7 +21,7 @@ public class Collider : Component
 
     protected Collider(float radius) : base()
     {
-        shape = new Circle(compTransform, radius);
+        shape = new Circle(radius);
     }
     
     protected Collider(ShapeType type, float r1, float r2) : base()
@@ -28,10 +29,10 @@ public class Collider : Component
         switch (type)
         {
             case ShapeType.Box:
-                shape = new Box(compTransform, r1, r2);
+                shape = new Box(r1, r2);
                 break;
             case ShapeType.Capsule:
-                shape = new Capsule(compTransform, r1, r2);
+                shape = new Capsule(r1, r2);
                 break;
             default:
                 throw new ArgumentException("Given ShapeType does not belong in this constructor!");
@@ -39,7 +40,7 @@ public class Collider : Component
     }
     protected Collider(List<Vector2> vertices) : base()
     {
-        shape = new Polygon(compTransform, vertices);
+        shape = new Polygon(vertices);
     }
 
     public static Collider CreateCircle(float radius)
@@ -82,6 +83,17 @@ public class Collider : Component
                 return CreatePolygon(vertices);
         }
         return null;
+    }
+
+    public override void Added(Entity entity)
+    {
+        base.Added(entity);
+        shape.SetTransform(entity.Transform);
+    }
+    public override void Removed(Entity entity)
+    {
+        base.Removed(entity);
+        shape.SetTransform(null); //This WILL cause crashes if you try to do stuff without transforms!
     }
 
     public override void TransformChanged()

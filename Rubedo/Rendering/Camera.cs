@@ -1,29 +1,43 @@
 ﻿//Heavily based off of Apos.Camera: https://github.com/Apostolique/Apos.Camera
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Internal;
 using Rubedo.Lib;
 using Rubedo.Rendering.Viewports;
 using System;
+using System.Collections.Generic;
 
 namespace Rubedo.Rendering;
 
 /// <summary>
-/// TODO: I am NeoCamera, and I don't have a summary yet.
+/// A camera class that renders things to the game window through a <see cref="IVirtualViewport"/>.
 /// </summary>
-public class NeoCamera
+public class Camera : IDisposable
 {
+    /* 
+     *  Cameras aren't components because they don't use any features
+     *  of the ECS, and are quite specialized, so why bother?
+     */
+
+    public GameState State { get; private set; }
     private Vector2 _xy = Vector2.Zero;
-    private Vector3 _xyz = new Vector3(Vector2.Zero, 1f);
+    private Vector3 _xyz = new Vector3(0, 0, 1f);
     private float _focalLength = 1f;
     private int _order;
+    private bool _disposed = false;
 
     public float X
     {
         get => _xy.X;
         set
         {
-            _xy.X = value;
-            _xyz.X = value;
+            if (_xy.X != value)
+            {
+                _viewRects.Clear();
+                _xy.X = value;
+                _xyz.X = value;
+            }
         }
     }
     public float Y
@@ -31,8 +45,12 @@ public class NeoCamera
         get => _xy.Y;
         set
         {
-            _xy.Y = value;
-            _xyz.Y = value;
+            if (_xy.Y != value)
+            {
+                _viewRects.Clear();
+                _xy.Y = value;
+                _xyz.Y = value;
+            }
         }
     }
     public float Z
@@ -40,7 +58,11 @@ public class NeoCamera
         get => _xyz.Z;
         set
         {
-            _xyz.Z = value;
+            if (_xyz.Z != value)
+            {
+                _viewRects.Clear();
+                _xyz.Z = value;
+            }
         }
     }
 
@@ -49,18 +71,43 @@ public class NeoCamera
         get => _focalLength;
         set
         {
-            _focalLength = value > 0.01f ? value : 0.01f;
+            if (_focalLength != value)
+            {
+                _viewRects.Clear();
+                _focalLength = value > 0.01f ? value : 0.01f;
+            }
         }
     }
 
-    public float Rotation { get; set; } = 0f;
-    public Vector2 Scale { get; set; } = Vector2.One;
+    public float Rotation { 
+        get => _rotation; 
+        set
+        {
+            if (_rotation != value)
+            {
+                _rotation = value;
+                _viewRects.Clear();
+            }
+        }
+    }
+    private float _rotation = 0f;
+    public Vector2 Scale 
+    {
+        get => _scale;
+        set
+        {
+            _viewRects.Clear();
+            _scale = value;
+        }
+    }
+    private Vector2 _scale = Vector2.One;
 
     public Vector2 XY
     {
         get => _xy;
         set
         {
+            _viewRects.Clear();
             X = value.X;
             Y = value.Y;
         }
@@ -70,24 +117,36 @@ public class NeoCamera
         get => _xyz;
         set
         {
+            _viewRects.Clear();
             X = value.X;
             Y = value.Y;
             Z = value.Z;
         }
     }
 
-    public IVirtualViewport VirtualViewport
-    {
-        get;
-        set;
-    }
+    public IVirtualViewport VirtualViewport { get; set; }
 
-    public int Order => _order;
+    /// <summary>
+    /// Determines which cameras are drawn first. Lower is drawn first.
+    /// </summary>
+    public int RenderOrder => _order;
 
-    public NeoCamera(IVirtualViewport virtualViewport, int order)
+    /// <summary>
+    /// The layers this camera renders.
+    /// </summary>
+    public readonly List<int> RenderLayers = new List<int>();
+
+    /// <summary>
+    /// The sampler state this camera will be rendered with.
+    /// </summary>
+    public SamplerState samplerState = SamplerState.PointClamp;
+
+    public Camera(GameState state, IVirtualViewport virtualViewport, int renderOrder)
     {
         VirtualViewport = virtualViewport;
-        _order = order;
+        _order = renderOrder;
+        State = state;
+        state.AddCamera(this);
     }
 
     public void SetViewport()
@@ -171,9 +230,36 @@ public class NeoCamera
         return scaleZ > 0 && scaleZ < maxScale;
     }
 
+    /// <summary>
+    /// Checks if the given rectangle intersects with this camera's view. AKA is the rectangle visible.
+    /// </summary>
+    public bool Intersects(RectF rect)
+    {
+        return ViewRect.Intersects(rect);
+    }
+    /// <summary>
+    /// Checks if the given rectangle intersects with this camera's view. AKA is the rectangle visible.
+    /// </summary>
+    public bool Intersects(in AABB aabb)
+    {
+        return ViewRect.Intersects(in aabb);
+    }
+
+    /// <summary>
+    /// Gets the world-space viewing rectangle.
+    /// </summary>
     public RectF ViewRect => GetViewRect(0);
+
+    private readonly Dictionary<float, RectF> _viewRects = new Dictionary<float, RectF>();
+
+    /// <summary>
+    /// Gets the world-space viewing rectangle.
+    /// </summary>
     public RectF GetViewRect(float z = 0)
     {
+        if (_viewRects.TryGetValue(z, out RectF rect))
+            return rect;
+
         BoundingFrustum frustum = GetBoundingFrustum(z);
         Vector3[] corners = frustum.GetCorners();
         Vector3 a = corners[0];
@@ -188,8 +274,9 @@ public class NeoCamera
 
         float width = right - left;
         float height = bottom - top;
-
-        return new RectF(left, top, width, height);
+        rect = new RectF(left, top, width, height);
+        _viewRects[z] = rect;
+        return rect;
     }
     public BoundingFrustum GetBoundingFrustum(float z = 0)
     {
@@ -199,9 +286,17 @@ public class NeoCamera
         return new BoundingFrustum(view * projection);
     }
 
-    public void GetExtents(out float width, out float height)
+    internal void OnWindowSizeChanged(object sender, EventArgs args)
     {
-        width = VirtualViewport.Width / 24f;
-        height = VirtualViewport.Height / 24f;
+        _viewRects.Clear();
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+        State.RemoveCamera(this);
+        GC.SuppressFinalize(this);
     }
 }

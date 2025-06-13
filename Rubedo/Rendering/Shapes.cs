@@ -22,7 +22,7 @@ public sealed class Shapes : IDisposable
     private int indexCount;
     private int vertexCount;
 
-    private NeoCamera camera;
+    private Camera camera;
 
     public const int CIRCLE_SEGMENTS = 32;
     public const int CAPSULE_SEGMENTS = 40;
@@ -77,8 +77,9 @@ public sealed class Shapes : IDisposable
         isDisposed = true;
     }
 
-    public void Begin(NeoCamera camera)
+    public void Begin(Camera camera)
     {
+        camera.SetViewport();
         this.camera = camera;
         if (started)
         {
@@ -101,6 +102,7 @@ public sealed class Shapes : IDisposable
 
         Flush();
         started = false;
+        camera.ResetViewport();
     }
     private void Flush()
     {

@@ -182,26 +182,27 @@ public static class InputManager
         return false;
     }
 
-    public static Vector2 MouseWorldPosition()
+    /// <summary>
+    /// Gets the mouse cursor's position in world-space, according to a camera.
+    /// </summary>
+    /// <param name="camera">The camera to position by. If null, the <see cref="GameState.MainCamera"/> will be used.</param>
+    /// <returns></returns>
+    public static Vector2 MouseWorldPosition(Camera camera = null)
     {
-        return RubedoEngine.Instance.Camera.ScreenToWorld(_currentMouseState.Position.ToVector2());
+        if (camera == null)
+            return RubedoEngine.CurrentState.MainCamera.ScreenToWorld(_currentMouseState.Position.ToVector2());
+        return camera.ScreenToWorld(_currentMouseState.Position.ToVector2());
     }
-    public static Vector2 MouseScreenPosition()
+    /// <summary>
+    /// Gets the mouse cursor's position in screen-space, according to a camera.
+    /// </summary>
+    /// <param name="camera">The camera to position by. If null, the <see cref="GameState.MainCamera"/> will be used.</param>
+    /// <returns></returns>
+    public static Vector2 MouseScreenPosition(Camera camera = null)
     {
-        return _currentMouseState.Position.ToVector2() + RubedoEngine.Instance.Camera.XY;
-        /*
-        Screen screen = RubedoEngine.Instance.Screen;
-        int paddingWidth = screen.PaddingWidth;
-        int paddingHeight = screen.PaddingHeight;
-        Rectangle bounds = RubedoEngine.Instance.Window.ClientBounds;
-        bounds.Width -= paddingWidth * 2;
-        bounds.Height -= paddingHeight * 2;
-        Vector2 pos = _currentMouseState.Position.ToVector2();
-        pos.X -= paddingWidth;
-        pos.Y -= paddingHeight;
-        pos.X = Lib.Math.Mix(0, screen.Width, pos.X / bounds.Width);
-        pos.Y = Lib.Math.Mix(0, screen.Height, pos.Y / bounds.Height);
-        return pos;*/
+        if (camera == null)
+            return _currentMouseState.Position.ToVector2() + RubedoEngine.CurrentState.MainCamera.XY;
+        return _currentMouseState.Position.ToVector2() + camera.XY;
     }
     /// <summary>
     /// Position-agnostic screen-space movement vector for the mouse.

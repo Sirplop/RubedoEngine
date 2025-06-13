@@ -18,12 +18,58 @@ public class GameState
     protected string _name = "";
 
     protected internal EntityList Entities { get; private set; } //should probably get moved into the statemanager.
+    protected internal RenderableComponentList Renderables { get; private set; }
+
+    protected List<Camera> _cameras;
+    /// <summary>
+    /// The "primary" camera, useful if most things are getting drawn to one camera.
+    /// </summary>
+    public Camera MainCamera => mainCamera;
+    protected Camera mainCamera = null;
 
     public string Name => _name;
     public GameState(StateManager sm)
     {
         Entities = new EntityList(this);
+        Renderables = new RenderableComponentList();
         stateManager = sm;
+        _cameras = new List<Camera>();
+        Renderables.Add(GUI.Root);
+    }
+
+    public void AddCamera(Camera camera, bool isMainCamera = false)
+    {
+        RubedoEngine.Instance.Window.ClientSizeChanged += camera.OnWindowSizeChanged;
+
+        if (isMainCamera)
+            mainCamera = camera;
+        if (_cameras.Count == 0)
+        {
+            _cameras.Add(camera);
+            mainCamera = camera; //by default, if there's only one camera, this is the main one.
+            return;
+        }
+        for (int i = 0; i < _cameras.Count; i++)
+        {
+            if (_cameras[i].RenderOrder > camera.RenderOrder)
+            {
+                _cameras.Insert(i, camera);
+                return;
+            }
+        }
+        _cameras.Add(camera); //larger than all other camera orders
+    }
+    public void RemoveCamera(Camera camera)
+    {
+        for (int i = 0; i < _cameras.Count; i++)
+        {
+            if (_cameras[i] == camera)
+            {
+                _cameras.RemoveAt(i);
+                RubedoEngine.Instance.Window.ClientSizeChanged -= camera.OnWindowSizeChanged;
+                return;
+            }
+        }
     }
 
     public virtual void Enter()
@@ -58,11 +104,30 @@ public class GameState
 
     public virtual void Draw(Renderer sb)
     {
+        for (int i = 0; i < _cameras.Count; i++)
+        {
+            Camera camera = _cameras[i];
+            camera.SetViewport();
+            for (int h = 0; h < camera.RenderLayers.Count; h++)
+            {
+                int layer = camera.RenderLayers[h];
+                List<IRenderable> renderables = Renderables.ComponentsWithLayer(layer);
+                sb.Begin(camera, camera.samplerState);
+                for (int j = 0; j < renderables.Count; j++)
+                {
+                    renderables[j].Render(sb, camera);
+                }
+                sb.End();
+            }
+            camera.ResetViewport();
+        }
+
+        /*
         foreach (Entity obj in Entities)
         {
             if (obj._visible)
                 obj.Draw(sb);
-        }
+        }*/
     }
 
     #region Object adding

@@ -10,18 +10,7 @@ public abstract class Component : ITransformable, IDestroyable
     public bool IsDestroyed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = false;
 
     public Entity Entity { get; protected set; }
-    /// <summary>
-    /// Short for <see cref="Entity.transform"/>
-    /// </summary>
-    public Transform Transform
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Entity.transform;
-    }
-    /// <summary>
-    /// This component's local transform.
-    /// </summary>
-    public Transform compTransform;
+    //public Transform Transform { get; protected set; }
     public bool Active
     {
         get => Entity._active && _active;
@@ -53,19 +42,12 @@ public abstract class Component : ITransformable, IDestroyable
     }
     internal bool _visible = true;
 
-    public Component()
-    {
-        compTransform = new Transform();
-        compTransform.attached = this;
-    }
-
     /// <summary>
     /// Called when this component is added to an Entity.
     /// </summary>
     public virtual void Added(Entity entity)
     {
         Entity = entity;
-        compTransform.SetParent(entity.transform);
     }
     /// <summary>
     /// Called when this component is removed from an Entity.
@@ -74,7 +56,6 @@ public abstract class Component : ITransformable, IDestroyable
     public virtual void Removed(Entity entity)
     {
         Entity = null;
-        compTransform.SetParent(null);
     }
 
     /// <summary>
@@ -88,10 +69,7 @@ public abstract class Component : ITransformable, IDestroyable
     /// <summary>
     /// Called when the Entity this component is attached to is removed from a scene.
     /// </summary>
-    public virtual void EntityRemoved(GameState state) 
-    {
-        this.Entity = null;
-    }
+    public virtual void EntityRemoved(GameState state) { }
 
     /// <summary>
     /// Called when this component is activated, or when its parent entity is activated.
@@ -108,17 +86,12 @@ public abstract class Component : ITransformable, IDestroyable
     /// </summary>
     public virtual void Update() { }
     /// <summary>
-    /// Called when this transform receives a change in a frame, I.E. the transform is marked "dirty".
+    /// Called when this component's transform receives a change in a frame, I.E. the transform is marked "dirty".
     /// </summary>
     public virtual void TransformChanged() { }
 
     /// <summary>
-    /// Draws the component, if needed.
-    /// </summary>
-    public virtual void Draw(Renderer sb)  { }
-
-    /// <summary>
-    /// 
+    /// Called when this component is destroyed.
     /// </summary>
     public virtual void OnDestroy() { }
 
@@ -134,7 +107,6 @@ public abstract class Component : ITransformable, IDestroyable
     public void Destroy()
     {
         OnDestroy();
-        this.compTransform = null;
         IsDestroyed = true;
     }
 }

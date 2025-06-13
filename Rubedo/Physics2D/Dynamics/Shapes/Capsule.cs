@@ -20,7 +20,7 @@ public class Capsule : Shape
     public Vector2 transEnd;
     public float transRadius;
 
-    public Capsule(Transform refTransform, float length, float radius) : base(refTransform)
+    public Capsule(float length, float radius)
     {
         type = ShapeType.Capsule;
         this.radius = radius;
@@ -65,11 +65,11 @@ public class Capsule : Shape
         if (!transformDirty)
             return;
 
-        Vector2 pos = transform.Position;
-        float radians = transform.Rotation;
+        Vector2 pos = _transform.Position;
+        float radians = _transform.Rotation;
         float sin = MathF.Sin(radians);
         float cos = MathF.Cos(radians);
-        Vector2 scale = transform.Scale;
+        Vector2 scale = _transform.Scale;
 
         Vector2 s = new Vector2(0, -length * 0.5f * (scale.Y * 0.5f + 0.5f));
         Vector2 e = new Vector2(0, -s.Y);

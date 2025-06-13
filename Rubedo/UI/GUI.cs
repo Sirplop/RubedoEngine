@@ -30,11 +30,6 @@ public static class GUI
     public static SpriteBatch SpriteBatch { get; set; } = null!;
 
     /// <summary>
-    /// The camera that renders the UI.
-    /// </summary>
-    public static NeoCamera UICamera { get; set; }
-
-    /// <summary>
     /// Defaults to LinearClamp.
     /// </summary>
     public static SamplerState GuiSampler { get; set; } = SamplerState.PointClamp;
@@ -48,10 +43,9 @@ public static class GUI
     private static bool _beginCalled = false;
     private static readonly Stack<(Rectangle, bool)> _scissorStack = new Stack<(Rectangle, bool)>();
 
-    public static void Setup(Game game, NeoCamera camera)
+    public static void Setup(Game game)
     {
         SpriteBatch = new SpriteBatch(game.GraphicsDevice);
-        UICamera = camera;
     }
 
     /* //immediate mode scissoring.

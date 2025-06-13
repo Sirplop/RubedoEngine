@@ -18,7 +18,7 @@ public class Box : Polygon
     public float Top => vertices[2].Y;
     public float Bottom => vertices[0].Y;
 
-    public Box(Transform refTransform, float width, float height) : base(refTransform)
+    public Box(float width, float height) : base()
     {
         type = ShapeType.Box;
         this.width = width;

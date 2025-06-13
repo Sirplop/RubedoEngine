@@ -77,8 +77,8 @@ public static class PhysicsCollisions
     #region Circle
     public static bool CircleToCircle(ref Manifold m, Circle circleA, Circle circleB)
     {
-        return CircleToCircle(ref m, circleA.transform.Position, circleA.radius * Lib.Math.Max(circleA.transform.Scale),
-            circleB.transform.Position, circleB.radius * Lib.Math.Max(circleB.transform.Scale));
+        return CircleToCircle(ref m, circleA.Transform.Position, circleA.radius * Lib.Math.Max(circleA.Transform.Scale),
+            circleB.Transform.Position, circleB.radius * Lib.Math.Max(circleB.Transform.Scale));
     }
     public static bool CircleToCircle(ref Manifold m, Vector2 circPos1, float circRad1, Vector2 circPos2, float circRad2)
     {
@@ -122,14 +122,14 @@ public static class PhysicsCollisions
         //we pick the "most relevant circle" to do collision with.
         //Basically, we find the closest point to our shape on the capsule line
         //and do a circle collision there.
-        Vector2 circlePos = circle.transform.Position;
+        Vector2 circlePos = circle.Transform.Position;
         capsule.TransformPoints();
         ShapeUtility.ClosestPointOnLine(ref capsule.transStart, ref capsule.transEnd, ref circlePos, out Vector2 closestPoint);
-        return CircleToCircle(ref m, circlePos, circle.radius * Lib.Math.Max(circle.transform.Scale), closestPoint, capsule.transRadius);
+        return CircleToCircle(ref m, circlePos, circle.radius * Lib.Math.Max(circle.Transform.Scale), closestPoint, capsule.transRadius);
     }
     public static bool CircleToPolygon(ref Manifold m, Circle circle, Polygon poly)
     {
-        return CircleToPolygon(ref m, circle.transform.Position, circle.radius * Lib.Math.Max(circle.transform.Scale), poly);
+        return CircleToPolygon(ref m, circle.Transform.Position, circle.radius * Lib.Math.Max(circle.Transform.Scale), poly);
     }
     
     public static bool CircleToPolygon(ref Manifold m, Vector2 circPos, float radius, Polygon poly)
@@ -269,7 +269,7 @@ public static class PhysicsCollisions
         capsule.TransformPoints();
         poly.TransformVertices();
         poly.TransformNormals();
-        Vector2 polyPos = poly.transform.Position;
+        Vector2 polyPos = poly.Transform.Position;
 
         ref Vector2 start = ref capsule.transStart;
         ref Vector2 end = ref capsule.transEnd;

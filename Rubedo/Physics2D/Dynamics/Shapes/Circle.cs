@@ -9,7 +9,7 @@ public class Circle : Shape
 {
     public float radius;
 
-    public Circle(Transform refTransform, float radius) : base(refTransform)
+    public Circle(float radius)
     {
         this.radius = radius;
         type = ShapeType.Circle;
@@ -18,8 +18,8 @@ public class Circle : Shape
 
     public override AABB GetBoundingBox()
     {
-        Vector2 min = transform.Position - Vector2.One * radius * Lib.Math.Max(transform.Scale);
-        Vector2 max = transform.Position + Vector2.One * radius * Lib.Math.Max(transform.Scale);
+        Vector2 min = Transform.Position - Vector2.One * radius * Lib.Math.Max(Transform.Scale);
+        Vector2 max = Transform.Position + Vector2.One * radius * Lib.Math.Max(Transform.Scale);
         return new AABB(min, max);
     }
 
@@ -36,7 +36,7 @@ public class Circle : Shape
     {
         result = new RaycastResult();
 
-        Vector2 delta = ray.origin - transform.Position;
+        Vector2 delta = ray.origin - Transform.Position;
 
         // Since  length of ray direction is always 1, therefore a = 1
         float b = 2 * Vector2.Dot(ray.direction, delta);
@@ -63,7 +63,7 @@ public class Circle : Shape
 
         result.point = ray.origin + ray.direction * t;
         result.distance = t;
-        result.normal = Vector2.Normalize(result.point - transform.Position);
+        result.normal = Vector2.Normalize(result.point - Transform.Position);
 
         return t <= distance;
     }

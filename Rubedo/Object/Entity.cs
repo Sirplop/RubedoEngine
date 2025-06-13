@@ -41,7 +41,12 @@ public sealed class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     }
     internal bool _visible = true;
 
-    public Transform transform;
+    public Transform Transform { get; private set; }
+
+    /// <summary>
+    /// Shortcut for <see cref="Transform.Parent"/>. Will be null if no parent.
+    /// </summary>
+    public Transform Parent => Transform.Parent;
 
     internal bool _hasAwakened = false;
 
@@ -50,8 +55,8 @@ public sealed class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     public Entity(Vector2 position, float rotation) : this(position, rotation, Vector2.One) { }
     public Entity(Vector2 position, float rotation, Vector2 scale)
     {
-        transform = new Transform(position, rotation, scale);
-        transform.attached = this;
+        Transform = new Transform(position, rotation, scale);
+        Transform.attached = this;
         Components = new ComponentList(this);
     }
 
@@ -103,11 +108,6 @@ public sealed class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     {
         Components.TransformChanged();
     }
-    internal void Draw(Renderer sb)
-    {
-        if (_visible)
-            Components.Draw(sb);
-    }
 
     public Entity Add(Component component)
     {
@@ -142,7 +142,7 @@ public sealed class Entity : IEnumerable<Component>, IEnumerable, ITransformable
             c.Destroy();
         }
         this.Components = null;
-        this.transform = null;
+        this.Transform = null;
         State.Remove(this);
         IsDestroyed = true;
     }

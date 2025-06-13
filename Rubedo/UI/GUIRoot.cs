@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Input;
+using Rubedo.Lib;
+using Rubedo.Rendering;
 using Rubedo.Rendering.Viewports;
 using System;
 
@@ -8,11 +10,22 @@ namespace Rubedo.UI;
 /// <summary>
 /// The root component for all UI. Updates and layouts are propogated from this. Should (probably) only ever have one.
 /// </summary>
-public class GUIRoot : UIComponent, IDisposable
+public class GUIRoot : UIComponent, IDisposable, IRenderable
 {
     private bool _disposed;
 
     public Selectable CurrentFocus => _currentFocus;
+
+    public RectF Bounds => RubedoEngine.Graphics.GraphicsDevice.Viewport.Bounds;
+
+    public bool Visible { get => _visible; set => _visible = value; }
+    private bool _visible = true;
+
+    public float LayerDepth { get => _layerDepth; set => _layerDepth = value; }
+    private float _layerDepth = 0;
+    public int RenderLayer { get => _renderLayer; set => _renderLayer = value; }
+    private int _renderLayer = (int)Rendering.RenderLayer.UI;
+
     protected Selectable _currentFocus = null;
     private const float MOUSE_DEADZONE = 10f; //squared value
 
@@ -108,10 +121,13 @@ public class GUIRoot : UIComponent, IDisposable
         UpdateLayout();
     }
 
-    public override void Draw()
+    public bool IsVisibleToCamera(Camera camera)
     {
-        GUI.UICamera.SetViewport();
+        return true; //gui is always rendered.
+    }
+
+    public void Render(Renderer renderer, Camera camera)
+    {
         base.Draw();
-        GUI.UICamera.ResetViewport();
     }
 }

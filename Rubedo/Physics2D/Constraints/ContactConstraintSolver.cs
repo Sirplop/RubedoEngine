@@ -26,8 +26,8 @@ public static class ContactConstraintSolver
             Contact c = m.contacts[i];
 
             // Relative velocity at contact
-            c.ra = c.position - m.A.position;
-            c.rb = c.position - m.B.position;
+            c.ra = c.position - m.A.Position;
+            c.rb = c.position - m.B.Position;
 
             RelVel(ref m, ref c, out Vector2 rv);
 

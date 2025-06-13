@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Graphics;
+using Rubedo.Internal;
 using Rubedo.Object;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Collections.Generic;
 namespace Rubedo.Rendering;
 
 /// <summary>
-/// Game renderer, wrapping <see cref="SpriteBatch"/>, using <see cref="NeoCamera"/>s to render onto the screen.
+/// Game renderer, wrapping <see cref="SpriteBatch"/>, using <see cref="Camera"/>s to render onto the screen.
 /// </summary>
 public class Renderer : IDisposable
 {
@@ -22,7 +23,6 @@ public class Renderer : IDisposable
     private bool _isDisposed;
     private Game _game;
     private BasicEffect _effect;
-    private List<NeoCamera> _cameras;
 
     public SpriteBatch Sprites { get; }
 
@@ -30,7 +30,6 @@ public class Renderer : IDisposable
     {
         ArgumentNullException.ThrowIfNull(game);
         this._game = game;
-        _cameras = new List<NeoCamera>();
         _isDisposed = false;
         Sprites = new SpriteBatch(game.GraphicsDevice);
         _effect = new BasicEffect(game.GraphicsDevice);
@@ -42,35 +41,6 @@ public class Renderer : IDisposable
         _effect.View = Matrix.Identity;
     }
 
-    public void AddCamera(NeoCamera camera)
-    {
-        if (_cameras.Count == 0)
-        {
-            _cameras.Add(camera);
-            return;
-        }
-        for (int i = 0; i < _cameras.Count; i++)
-        {
-            if (_cameras[i].Order >= camera.Order)
-            {
-                _cameras.Insert(i, camera);
-                return;
-            }
-        }
-        _cameras.Add(camera); //larger than all other camera orders
-    }
-    public void RemoveCamera(NeoCamera camera)
-    {
-        for (int i = 0; i < _cameras.Count; i++)
-        {
-            if (_cameras[i] == camera)
-            {
-                _cameras.RemoveAt(i);
-                return;
-            }
-        }
-    }
-
     public void Dispose()
     {
         if (_isDisposed)
@@ -78,9 +48,10 @@ public class Renderer : IDisposable
         _effect?.Dispose();
         Sprites?.Dispose();
         _isDisposed = true;
+        GC.SuppressFinalize(this);
     }
 
-    public void Begin(NeoCamera camera, SamplerState sampler)
+    public void Begin(Camera camera, SamplerState sampler)
     {
         ArgumentNullException.ThrowIfNull(camera);
 

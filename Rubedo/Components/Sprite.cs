@@ -1,14 +1,15 @@
-﻿using Rubedo.Object;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Rubedo.Rendering;
 using Rubedo.Internal.Assets;
 using Rubedo.Graphics;
+using Rubedo.Lib;
+using Rubedo.Object;
 
 namespace Rubedo.Components;
 
-public class Sprite : Component
+public class Sprite : RenderableComponent
 {
     protected Texture2DRegion _texture;
     protected Color _color = Color.White;
@@ -39,16 +40,52 @@ public class Sprite : Component
     public float Width => _texture.Width;
     public float Height => _texture.Height;
 
-    public float layer = 0;
+    public override RectF Bounds
+    {
+        get
+        {
+            if (_boundsDirty)
+            {
+                _boundsDirty = false;
+                Rectangle bounds = _texture.Bounds;
+                Vector2 position = Entity.Transform.Position;
+                Vector2 scale = Entity.Transform.Scale;
+                float rotation = Entity.Transform.Rotation;
+
+                Vector2 a = Lib.MathV.RotateRadians(new Vector2(bounds.Left, bounds.Top), rotation, scale.X, scale.Y);
+                Vector2 b = Lib.MathV.RotateRadians(new Vector2(bounds.Right, bounds.Top), rotation, scale.X, scale.Y);
+                Vector2 c = Lib.MathV.RotateRadians(new Vector2(bounds.Left, bounds.Bottom), rotation, scale.X, scale.Y);
+                Vector2 d = Lib.MathV.RotateRadians(new Vector2(bounds.Right, bounds.Bottom), rotation, scale.X, scale.Y);
+
+                float left = Lib.Math.Min(a.X, b.X, c.X, d.X);
+                float right = Lib.Math.Max(a.X, b.X, c.X, d.X);
+                float top = Lib.Math.Min(a.Y, b.Y, c.Y, d.Y);
+                float bottom = Lib.Math.Max(a.Y, b.Y, c.Y, d.Y);
+
+                float width = right - left;
+                float height = bottom - top;
+
+                _bounds = new RectF(position.X + left - width / 2, position.Y + top - height / 2, width, height);
+            }
+            return _bounds;
+        }
+    }
+    private RectF _bounds;
+    private bool _boundsDirty = true;
 
     public Sprite(string texture) : this(AssetManager.LoadTexture(texture), 0) { }
     public Sprite(string texture, float layer) : this(AssetManager.LoadTexture(texture), layer) { }
     public Sprite(Texture2D texture) : this(texture, 0) { }
-    public Sprite(Texture2D texture, float layer) : base()
+    public Sprite(Texture2D texture, float layerDepth) : base()
     {
         _texture = texture ?? throw new NullReferenceException("Sprite texture cannot be null!");
-        this.layer = layer;
+        _layerDepth = layerDepth;
         Pivot = new Vector2(0.5f, 0.5f);
+    }
+
+    public override void TransformChanged()
+    {
+        _boundsDirty = true;
     }
 
     public void SetColor(Color color)
@@ -56,38 +93,17 @@ public class Sprite : Component
         this._color = color;
     }
 
-    public override void Draw(Renderer sb)
+    public override void Render(Renderer sb, Camera camera)
     {
-        if (!Visible)
+        if (!Visible || !IsVisibleToCamera(camera))
             return;
 
         sb.Draw(
             _texture,
-            compTransform,
+            Entity.Transform,
             null,
             _color,
             PixelPivot,
-            SpriteEffects.None, layer);
+            SpriteEffects.None, _layerDepth);
     }
-
-    /*
-    [Obsolete]
-    public bool Test(Vector2 point)
-    {
-        Color[] T = new Color[1];
-        Vector2 pos = compTransform.Position;
-        int x = Lib.Math.FloorToInt(point.X) - Lib.Math.FloorToInt(pos.X) + _texture.Width / 2;
-        int y = Lib.Math.FloorToInt(point.Y) - Lib.Math.FloorToInt(pos.Y) + _texture.Height / 2;
-        if (x < 0 || y < 0)
-            return false;
-        if (x > _texture.Width || y > _texture.Height)
-            return false;
-
-        x = Math.Min(x, _texture.Width - 1);
-        y = Math.Min(y, _texture.Height - 1);
-        Rectangle rect = new Rectangle(x, y, 1, 1);
-        _texture.GetData(0, rect, T, 0, 1);
-
-        return T[0].A != 0;
-    }*/
 }

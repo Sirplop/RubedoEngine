@@ -41,6 +41,11 @@ public struct RectF
         this.width = size.X; this.height = size.Y;
     }
 
+    public static implicit operator RectF(Rectangle rectangle)
+    {
+        return new RectF(rectangle.Left, rectangle.Top, rectangle.Size.X, rectangle.Size.Y);
+    }
+
     public static RectF FromCorners(Vector2 min, Vector2 max)
     {
         return new RectF(min.X, min.Y, max.X - min.X, max.Y - min.Y);
@@ -68,15 +73,26 @@ public struct RectF
         else
             result = FromCorners(firstMinimum, firstMaximum);
     }
-    public bool Intersects(RectF rectangle)
+    public bool Intersects(in RectF rectangle)
     {
-        return Intersects(ref this, ref rectangle);
+        return Intersects(in this, in rectangle);
     }
-    public static bool Intersects(ref RectF first, ref RectF second)
+    public static bool Intersects(in RectF first, in RectF second)
     {
         return first.x < second.x + second.width && first.x + first.width > second.x &&
                first.y < second.y + second.height && first.y + first.height > second.y;
     }
+
+    public bool Intersects(in AABB aabb)
+    {
+        return Intersects(in this, in aabb);
+    }
+    public static bool Intersects(in RectF first, in AABB second)
+    {
+        return first.x < second.max.X && first.x + first.width > second.min.Y &&
+               first.y < second.max.Y && first.y + first.height > second.min.Y;
+    }
+
 
     public bool Contains(in Vector2 point)
     {

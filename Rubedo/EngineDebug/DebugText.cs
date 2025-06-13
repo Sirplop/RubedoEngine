@@ -55,7 +55,7 @@ public class DebugText
             if (drawDataSpace[i] == Renderer.Space.World)
                 sb.DrawString(fontR, Renderer.Space.World, data.text, data.position, color, 0, data.scale, 0, SpriteEffects.None);
             else
-                sb.DrawString(fontR, Renderer.Space.Screen, data.text, RubedoEngine.Instance.Camera.ScreenToWorld(data.position), color, 0, data.scale / RubedoEngine.Instance.Camera.WorldToScreenScale(), 99, SpriteEffects.None);
+                sb.DrawString(fontR, Renderer.Space.Screen, data.text, RubedoEngine.CurrentState.MainCamera.ScreenToWorld(data.position), color, 0, data.scale / RubedoEngine.CurrentState.MainCamera.WorldToScreenScale(), 99, SpriteEffects.None);
         }
         drawData.Clear();
         drawDataSpace.Clear();

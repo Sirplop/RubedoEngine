@@ -35,7 +35,7 @@ public class PhysicsBody : Component
 
     public readonly Collider collider; //TODO: Handle linked colliders better.
 
-    public Vector2 position => compTransform.Position;
+    public Vector2 Position => Entity.Transform.Position;
 
     public Vector2 LinearVelocity { get => velocity; internal set => velocity = value; }
     public float AngularVelocity { get => angularVelocity; internal set => angularVelocity = value; }
@@ -84,10 +84,10 @@ public class PhysicsBody : Component
         if (_invMass == 0)
             return;
 
-        Vector2 pos = Entity.transform.Position;
+        Vector2 pos = Entity.Transform.Position;
         MathV.MulAdd(ref pos, ref velocity, dt, out pos);
-        Entity.transform.SetPosition(ref pos);
-        Entity.transform.Rotation += angularVelocity * dt;
+        Entity.Transform.SetPosition(ref pos);
+        Entity.Transform.Rotation += angularVelocity * dt;
     }
 
     public override void Update()
@@ -99,7 +99,6 @@ public class PhysicsBody : Component
 
     public override void EntityRemoved(GameState state)
     {
-        base.EntityRemoved(state);
         RubedoEngine.Instance.World.RemoveBody(this);
     }
 

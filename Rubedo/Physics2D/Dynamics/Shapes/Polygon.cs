@@ -26,9 +26,9 @@ public class Polygon : Shape
         }
     }
 
-    protected Polygon(Transform refTransform) : base(refTransform) { }
+    protected Polygon() { }
 
-    public Polygon(Transform refTransform, IEnumerable<Vector2> verts) : base(refTransform)
+    public Polygon(IEnumerable<Vector2> verts)
     {
         SetVertices(verts);
         type = ShapeType.Polygon;
@@ -36,7 +36,7 @@ public class Polygon : Shape
         normalsDirty = true;
     }
 
-    public Polygon(Transform refTransform, float halfWidth, float halfHeight) : base(refTransform)
+    public Polygon(float halfWidth, float halfHeight)
     {
         SetBox(halfWidth, halfHeight);
         type = ShapeType.Polygon;
@@ -154,8 +154,8 @@ public class Polygon : Shape
             float t;
             int j = (i + 1) % VertexCount;
 
-            Vector2 a = transform.LocalToWorldPosition(vertices[i]);
-            Vector2 b = transform.LocalToWorldPosition(vertices[j]);
+            Vector2 a = Transform.LocalToWorldPosition(vertices[i]);
+            Vector2 b = Transform.LocalToWorldPosition(vertices[j]);
 
             if (ray.IntersectSegment(a, b, distance, out t))
             {
@@ -181,7 +181,7 @@ public class Polygon : Shape
             return;
         for (int i = 0; i < vertices.Length; i++)
         {
-            transform.LocalToWorldPosition(ref vertices[i], out transformedVertices[i]);
+            Transform.LocalToWorldPosition(ref vertices[i], out transformedVertices[i]);
         }
         transformDirty = false;
     }
@@ -193,8 +193,8 @@ public class Polygon : Shape
         Vector2 face, vert1, vert2;
         for (int i = 0; i < vertices.Length; i++)
         {
-            transform.LocalToWorldPosition(ref vertices[i], out vert1);
-            transform.LocalToWorldPosition(ref vertices[(i + 1) % VertexCount], out vert2);
+            Transform.LocalToWorldPosition(ref vertices[i], out vert1);
+            Transform.LocalToWorldPosition(ref vertices[(i + 1) % VertexCount], out vert2);
             Vector2.Subtract(ref vert2, ref vert1, out face);
             MathV.Right(ref face, out face);
             MathV.Normalize(ref face);
