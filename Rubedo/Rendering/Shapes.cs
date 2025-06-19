@@ -563,6 +563,13 @@ public sealed class Shapes : IDisposable
         DrawLine(max.X, min.Y, min.X, min.Y, color);
         DrawLine(min.X, min.Y, min.X, max.Y, color);
     }
+    public void DrawBox(Rectangle rect, Color color)
+    {
+        DrawLine(rect.Left, rect.Top, rect.Right, rect.Top, color);
+        DrawLine(rect.Right, rect.Top, rect.Right, rect.Bottom, color);
+        DrawLine(rect.Right, rect.Bottom, rect.Left, rect.Bottom, color);
+        DrawLine(rect.Left, rect.Bottom, rect.Left, rect.Top, color);
+    }
 
     public void DrawBox(Transform transform, float width, float height, Color color)
     {

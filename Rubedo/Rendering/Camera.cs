@@ -26,6 +26,7 @@ public class Camera : IDisposable
     private float _focalLength = 1f;
     private int _order;
     private bool _disposed = false;
+    private bool _viewRectDirty = true;
 
     public float X
     {
@@ -34,7 +35,7 @@ public class Camera : IDisposable
         {
             if (_xy.X != value)
             {
-                _viewRects.Clear();
+                _viewRectDirty = true;
                 _xy.X = value;
                 _xyz.X = value;
             }
@@ -47,7 +48,7 @@ public class Camera : IDisposable
         {
             if (_xy.Y != value)
             {
-                _viewRects.Clear();
+                _viewRectDirty = true;
                 _xy.Y = value;
                 _xyz.Y = value;
             }
@@ -60,7 +61,7 @@ public class Camera : IDisposable
         {
             if (_xyz.Z != value)
             {
-                _viewRects.Clear();
+                _viewRectDirty = true;
                 _xyz.Z = value;
             }
         }
@@ -73,7 +74,7 @@ public class Camera : IDisposable
         {
             if (_focalLength != value)
             {
-                _viewRects.Clear();
+                _viewRectDirty = true;
                 _focalLength = value > 0.01f ? value : 0.01f;
             }
         }
@@ -86,7 +87,7 @@ public class Camera : IDisposable
             if (_rotation != value)
             {
                 _rotation = value;
-                _viewRects.Clear();
+                _viewRectDirty = true;
             }
         }
     }
@@ -96,7 +97,7 @@ public class Camera : IDisposable
         get => _scale;
         set
         {
-            _viewRects.Clear();
+            _viewRectDirty = true;
             _scale = value;
         }
     }
@@ -107,7 +108,7 @@ public class Camera : IDisposable
         get => _xy;
         set
         {
-            _viewRects.Clear();
+            _viewRectDirty = true;
             X = value.X;
             Y = value.Y;
         }
@@ -117,11 +118,17 @@ public class Camera : IDisposable
         get => _xyz;
         set
         {
-            _viewRects.Clear();
+            _viewRectDirty = true;
             X = value.X;
             Y = value.Y;
             Z = value.Z;
         }
+    }
+
+    public float Zoom
+    {
+        get => 1f / Z;
+        set => Z = 1f / value;
     }
 
     public IVirtualViewport VirtualViewport { get; set; }
@@ -174,7 +181,7 @@ public class Camera : IDisposable
     public Matrix GetView3D()
     {
         return
-            Matrix.CreateLookAt(XYZ, new Vector3(XY, Z - 1), new Vector3((float)MathF.Sin(Rotation), (float)MathF.Cos(Rotation), 0)) *
+            Matrix.CreateLookAt(XYZ, new Vector3(XY, Z + 1), new Vector3((float)MathF.Sin(Rotation), (float)MathF.Cos(Rotation), 0)) *
             Matrix.CreateScale(Scale.X, -Scale.Y, 1f);
     }
     public Matrix GetViewInvert(float z = 0) => Matrix.Invert(GetView(z));
@@ -250,16 +257,17 @@ public class Camera : IDisposable
     /// </summary>
     public RectF ViewRect => GetViewRect(0);
 
-    private readonly Dictionary<float, RectF> _viewRects = new Dictionary<float, RectF>();
+    private RectF _viewRect = new RectF();
 
     /// <summary>
     /// Gets the world-space viewing rectangle.
     /// </summary>
     public RectF GetViewRect(float z = 0)
     {
-        if (_viewRects.TryGetValue(z, out RectF rect))
-            return rect;
+        if (!_viewRectDirty)
+            return _viewRect;
 
+        _viewRectDirty = false;
         BoundingFrustum frustum = GetBoundingFrustum(z);
         Vector3[] corners = frustum.GetCorners();
         Vector3 a = corners[0];
@@ -274,9 +282,8 @@ public class Camera : IDisposable
 
         float width = right - left;
         float height = bottom - top;
-        rect = new RectF(left, top, width, height);
-        _viewRects[z] = rect;
-        return rect;
+        _viewRect = new RectF(left, top, width, height);
+        return _viewRect;
     }
     public BoundingFrustum GetBoundingFrustum(float z = 0)
     {
@@ -288,7 +295,7 @@ public class Camera : IDisposable
 
     internal void OnWindowSizeChanged(object sender, EventArgs args)
     {
-        _viewRects.Clear();
+        _viewRectDirty = true;
     }
 
     public void Dispose()

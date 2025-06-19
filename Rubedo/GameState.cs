@@ -5,6 +5,7 @@ using Rubedo.Internal;
 using Rubedo.UI;
 using Rubedo.Rendering;
 using Rubedo.Input;
+using Microsoft.Xna.Framework;
 
 namespace Rubedo;
 
@@ -34,7 +35,6 @@ public class GameState
         Renderables = new RenderableComponentList();
         stateManager = sm;
         _cameras = new List<Camera>();
-        Renderables.Add(GUI.Root);
     }
 
     public void AddCamera(Camera camera, bool isMainCamera = false)
@@ -85,6 +85,7 @@ public class GameState
         }
         Entities.UpdateLists();
         GUI.Root.DestroyChildren();
+        Renderables.Clear();
     }
 
     public virtual void LoadContent()
@@ -106,28 +107,25 @@ public class GameState
     {
         for (int i = 0; i < _cameras.Count; i++)
         {
-            Camera camera = _cameras[i];
-            camera.SetViewport();
-            for (int h = 0; h < camera.RenderLayers.Count; h++)
-            {
-                int layer = camera.RenderLayers[h];
-                List<IRenderable> renderables = Renderables.ComponentsWithLayer(layer);
-                sb.Begin(camera, camera.samplerState);
-                for (int j = 0; j < renderables.Count; j++)
-                {
-                    renderables[j].Render(sb, camera);
-                }
-                sb.End();
-            }
-            camera.ResetViewport();
+            DrawCamera(_cameras[i], sb);
         }
+    }
 
-        /*
-        foreach (Entity obj in Entities)
+    protected void DrawCamera(Camera camera, Renderer sb)
+    {
+        camera.SetViewport();
+        for (int h = 0; h < camera.RenderLayers.Count; h++)
         {
-            if (obj._visible)
-                obj.Draw(sb);
-        }*/
+            int layer = camera.RenderLayers[h];
+            sb.Begin(camera, camera.samplerState);
+            List<IRenderable> renderables = Renderables.ComponentsWithLayer(layer);
+            for (int j = 0; j < renderables.Count; j++)
+            {
+                renderables[j].Render(sb, camera);
+            }
+            sb.End();
+        }
+        camera.ResetViewport();
     }
 
     #region Object adding

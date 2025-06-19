@@ -10,8 +10,6 @@ using Rubedo.Input;
 using Rubedo.EngineDebug;
 using Rubedo.Internal.Assets;
 using Rubedo.Physics2D.Common;
-using System;
-using Rubedo.Rendering.Viewports;
 
 namespace Rubedo;
 
@@ -59,9 +57,10 @@ public class RubedoEngine : Game
         _renderer = new Renderer(this);
 
         GUI.Setup(this);
-        GUI.Root = new GUIRoot();
 
         _physicsTimer = new Timer();
+
+        Lib.SDL2Extern.SDL_SetWindowMinimumSize(Window.Handle, 320, 320);
 
         base.Initialize(); //this calls LoadContent, so it must happen last.
     }
@@ -87,7 +86,7 @@ public class RubedoEngine : Game
         }
         _physicsTimer.Stop();
 
-        GUI.Root?.UpdateEnd();
+        //GUI.Root?.UpdateEnd();
 
         base.Update(gameTime);
     }

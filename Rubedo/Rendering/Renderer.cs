@@ -55,7 +55,7 @@ public class Renderer : IDisposable
     {
         ArgumentNullException.ThrowIfNull(camera);
 
-        _effect.View = camera.View;
+        _effect.View = camera.GetView();
         _effect.Projection = camera.GetProjection();
         _effect.World = Matrix.Identity;
 

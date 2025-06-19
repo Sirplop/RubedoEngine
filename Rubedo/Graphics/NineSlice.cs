@@ -38,6 +38,11 @@ public class NineSlice
     /// </summary>
     public float pixelMultiplier = 1;
 
+    /// <summary>
+    /// The name of this resource.
+    /// </summary>
+    public string Name { get; }
+
     private readonly Texture2DRegion[] _slices;
     public ReadOnlySpan<Texture2DRegion> Slices => _slices;
 
@@ -50,7 +55,7 @@ public class NineSlice
     /// Constructs a new NineSlice from the given array of <see cref="Texture2DRegion"/>s.
     /// </summary>
     /// <param name="slices"></param>
-    public NineSlice(Texture2DRegion[] slices)
+    public NineSlice(Texture2DRegion[] slices, string name = "")
     {
         ArgumentNullException.ThrowIfNull(slices);
         if (slices.Length != 9)
@@ -63,5 +68,19 @@ public class NineSlice
         Point topLeft = slices[TOP_LEFT].Size;
         Point bottomRight = slices[BOTTOM_RIGHT].Size;
         Padding = new Padding(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y);
+
+        if (string.IsNullOrEmpty(name))
+        {
+            Name = $"{slices[0].Name}.NineSlice";
+        }
+    }
+    public override string ToString()
+    {
+        if (!string.IsNullOrEmpty(Name))
+        {
+            return Name;
+        }
+
+        return base.ToString();
     }
 }

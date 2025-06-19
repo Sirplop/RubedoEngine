@@ -73,14 +73,17 @@ public class Sprite : RenderableComponent
     private RectF _bounds;
     private bool _boundsDirty = true;
 
-    public Sprite(string texture) : this(AssetManager.LoadTexture(texture), 0) { }
-    public Sprite(string texture, float layer) : this(AssetManager.LoadTexture(texture), layer) { }
-    public Sprite(Texture2D texture) : this(texture, 0) { }
-    public Sprite(Texture2D texture, float layerDepth) : base()
+    public Sprite(string texture) : this(AssetManager.LoadTexture(texture), 0, Color.White) { }
+    public Sprite(string texture, int layer) : this(AssetManager.LoadTexture(texture), layer, Color.White) { }
+    public Sprite(string texture, int layer, Color color) : this(AssetManager.LoadTexture(texture), layer, color) { }
+    public Sprite(Texture2D texture) : this(texture, 0, Color.White) { }
+    public Sprite(Texture2D texture, int layerDepth) : this(texture, layerDepth, Color.White) { }
+    public Sprite(Texture2D texture, int layerDepth, Color color) : base()
     {
         _texture = texture ?? throw new NullReferenceException("Sprite texture cannot be null!");
-        _layerDepth = layerDepth;
+        LayerDepth = layerDepth;
         Pivot = new Vector2(0.5f, 0.5f);
+        SetColor(color);
     }
 
     public override void TransformChanged()

@@ -142,7 +142,8 @@ public class Label : UIComponent, IColorable
 
     public override void Draw()
     {
-        DynamicSpriteFont fontR = font.GetFont(_fontSize);
+        int scale = Lib.Math.CeilToInt(GUI.Root.Scale);
+        DynamicSpriteFont fontR = font.GetFont(_fontSize * scale);
         Vector2 pos;
         switch (horizontalAlignment)
         {
@@ -176,14 +177,17 @@ public class Label : UIComponent, IColorable
             }
             if (DrawBackground)
             {
-                GUI.SpriteBatch.Draw(testWhite, new Rectangle((int)realPos.X, (int)realPos.Y, (int)line.TextSize.X, (int)line.TextSize.Y), Color.Green);
+                GUI.SpriteBatch.Draw(testWhite, new Rectangle((int)realPos.X, (int)realPos.Y, (int)(line.TextSize.X), (int)(line.TextSize.Y)), Color.Green);
                 var glyphs = fontR.GetGlyphs(line.Text, realPos);
                 foreach (var g in glyphs)
                 {
-                    GUI.SpriteBatch.Draw(testWhite, g.Bounds, Color.Wheat);
+                    Rectangle rect = g.Bounds;
+                    rect.Width = (int)(rect.Width / GUI.Root.Scale);
+                    rect.Height = (int)(rect.Height / GUI.Root.Scale);
+                    GUI.SpriteBatch.Draw(testWhite, rect, Color.Wheat);
                 }
             }
-            GUI.SpriteBatch.DrawString(fontR, line.Text, realPos, color);
+            GUI.SpriteBatch.DrawString(fontR, line.Text, realPos, color, scale: new Vector2(1f / scale));
             pos.Y += line.TextSize.Y;
         }
         base.Draw();

@@ -40,7 +40,7 @@ public class PixelViewport : IVirtualViewport
 
     public float TargetWidth { get; set; }
     public float TargetHeight { get; set; }
-    public float Ratio { get; set; }
+    public float Ratio { get; private set; }
 
     public Vector2 XY => new Vector2(X, Y);
     public Vector2 Origin => _origin;

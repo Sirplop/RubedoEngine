@@ -78,7 +78,10 @@ public abstract class Selectable : UIComponent
 
     public override void UpdateInput()
     {
-        isHovered = Clip.Contains(InputManager.MouseScreenPosition());
+        Vector2 pos = InputManager.MouseScreenPosition();
+        Vector2 uiPos = GUI.Root.ScreenToUI(pos);
+
+        isHovered = Clip.Contains(uiPos);
         if (GUI.MouseControlsEnabled && isHovered)
             GUI.Root.GrabFocus(this);
 

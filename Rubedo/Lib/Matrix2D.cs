@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Rubedo.Lib;
 
 /// <summary>
-/// A represnetation of a float 2x3 matrix containing position, rotation, and scale.
+/// A representation of a float 2x3 matrix containing position, rotation, and scale.
 /// </summary>
 public struct Matrix2D
 {

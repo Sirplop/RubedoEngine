@@ -1,6 +1,8 @@
-﻿using Rubedo.Lib;
+﻿using Microsoft.Xna.Framework;
+using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Rendering;
+using System;
 
 namespace Rubedo.Components;
 
@@ -9,14 +11,36 @@ namespace Rubedo.Components;
 /// </summary>
 public abstract class RenderableComponent : Component, IRenderable
 {
-    protected GameState attachedState;
+    internal const float LAYER_SCALE = 1.175494e-6f; //Very small float value that's still large enough to do math with 0.5.
+
+    protected GameState attachedState = null;
 
     public abstract RectF Bounds { get; }
 
-    public float LayerDepth { get => _layerDepth; set => _layerDepth = value; }
+    public int LayerDepth 
+    {
+        get => _realLayerDepth;
+        set
+        {
+            _layerDepth = (value * LAYER_SCALE) - 5e-1f;
+            _realLayerDepth = value;
+        }
+    }
+    protected int _realLayerDepth = 0;
     protected float _layerDepth = 0;
-    public int RenderLayer { get => _renderLayer; set => _renderLayer = value; }
 
+    public int RenderLayer 
+    { 
+        get => _renderLayer; 
+        set
+        {
+            if (_renderLayer != value)
+            {
+                attachedState?.Renderables.UpdateRenderableLayer(this, _renderLayer, value);
+                _renderLayer = value;
+            }
+        }
+    }
     protected int _renderLayer = (int)Rendering.RenderLayer.Default;
 
     public virtual bool IsVisibleToCamera(Camera camera)

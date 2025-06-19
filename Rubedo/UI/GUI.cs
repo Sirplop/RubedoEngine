@@ -1,11 +1,7 @@
 ﻿using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Rubedo.Lib;
-using Rubedo.Rendering;
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Rubedo.UI;
 
@@ -20,7 +16,7 @@ public static class GUI
     public static bool DoUIInput { get; set; } = true;
 
     /// <summary>
-    /// Controls when mouse vs keyboard/gamepade controls are used.
+    /// Controls when mouse vs keyboard/gamepad controls are used.
     /// </summary>
     public static bool MouseControlsEnabled { get; set; } = true;
 
@@ -42,6 +38,8 @@ public static class GUI
     private static readonly RasterizerState _rasterState = new RasterizerState { ScissorTestEnable = true };
     private static bool _beginCalled = false;
     private static readonly Stack<(Rectangle, bool)> _scissorStack = new Stack<(Rectangle, bool)>();
+
+    internal static Matrix offsetMatrix;
 
     public static void Setup(Game game)
     {
@@ -79,9 +77,15 @@ public static class GUI
         {
             End();
         }
+        Viewport view = SpriteBatch.GraphicsDevice.Viewport;
+        int x = (int)(r.X * Root.Scale) + view.X; //must offset the scissor by the viewport.
+        int y = (int)(r.Y * Root.Scale) + view.Y;
+        int w = (int)(r.Width * Root.Scale);
+        int h = (int)(r.Height * Root.Scale);
+
 
         _scissorStack.Push((SpriteBatch.GraphicsDevice.ScissorRectangle, wasBeginCalled));
-        SpriteBatch.GraphicsDevice.ScissorRectangle = r;
+        SpriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(x, y, w, h);
         Begin();
     }
     /// <summary>
@@ -103,7 +107,7 @@ public static class GUI
     /// </summary>
     private static void Begin()
     {
-        SpriteBatch.Begin(sortMode: SpriteSortMode.Deferred, rasterizerState: _rasterState, samplerState: GuiSampler);
+        SpriteBatch.Begin(sortMode: SpriteSortMode.Deferred, rasterizerState: _rasterState, samplerState: GuiSampler, transformMatrix: Root.UIMatrix);
         _beginCalled = true;
     }
     /// <summary>

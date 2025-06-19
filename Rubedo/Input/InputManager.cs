@@ -201,8 +201,8 @@ public static class InputManager
     public static Vector2 MouseScreenPosition(Camera camera = null)
     {
         if (camera == null)
-            return _currentMouseState.Position.ToVector2() + RubedoEngine.CurrentState.MainCamera.XY;
-        return _currentMouseState.Position.ToVector2() + camera.XY;
+            camera = RubedoEngine.CurrentState.MainCamera;
+        return _currentMouseState.Position.ToVector2() - camera.VirtualViewport.XY;
     }
     /// <summary>
     /// Position-agnostic screen-space movement vector for the mouse.

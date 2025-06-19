@@ -27,6 +27,8 @@ public class BestFitViewport : IVirtualViewport
     private Vector2 _origin;
 
     private float _targetRatio;
+    public float TargetWidth { get; set; }
+    public float TargetHeight { get; set; }
 
     private bool _isSet;
 
@@ -48,6 +50,8 @@ public class BestFitViewport : IVirtualViewport
         _graphicsDevice = graphicsDevice;
         _window = window;
 
+        TargetWidth = targetWidth;
+        TargetHeight = targetHeight;
         _targetRatio = targetWidth / targetHeight;
 
         _isSet = false;
@@ -75,7 +79,7 @@ public class BestFitViewport : IVirtualViewport
     public void Set()
     {
         if (_isSet)
-            throw new Exception("Trying to set an already set screen: " + nameof(PixelViewport));
+            throw new Exception("Trying to set an already set screen: " + nameof(BestFitViewport));
         ObjectDisposedException.ThrowIf(_disposed, this);
         _isSet = true;
         _oldViewport = _graphicsDevice.Viewport;
@@ -97,9 +101,35 @@ public class BestFitViewport : IVirtualViewport
 
     private void OnClientSizeChanged(object sender, EventArgs e)
     {
-        _viewport = new Viewport(0, 0, _graphicsDevice.PresentationParameters.BackBufferWidth, _graphicsDevice.PresentationParameters.BackBufferHeight);
-        _virtualWidth = _viewport.Width / _targetRatio;
-        _virtualHeight = _viewport.Height / _targetRatio;
-        _origin = new Vector2(_virtualWidth / 2f, _virtualHeight / 2f);
+        float backBufferWidth = _graphicsDevice.PresentationParameters.BackBufferWidth;
+        float backBufferHeight = _graphicsDevice.PresentationParameters.BackBufferHeight;
+
+        float ratioWidth = backBufferWidth / TargetWidth;
+        float ratioHeight = backBufferHeight / TargetHeight;
+
+        float rx = 0;
+        float ry = 0;
+        float rw = backBufferWidth;
+        float rh = backBufferHeight;
+
+        _virtualWidth = TargetWidth;
+        _virtualHeight = TargetHeight;
+
+        if (ratioWidth < ratioHeight) //the width is smaller, scale based on width.
+        {
+            _targetRatio = ratioWidth;
+            rh = TargetHeight * ratioWidth;
+            ry = (backBufferHeight - rh) / 2f;
+        }
+        else //the height is smaller, scale width based on height.
+        {
+            _targetRatio = ratioHeight;
+            rw = TargetWidth * ratioHeight;
+            rx = (backBufferWidth - rw) / 2f;
+        }
+
+        _viewport = new Viewport((int)rx, (int)ry, (int)rw, (int)rh);
+
+        _origin = new Vector2((_virtualWidth / 2f), (_virtualHeight / 2f));
     }
 }

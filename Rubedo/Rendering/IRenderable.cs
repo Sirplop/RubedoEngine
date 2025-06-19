@@ -20,7 +20,8 @@ public interface IRenderable
     /// <summary>
     /// The depth of this renderable inside its layer. Higher is in front.
     /// </summary>
-    float LayerDepth { get; set; }
+    /// <remarks>Range is from ~-400,000 to ~400,000.</remarks>
+    int LayerDepth { get; set; }
     /// <summary>
     /// The render layer for this renderable. If you're looking for in-layer sorting, you want <seealso cref="LayerDepth"/>.
     /// </summary>

@@ -54,6 +54,8 @@ public class Vertical : LayoutGroup
             maxWidth = MathF.Max(c.Width, maxWidth);
             maxHeight += c.Height + childPadding;
         }
+        if (maxHeight > 0) //remove extra child padding.
+            maxHeight -= childPadding;
 
         Width = MathF.Min(maxWidth + paddingLeft + paddingRight, absMaxWidth);
         Height = MathF.Min(maxHeight + paddingTop + paddingBottom, absMaxHeight);

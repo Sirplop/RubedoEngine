@@ -1,5 +1,4 @@
 ﻿using Rubedo.Rendering;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Rubedo.Internal;
@@ -27,21 +26,20 @@ public class RenderableComponentList
 
     public void UpdateRenderableLayer(IRenderable component, int oldLayer, int newLayer)
     {
-        if (_renderablesByLayer.TryGetValue(oldLayer, out List<IRenderable> value) && value.Contains(component))
+        if (_renderablesByLayer.TryGetValue(oldLayer, out List<IRenderable> value))
         {
             value.Remove(component);
             AddToRenderLayer(component, newLayer);
         }
     }
 
-
     private void AddToRenderLayer(IRenderable component, int layer)
     {
         List<IRenderable> list = ComponentsWithLayer(layer);
-        if (list.Contains(component))
-            RubedoEngine.Logger.Error("Renderable layer list aleady contains this component!");
-        else
+        if (!list.Contains(component))
             list.Add(component);
+        else
+            RubedoEngine.Logger.Error("Renderable layer list aleady contains this component!");
     }
 
 
@@ -52,5 +50,10 @@ public class RenderableComponentList
             value = _renderablesByLayer[layer] = new List<IRenderable>();
         }
         return value;
+    }
+
+    public void Clear()
+    {
+        _renderablesByLayer.Clear();
     }
 }

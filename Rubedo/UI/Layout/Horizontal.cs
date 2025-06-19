@@ -54,6 +54,8 @@ public class Horizontal : LayoutGroup
             maxWidth += c.Width + childPadding;
             maxHeight = MathF.Max(c.Height, maxHeight);
         }
+        if (maxWidth > 0) //remove extra child padding.
+            maxWidth -= childPadding;
 
         Width = MathF.Min(maxWidth + paddingLeft + paddingRight, absMaxWidth);
         Height = MathF.Min(maxHeight + paddingTop + paddingBottom, absMaxHeight);

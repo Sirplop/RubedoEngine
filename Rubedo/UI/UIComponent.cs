@@ -277,7 +277,7 @@ public abstract class UIComponent : IDestroyable
     /// Set the anchor of this entity.
     /// </summary>
     /// <param name="anchor">New anchor to set.</param>
-    private void SetAnchor(Anchor anchor)
+    protected virtual void SetAnchor(Anchor anchor)
     {
         if (_anchor != anchor)
         {
@@ -290,7 +290,7 @@ public abstract class UIComponent : IDestroyable
     /// Set the offset of this entity.
     /// </summary>
     /// <param name="offset">New offset to set.</param>
-    private void SetOffset(Vector2 offset)
+    protected virtual void SetOffset(Vector2 offset)
     {
         if (_offset != offset)
         {
@@ -337,8 +337,8 @@ public abstract class UIComponent : IDestroyable
         int parent_top = parentClip.Y;
         int parent_right = parent_left + (int)Parent.Width; //use actual width and height instead of clip
         int parent_bottom = parent_top + (int)Parent.Height; //to make anchors properly relative to the parent's full size.
-        int parent_center_x = parent_left + (int)Parent.Width / 2;//parentClip.Width / 2;
-        int parent_center_y = parent_top + (int)Parent.Height / 2;//parentClip.Height / 2;
+        int parent_center_x = parent_left + (int)Parent.Width / 2;
+        int parent_center_y = parent_top + (int)Parent.Height / 2;
 
         switch (_anchor)
         {
