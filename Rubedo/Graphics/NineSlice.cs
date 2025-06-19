@@ -71,7 +71,7 @@ public class NineSlice
 
         if (string.IsNullOrEmpty(name))
         {
-            Name = $"{slices[0].Name}.NineSlice";
+            Name = $"{slices[0].Texture.Name}.NineSlice";
         }
     }
     public override string ToString()
