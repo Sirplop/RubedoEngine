@@ -1,16 +1,15 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Rubedo.Object;
-using Rubedo.Internal;
 using Rubedo.UI;
-using Rubedo.Rendering;
 using Rubedo.Input;
 using Microsoft.Xna.Framework;
+using Rubedo.Graphics;
 
 namespace Rubedo;
 
 /// <summary>
-/// I am GameState, and this is my summary.
+/// A graph of entities, renderable components, and cameras. If you know what a scene is, this is that.
 /// </summary>
 public class GameState
 {

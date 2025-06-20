@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Rubedo.Rendering.Viewports;
+namespace Rubedo.Graphics.Viewports;
 
 /// <summary>
 /// A full-window viewport with a target resolution that it will try to scale to.

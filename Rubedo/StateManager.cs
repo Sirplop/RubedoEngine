@@ -1,12 +1,10 @@
-﻿
-using Microsoft.Xna.Framework.Graphics;
-using Rubedo.Rendering;
+﻿using Rubedo.Graphics;
 using System.Collections.Generic;
 
 namespace Rubedo;
 
 /// <summary>
-/// I am StateManager, and this is my summary.
+/// Manages which <see cref="GameState"/> is currently loaded, and which ones can be loaded.
 /// </summary>
 public class StateManager
 {

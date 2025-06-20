@@ -1,7 +1,6 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Rubedo.Graphics;
-using Rubedo.Rendering;
 
 namespace Rubedo.UI.Graphics;
 

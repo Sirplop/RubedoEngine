@@ -2,13 +2,13 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics.Viewports;
 using Rubedo.Internal;
 using Rubedo.Lib;
-using Rubedo.Rendering.Viewports;
 using System;
 using System.Collections.Generic;
 
-namespace Rubedo.Rendering;
+namespace Rubedo.Graphics;
 
 /// <summary>
 /// A camera class that renders things to the game window through a <see cref="IVirtualViewport"/>.

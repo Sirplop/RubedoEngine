@@ -7,12 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Rubedo.Internal.Assets;
+namespace Rubedo;
 
 /// <summary>
-/// I am AssetManager, and this is my summary.
+/// Handles loading and unloading various assets.
 /// </summary>
-public static class AssetManager
+public static class Assets
 {
     /// <summary>
     /// The directory path appended to the root directory for textures.

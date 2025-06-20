@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Rubedo.Rendering.Viewports;
+namespace Rubedo.Graphics.Viewports;
 
 /// <summary>
 /// A viewport that preserves its given aspect ratio. Will create pillar/letterboxing.
@@ -130,6 +130,6 @@ public class BestFitViewport : IVirtualViewport
 
         _viewport = new Viewport((int)rx, (int)ry, (int)rw, (int)rh);
 
-        _origin = new Vector2((_virtualWidth / 2f), (_virtualHeight / 2f));
+        _origin = new Vector2(_virtualWidth / 2f, _virtualHeight / 2f);
     }
 }

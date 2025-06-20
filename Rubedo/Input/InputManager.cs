@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Rubedo.Rendering;
+using Rubedo.Graphics;
 
 namespace Rubedo.Input;
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using Rubedo.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
-using Rubedo.Rendering;
 using System;
 
 namespace Rubedo.Components;
@@ -41,7 +41,7 @@ public abstract class RenderableComponent : Component, IRenderable
             }
         }
     }
-    protected int _renderLayer = (int)Rendering.RenderLayer.Default;
+    protected int _renderLayer = (int)Graphics.RenderLayer.Default;
 
     public virtual bool IsVisibleToCamera(Camera camera)
     {

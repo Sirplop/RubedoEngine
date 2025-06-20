@@ -1,13 +1,12 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Rubedo.Graphics;
 using Rubedo.Internal;
 using Rubedo.Object;
 using System;
 using System.Collections.Generic;
 
-namespace Rubedo.Rendering;
+namespace Rubedo.Graphics;
 
 /// <summary>
 /// Game renderer, wrapping <see cref="SpriteBatch"/>, using <see cref="Camera"/>s to render onto the screen.
@@ -29,7 +28,7 @@ public class Renderer : IDisposable
     public Renderer(Game game)
     {
         ArgumentNullException.ThrowIfNull(game);
-        this._game = game;
+        _game = game;
         _isDisposed = false;
         Sprites = new SpriteBatch(game.GraphicsDevice);
         _effect = new BasicEffect(game.GraphicsDevice);

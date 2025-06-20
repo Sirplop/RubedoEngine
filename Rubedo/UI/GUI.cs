@@ -21,7 +21,7 @@ public static class GUI
     public static bool MouseControlsEnabled { get; set; } = true;
 
     /// <summary>
-    /// SpriteBatch used to draw the UI. We don't use a <see cref="Rendering.Renderer"/> because we're rendering screen coordinates.
+    /// SpriteBatch used to draw the UI. We don't use a <see cref="Rubedo.Graphics.Renderer"/> because we're rendering screen coordinates.
     /// </summary>
     public static SpriteBatch SpriteBatch { get; set; } = null!;
 

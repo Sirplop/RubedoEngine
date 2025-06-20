@@ -2,8 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Components;
-using Rubedo.Internal.Assets;
-using Rubedo.Rendering;
+using Rubedo.Graphics;
 using System.Collections.Generic;
 
 namespace Rubedo.EngineDebug;
@@ -15,7 +14,7 @@ public class DebugText
         get
         {
             if (instance == null)
-                instance = new DebugText(AssetManager.CreateNewFontSystem("consolas", "fonts/Consolas.ttf"), Color.AntiqueWhite);
+                instance = new DebugText(Assets.CreateNewFontSystem("consolas", "fonts/Consolas.ttf"), Color.AntiqueWhite);
             return instance;
         }
     }

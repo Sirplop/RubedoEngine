@@ -1,11 +1,10 @@
 ﻿using Rubedo.Components;
-using Rubedo.Object;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Rubedo.Rendering;
 
-namespace Rubedo.Internal;
+namespace Rubedo.Object;
 
 /// <summary>
 /// I am ComponentList, and this is my summary.

@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics;
 using Rubedo.Input;
 using Rubedo.Lib;
-using Rubedo.Rendering;
 using System;
 using System.Collections.Generic;
 
@@ -37,7 +37,7 @@ public class GUIRoot : UIComponent, IDisposable, IRenderable
     protected float _layerDepth = 0;
 
     public int RenderLayer { get => _renderLayer; set => _renderLayer = value; }
-    private int _renderLayer = (int)Rendering.RenderLayer.UI;
+    private int _renderLayer = (int)Rubedo.Graphics.RenderLayer.UI;
 
     public Point TargetResolution 
     {

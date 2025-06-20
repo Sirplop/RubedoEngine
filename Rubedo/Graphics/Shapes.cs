@@ -4,7 +4,7 @@ using Rubedo.Lib;
 using Rubedo.Object;
 using System;
 
-namespace Rubedo.Rendering;
+namespace Rubedo.Graphics;
 
 /// <summary>
 /// Draw primitive shapes for testing.

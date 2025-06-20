@@ -1,6 +1,6 @@
 ﻿using Rubedo.Lib;
 
-namespace Rubedo.Rendering;
+namespace Rubedo.Graphics;
 
 /// <summary>
 /// When applied to a <see cref="Components.Component"/>, 

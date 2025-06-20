@@ -1,9 +1,8 @@
-﻿using Rubedo.Object;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Rubedo.Internal;
+namespace Rubedo.Object;
 
 /// <summary>
 /// I am GameObjectList, and this is my summary.

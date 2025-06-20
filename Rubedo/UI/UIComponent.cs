@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo.Internal;
 using Rubedo.Lib;
+using Rubedo.Object;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

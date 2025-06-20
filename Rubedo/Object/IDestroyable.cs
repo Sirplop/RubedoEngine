@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Rubedo.Internal;
+namespace Rubedo.Object;
 
 /// <summary>
 /// Provides a method to destroy this object, similar to an <see cref="System.IDisposable"/>.

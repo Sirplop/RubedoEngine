@@ -5,11 +5,10 @@ using NLog.Layouts;
 using NLog.Targets;
 using NLog;
 using Rubedo.UI;
-using Rubedo.Rendering;
 using Rubedo.Input;
 using Rubedo.EngineDebug;
-using Rubedo.Internal.Assets;
 using Rubedo.Physics2D.Common;
+using Rubedo.Graphics;
 
 namespace Rubedo;
 
@@ -44,7 +43,7 @@ public class RubedoEngine : Game
         _stateManager = new StateManager();
         _physicsWorld = new PhysicsWorld();
 
-        AssetManager.Initialize("Content");
+        Assets.Initialize("Content");
 
         IsMouseVisible = true;
         IsFixedTimeStep = false;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo.Rendering;
+using Rubedo.Graphics;
 using System.Threading.Tasks;
 
 namespace Rubedo.Components;

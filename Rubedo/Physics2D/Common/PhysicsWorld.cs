@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.EngineDebug;
+using Rubedo.Graphics;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Collision.Broadphase;
 using Rubedo.Physics2D.Constraints;
 using Rubedo.Physics2D.Dynamics;
-using Rubedo.Rendering;
 using System.Collections.Generic;
 
 namespace Rubedo.Physics2D.Common;

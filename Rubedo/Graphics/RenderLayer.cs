@@ -1,4 +1,4 @@
-﻿namespace Rubedo.Rendering;
+﻿namespace Rubedo.Graphics;
 
 /// <summary>
 /// Rendering layer orders and representation.

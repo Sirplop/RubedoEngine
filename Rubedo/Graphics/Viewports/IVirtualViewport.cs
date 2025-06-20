@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace Rubedo.Rendering.Viewports;
+namespace Rubedo.Graphics.Viewports;
 
 /// <summary>
 /// A virtual window, making up the whole or part of the actual program window.

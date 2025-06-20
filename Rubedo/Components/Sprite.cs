@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using Rubedo.Rendering;
-using Rubedo.Internal.Assets;
 using Rubedo.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
@@ -73,9 +71,9 @@ public class Sprite : RenderableComponent
     private RectF _bounds;
     private bool _boundsDirty = true;
 
-    public Sprite(string texture) : this(AssetManager.LoadTexture(texture), 0, Color.White) { }
-    public Sprite(string texture, int layer) : this(AssetManager.LoadTexture(texture), layer, Color.White) { }
-    public Sprite(string texture, int layer, Color color) : this(AssetManager.LoadTexture(texture), layer, color) { }
+    public Sprite(string texture) : this(Assets.LoadTexture(texture), 0, Color.White) { }
+    public Sprite(string texture, int layer) : this(Assets.LoadTexture(texture), layer, Color.White) { }
+    public Sprite(string texture, int layer, Color color) : this(Assets.LoadTexture(texture), layer, color) { }
     public Sprite(Texture2D texture) : this(texture, 0, Color.White) { }
     public Sprite(Texture2D texture, int layerDepth) : this(texture, layerDepth, Color.White) { }
     public Sprite(Texture2D texture, int layerDepth, Color color) : base()

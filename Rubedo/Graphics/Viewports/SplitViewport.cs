@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Rubedo.Rendering.Viewports;
+namespace Rubedo.Graphics.Viewports;
 
 /// <summary>
 /// A Viewport that covers a percentage of the window.

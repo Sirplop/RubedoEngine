@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Rubedo.Graphics;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
 
@@ -15,5 +16,5 @@ internal interface IBroadphase
     void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> manifoldSet);
     void Clear();
 
-    void DebugDraw(Rendering.Shapes shapes);
+    void DebugDraw(Shapes shapes);
 }

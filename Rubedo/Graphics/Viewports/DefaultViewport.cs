@@ -3,7 +3,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace Rubedo.Rendering.Viewports;
+namespace Rubedo.Graphics.Viewports;
 
 /// <summary>
 /// A full-window <see cref="SplitViewport"/>.

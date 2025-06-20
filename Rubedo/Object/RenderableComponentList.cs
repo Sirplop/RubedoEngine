@@ -1,7 +1,7 @@
-﻿using Rubedo.Rendering;
+﻿using Rubedo.Graphics;
 using System.Collections.Generic;
 
-namespace Rubedo.Internal;
+namespace Rubedo.Object;
 
 /// <summary>
 /// The list of renderable components that are to be rendered by the game state.

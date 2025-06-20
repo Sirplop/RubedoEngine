@@ -1,11 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Rubedo.Graphics;
 using Rubedo.Lib;
 using System;
 using System.Reflection;
 
-namespace Rubedo.Rendering;
+namespace Rubedo.Graphics;
 
 /// <summary>
 /// Extension methods for <see cref="SpriteBatch"/>
@@ -42,7 +41,7 @@ public static class SpriteBatchExtensions
     /// <param name="clippingRectangle">An optional clipping rectangle.</param>
     public static void Draw(this SpriteBatch spriteBatch, Texture2DRegion textureRegion, Vector2 position, Color color, Rectangle? clippingRectangle = null)
     {
-        Draw(spriteBatch, textureRegion, position, color, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, 0, clippingRectangle);
+        spriteBatch.Draw(textureRegion, position, color, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, 0, clippingRectangle);
     }
 
     /// <summary>
@@ -55,7 +54,7 @@ public static class SpriteBatchExtensions
     /// <param name="clippingRectangle">An optional clipping rectangle.</param>
     public static void Draw(this SpriteBatch spriteBatch, Texture2DRegion textureRegion, Rectangle destinationRectangle, Color color, Rectangle? clippingRectangle = null)
     {
-        Draw(spriteBatch, textureRegion.Texture, textureRegion.Bounds, destinationRectangle, color, clippingRectangle);
+        spriteBatch.Draw(textureRegion.Texture, textureRegion.Bounds, destinationRectangle, color, clippingRectangle);
     }
 
     /// <summary>
@@ -139,7 +138,7 @@ public static class SpriteBatchExtensions
             {
                 ClipSourceRectangle(in source, in destination, clippingRectangle.Value, out source);
                 ClipDestinationRectangle(in destination, clippingRectangle.Value, out destination);
-                Draw(spriteBatch, rawSlices[i].Texture, source, destination, color, clippingRectangle);
+                spriteBatch.Draw(rawSlices[i].Texture, source, destination, color, clippingRectangle);
             }
             else
             {
@@ -173,7 +172,7 @@ public static class SpriteBatchExtensions
                     {
                         ClipSourceRectangle(in source, in destination, clippingRectangle.Value, out source);
                         ClipDestinationRectangle(in destination, clippingRectangle.Value, out destination);
-                        Draw(spriteBatch, rawSlices[i].Texture, source, destination, color, clippingRectangle);
+                        spriteBatch.Draw(rawSlices[i].Texture, source, destination, color, clippingRectangle);
                     }
                     else
                     {
@@ -230,7 +229,7 @@ public static class SpriteBatchExtensions
                 destination.Width = Lib.Math.FloorToInt(sourceWidth * (destination.Width / (float)source.Width));
                 destination.Height = Lib.Math.FloorToInt(sourceHeight * (destination.Height / (float)source.Height));
 
-                Draw(spriteBatch, rawSlices[index].Texture, drawSource, destination, color, clippingRectangle);
+                spriteBatch.Draw(rawSlices[index].Texture, drawSource, destination, color, clippingRectangle);
                 y += sourceHeight;
             }
             y = area.Y;
@@ -266,7 +265,7 @@ public static class SpriteBatchExtensions
             destination.Width = Lib.Math.FloorToInt(sourceWidth * (destination.Width / (float)source.Width));
             destination.Height = Lib.Math.FloorToInt(sourceHeight * (destination.Height / (float)source.Height));
 
-            Draw(spriteBatch, rawSlices[index].Texture, drawSource, destination, color, clippingRectangle);
+            spriteBatch.Draw(rawSlices[index].Texture, drawSource, destination, color, clippingRectangle);
             x += sourceWidth;
         }
     }
@@ -299,7 +298,7 @@ public static class SpriteBatchExtensions
             destination.Width = Lib.Math.FloorToInt(sourceWidth * (destination.Width / (float)source.Width));
             destination.Height = Lib.Math.FloorToInt(sourceHeight * (destination.Height / (float)source.Height));
 
-            Draw(spriteBatch, rawSlices[index].Texture, drawSource, destination, color, clippingRectangle);
+            spriteBatch.Draw(rawSlices[index].Texture, drawSource, destination, color, clippingRectangle);
             y += sourceHeight;
         }
     }
