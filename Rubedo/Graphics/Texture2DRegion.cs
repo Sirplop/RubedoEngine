@@ -95,9 +95,9 @@ public class Texture2DRegion
         BottomUV = Bounds.Bottom / (float)texture.Height;
 
         if (string.IsNullOrEmpty(name))
-        {
             Name = $"{texture.Name}.Region";
-        }
+        else
+            Name = name;
     }
 
     public static implicit operator Texture2DRegion(Texture2D texture)

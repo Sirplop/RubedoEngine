@@ -70,9 +70,9 @@ public class NineSlice
         Padding = new Padding(topLeft.X, topLeft.Y, bottomRight.X, bottomRight.Y);
 
         if (string.IsNullOrEmpty(name))
-        {
             Name = $"{slices[0].Texture.Name}.NineSlice";
-        }
+        else
+            Name = name;
     }
     public override string ToString()
     {
