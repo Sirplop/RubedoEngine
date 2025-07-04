@@ -77,8 +77,8 @@ public static class PhysicsCollisions
     #region Circle
     public static bool CircleToCircle(ref Manifold m, Circle circleA, Circle circleB)
     {
-        return CircleToCircle(ref m, circleA.Transform.Position, circleA.radius * Lib.Math.Max(circleA.Transform.Scale),
-            circleB.Transform.Position, circleB.radius * Lib.Math.Max(circleB.Transform.Scale));
+        return CircleToCircle(ref m, circleA.Transform.Position, circleA.radius * Lib.MathV.Max(circleA.Transform.Scale),
+            circleB.Transform.Position, circleB.radius * Lib.MathV.Max(circleB.Transform.Scale));
     }
     public static bool CircleToCircle(ref Manifold m, Vector2 circPos1, float circRad1, Vector2 circPos2, float circRad2)
     {
@@ -125,11 +125,11 @@ public static class PhysicsCollisions
         Vector2 circlePos = circle.Transform.Position;
         capsule.TransformPoints();
         ShapeUtility.ClosestPointOnLine(ref capsule.transStart, ref capsule.transEnd, ref circlePos, out Vector2 closestPoint);
-        return CircleToCircle(ref m, circlePos, circle.radius * Lib.Math.Max(circle.Transform.Scale), closestPoint, capsule.transRadius);
+        return CircleToCircle(ref m, circlePos, circle.radius * Lib.MathV.Max(circle.Transform.Scale), closestPoint, capsule.transRadius);
     }
     public static bool CircleToPolygon(ref Manifold m, Circle circle, Polygon poly)
     {
-        return CircleToPolygon(ref m, circle.Transform.Position, circle.radius * Lib.Math.Max(circle.Transform.Scale), poly);
+        return CircleToPolygon(ref m, circle.Transform.Position, circle.radius * Lib.MathV.Max(circle.Transform.Scale), poly);
     }
     
     public static bool CircleToPolygon(ref Manifold m, Vector2 circPos, float radius, Polygon poly)

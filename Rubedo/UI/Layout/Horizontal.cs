@@ -84,20 +84,21 @@ public class Horizontal : LayoutGroup
             if (!c.IsVisible() || c.IgnoresLayout)
                 continue;
 
-            currentX -= c.Width + childPadding; switch (c.Anchor)
+            currentX -= c.Width + childPadding; 
+            switch (c.Anchor)
             {
                 case Anchor.TopLeft:
-                case Anchor.Top:
-                case Anchor.TopRight:
+                case Anchor.Left:
+                case Anchor.BottomLeft:
                     c.Offset = new Vector2(currentX, paddingTop);
                     break;
-                case Anchor.Left:
+                case Anchor.Top:
                 case Anchor.Center:
-                case Anchor.Right:
-                    c.Offset = new Vector2(currentX - (Height * 0.5f) + (c.Width * 0.5f), paddingTop);
-                    break;
-                case Anchor.BottomLeft:
                 case Anchor.Bottom:
+                    c.Offset = new Vector2(currentX - (Width * 0.5f) + (c.Width * 0.5f), paddingTop);
+                    break;
+                case Anchor.TopRight:
+                case Anchor.Right:
                 case Anchor.BottomRight:
                     c.Offset = new Vector2(Width - currentX - c.Width, paddingTop);
                     break;
@@ -120,17 +121,17 @@ public class Horizontal : LayoutGroup
             switch (c.Anchor)
             {
                 case Anchor.TopLeft:
-                case Anchor.Top:
-                case Anchor.TopRight:
+                case Anchor.Left:
+                case Anchor.BottomLeft:
                     c.Offset = new Vector2(currentX, paddingTop);
                     break;
-                case Anchor.Left:
+                case Anchor.Top:
                 case Anchor.Center:
-                case Anchor.Right:
+                case Anchor.Bottom:
                     c.Offset = new Vector2(currentX - (Width * 0.5f) + (c.Width * 0.5f), paddingTop);
                     break;
-                case Anchor.BottomLeft:
-                case Anchor.Bottom:
+                case Anchor.TopRight:
+                case Anchor.Right:
                 case Anchor.BottomRight:
                     c.Offset = new Vector2(Width - currentX - c.Width, paddingTop);
                     break;

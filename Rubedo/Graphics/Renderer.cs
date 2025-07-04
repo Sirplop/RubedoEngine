@@ -1,7 +1,6 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Rubedo.Internal;
 using Rubedo.Object;
 using System;
 using System.Collections.Generic;

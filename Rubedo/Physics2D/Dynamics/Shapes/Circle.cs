@@ -18,8 +18,8 @@ public class Circle : Shape
 
     public override AABB GetBoundingBox()
     {
-        Vector2 min = Transform.Position - Vector2.One * radius * Lib.Math.Max(Transform.Scale);
-        Vector2 max = Transform.Position + Vector2.One * radius * Lib.Math.Max(Transform.Scale);
+        Vector2 min = Transform.Position - Vector2.One * radius * Lib.MathV.Max(Transform.Scale);
+        Vector2 max = Transform.Position + Vector2.One * radius * Lib.MathV.Max(Transform.Scale);
         return new AABB(min, max);
     }
 

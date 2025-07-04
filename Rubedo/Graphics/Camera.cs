@@ -3,7 +3,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Graphics.Viewports;
-using Rubedo.Internal;
 using Rubedo.Lib;
 using System;
 using System.Collections.Generic;

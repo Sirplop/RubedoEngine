@@ -306,7 +306,7 @@ public sealed class Shapes : IDisposable
     public void DrawCircleFill(Transform transform, float radius, Color color)
     {
         EnsureStarted();
-        radius = radius * Lib.Math.Max(transform.Scale);
+        radius = radius * Lib.MathV.Max(transform.Scale);
 
         int shapeTriangleCount = CIRCLE_SEGMENTS - 2;      // The triangle count of a convex polygon is alway 2 less than the vertex count.
         int shapeIndexCount = shapeTriangleCount * 3;       // The indices count will just be 3 times the triangle count.
@@ -671,7 +671,7 @@ public sealed class Shapes : IDisposable
     }
     public void DrawCircle(Transform transform, float radius, Color color)
     {
-        radius *= Lib.Math.Max(transform.Scale);
+        radius *= Lib.MathV.Max(transform.Scale);
 
         float angle = MathHelper.TwoPi / CIRCLE_SEGMENTS;
 

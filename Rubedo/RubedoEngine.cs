@@ -93,7 +93,6 @@ public class RubedoEngine : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Black);
         _stateManager.Draw(_renderer);
 
         base.Draw(gameTime);

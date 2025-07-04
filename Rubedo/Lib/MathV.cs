@@ -172,7 +172,7 @@ public static class MathV
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Normalize(ref Vector2 vec)
     {
-        if (Math.NearlyZero(ref vec))
+        if (MathV.NearlyZero(ref vec))
         {
             vec.X = vec.Y = 0;
             return;
@@ -311,5 +311,47 @@ public static class MathV
     {
         c.X = a.X < b.X ? a.X : b.X;
         c.Y = a.Y < b.Y ? a.Y : b.Y;
+    }
+
+    /// <summary>
+    /// Gets the largest component of the given vector.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Max(in Vector2 vec)
+    {
+        return MathF.Max(vec.X, vec.Y);
+    }
+    /// <summary>
+    /// Gets the smallest component of the given vector.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Min(in Vector2 vec)
+    {
+        return MathF.Min(vec.X, vec.Y);
+    }
+
+    /// <summary>
+    /// Gets the minimum value of the provided values.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Min(in float v1, in float v2)
+    {
+        return MathF.Min(v1, v2);
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool NearlyEqual(Vector2 a, Vector2 b)
+    {
+        return Vector2.DistanceSquared(a, b) <= Math.EPSILON;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool NearlyEqual(ref Vector2 a, ref Vector2 b)
+    {
+        Vector2.DistanceSquared(ref a, ref b, out float val);
+        return val <= Math.EPSILON;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool NearlyZero(ref Vector2 a)
+    {
+        return a.LengthSquared() <= Math.EPSILON;
     }
 }

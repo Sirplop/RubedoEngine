@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using Rubedo.Rendering;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Object;

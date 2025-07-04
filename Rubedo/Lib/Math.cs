@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Lib;
@@ -68,31 +67,7 @@ public static class Math
     {
         return Clamp(v, 0.0f, 1.0f);
     }
-    /// <summary>
-    /// Gets the largest component of the given vector.
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Max(in Vector2 vec)
-    {
-        return MathF.Max(vec.X, vec.Y);
-    }
-    /// <summary>
-    /// Gets the smallest component of the given vector.
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Min(in Vector2 vec)
-    {
-        return MathF.Min(vec.X, vec.Y);
-    }
-
-    /// <summary>
-    /// Gets the minimum value of the provided values.
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Min(in float v1, in float v2)
-    {
-        return MathF.Min(v1, v2);
-    }
+    
     /// <summary>
     /// Gets the minimum value of the provided values.
     /// </summary>
@@ -140,22 +115,7 @@ public static class Math
     {
         return MathF.Abs(a - b) < EPSILON;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool NearlyEqual(Vector2 a, Vector2 b)
-    {
-        return Vector2.DistanceSquared(a, b) <= EPSILON;
-    }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool NearlyEqual(ref Vector2 a, ref Vector2 b)
-    {
-        Vector2.DistanceSquared(ref a, ref b, out float val);
-        return val <= EPSILON;
-    }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool NearlyZero(ref Vector2 a)
-    {
-        return a.LengthSquared() <= EPSILON;
-    }
+    
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float ToRadians(float angleDegrees)
@@ -196,5 +156,31 @@ public static class Math
         if (a == b) //prevent divide by 0
             return 1;
         return (c - a) / (b - a);
+    }
+
+    /// <summary>
+    /// Returns whether or not the given value is greater than 0 and is a power of 2.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsPowerOf2(in int value)
+    {
+        return value > 0 && (value & (value - 1)) == 0;
+    }
+    /// <summary>
+    /// Returns the next greater-or-equal power of 2 to the given number.
+    /// </summary>
+    /// <example>A value of 100 would result in 128.</example>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int Power2Roundup(int x)
+    {
+        if (x < 0)
+            return 0;
+        --x;
+        x |= x >> 1;    // Divide by 2^k for consecutive doublings of k up to 32,
+        x |= x >> 2;    // and then or the results.
+        x |= x >> 4;
+        x |= x >> 8;    // The result is a number of 1 bits equal to the number
+        x |= x >> 16;   // of bits in the original number, plus 1. That's the
+        return x + 1;   // next highest power of 2.
     }
 }
