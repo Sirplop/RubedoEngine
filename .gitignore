@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Rubedo/Content/Content.mgcb
+/Rubedo.Compiler/Rubedo.Compiler.csproj
+/Rubedo.Compiler/Rubedo.Compiler.csproj
