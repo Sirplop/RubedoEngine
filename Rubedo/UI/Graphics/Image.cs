@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo.Graphics;
+using Rubedo.Graphics.Sprites;
 
 namespace Rubedo.UI.Graphics;
 
@@ -14,7 +14,7 @@ public class Image : UIComponent, IColorable
         Tiled
     }
 
-    public Texture2DRegion Region { get; set; }
+    public TextureRegion2D Region { get; set; }
     public Color Color { get; set; }
 
     public int PrefWidth
@@ -47,10 +47,10 @@ public class Image : UIComponent, IColorable
     public DrawMode drawMode = DrawMode.Default;
     public Vector2 uvOffset = Vector2.Zero;
 
-    public Image(Texture2DRegion region) : this(region, region.Width, region.Height, Color.White) { }
-    public Image(Texture2DRegion region, Color color) : this(region, region.Width, region.Height, color) { }
-    public Image(Texture2DRegion region, int prefWidth, int prefHeight) : this(region, prefWidth, prefHeight, Color.White) { }
-    public Image(Texture2DRegion region, int prefWidth, int prefHeight, Color color)
+    public Image(TextureRegion2D region) : this(region, region.Width, region.Height, Color.White) { }
+    public Image(TextureRegion2D region, Color color) : this(region, region.Width, region.Height, color) { }
+    public Image(TextureRegion2D region, int prefWidth, int prefHeight) : this(region, prefWidth, prefHeight, Color.White) { }
+    public Image(TextureRegion2D region, int prefWidth, int prefHeight, Color color)
     {
         Region = region;
         _prefWidth = prefWidth;

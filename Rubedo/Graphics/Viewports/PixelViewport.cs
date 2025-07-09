@@ -120,6 +120,6 @@ public class PixelViewport : IVirtualViewport
             _virtualHeight = _viewport.Height / ratioHeight;
         }
 
-        _origin = new Vector2(_virtualWidth / 2f, _virtualHeight / 2f);
+        _origin = new Vector2(MathF.Round(_virtualWidth / 2f), MathF.Round(_virtualHeight / 2f));
     }
 }

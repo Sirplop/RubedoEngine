@@ -4,7 +4,7 @@ using Rubedo.Lib;
 using Rubedo.UI.Input;
 using System;
 
-namespace Rubedo.Graphics;
+namespace Rubedo.Graphics.Sprites;
 
 /// <summary>
 /// A specialized Texture2DRegion that has been sliced into 9 sections.
@@ -43,8 +43,8 @@ public class NineSlice
     /// </summary>
     public string Name { get; }
 
-    private readonly Texture2DRegion[] _slices;
-    public ReadOnlySpan<Texture2DRegion> Slices => _slices;
+    private readonly TextureRegion2D[] _slices;
+    public ReadOnlySpan<TextureRegion2D> Slices => _slices;
 
     /// <summary>
     /// Size information of the patches around the center patch.    
@@ -52,10 +52,10 @@ public class NineSlice
     public Padding Padding { get; }
 
     /// <summary>
-    /// Constructs a new NineSlice from the given array of <see cref="Texture2DRegion"/>s.
+    /// Constructs a new NineSlice from the given array of <see cref="TextureRegion2D"/>s.
     /// </summary>
     /// <param name="slices"></param>
-    public NineSlice(Texture2DRegion[] slices, string name = "")
+    public NineSlice(TextureRegion2D[] slices, string name = "")
     {
         ArgumentNullException.ThrowIfNull(slices);
         if (slices.Length != 9)

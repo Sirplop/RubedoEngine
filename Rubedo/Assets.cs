@@ -3,6 +3,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics.Animation;
+using Rubedo.Graphics.Sprites;
+using Rubedo.Serializers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,17 +45,20 @@ public static class Assets
     private static readonly string[] supportedTexture2DExtensions = new string[4] { ".png", ".jpg", ".jpeg", ".bmp" };
     private static readonly string[] supportedAudioExtensions = new string[2] { ".wav", ".ogg" };
 
-    private static Dictionary<string, FontSystem> loadedFonts;
+    private static Dictionary<string, FontSystem> loadedFonts; //fonts don't use a weak reference, because we want this to be persistent.
     private static Dictionary<string, WeakReference<Texture2D>> loadedTextures;
     private static Dictionary<string, WeakReference<SoundEffect>> loadedSounds;
-
+    private static Dictionary<string, WeakReference<TextureAtlas2D>> loadedAtlases;
+    private static Dictionary<string, WeakReference<IAnimation>> loadedAnimations;
 
     public static void Initialize(string rootDirectory)
     {
         RootDirectory = rootDirectory;
         loadedFonts = new Dictionary<string, FontSystem>(StringComparer.OrdinalIgnoreCase);
         loadedTextures = new Dictionary<string, WeakReference<Texture2D>>(StringComparer.OrdinalIgnoreCase);
+        loadedAtlases = new Dictionary<string, WeakReference<TextureAtlas2D>>(StringComparer.OrdinalIgnoreCase);
         loadedSounds = new Dictionary<string, WeakReference<SoundEffect>>(StringComparer.OrdinalIgnoreCase);
+        loadedAnimations = new Dictionary<string, WeakReference<IAnimation>>(StringComparer.OrdinalIgnoreCase);
     }
     #region Fonts
     /// <summary>
@@ -101,6 +107,9 @@ public static class Assets
     #region Textures
     public static Texture2D LoadTexture(string name)
     {
+        if (name == string.Empty)
+            return null; //real quick n' dirty null propogation.
+
         Texture2D texture = null;
         if (loadedTextures.TryGetValue(name, out WeakReference<Texture2D> value) && value.TryGetTarget(out texture))
         {
@@ -120,7 +129,7 @@ public static class Assets
                         if (!loadedTextures.ContainsKey(name))
                             loadedTextures.Add(name, new WeakReference<Texture2D>(texture));
                         else
-                            loadedTextures[name] = new WeakReference<Texture2D>(texture);
+                            loadedTextures[name].SetTarget(texture);
                         return texture;
                     }
                 }
@@ -128,6 +137,23 @@ public static class Assets
             catch { } //TODO: Make a better way to handle this whole thing.
         }
         throw new ContentLoadException($"Texture at '{path}' does not exist!");
+    }
+
+    public static TextureAtlas2D LoadAtlas(string atlasPath)
+    {
+        TextureAtlas2D atlas;
+        if (loadedAtlases.TryGetValue(atlasPath, out WeakReference<TextureAtlas2D> value) && value.TryGetTarget(out atlas))
+        {
+            return atlas;
+        }
+
+        atlas = TextureAtlas2DLoader.Load(atlasPath);
+        if (loadedAtlases.ContainsKey(atlasPath))
+            loadedAtlases[atlasPath].SetTarget(atlas);
+        else
+            loadedAtlases.Add(atlasPath, new WeakReference<TextureAtlas2D>(atlas));
+
+        return atlas;
     }
     #endregion
     #region Sounds
@@ -152,7 +178,7 @@ public static class Assets
                         if (!loadedSounds.ContainsKey(name))
                             loadedSounds.Add(name, new WeakReference<SoundEffect>(effect));
                         else
-                            loadedSounds[name] = new WeakReference<SoundEffect>(effect);
+                            loadedSounds[name].SetTarget(effect);
                         return effect;
                     }
                 }
@@ -161,6 +187,37 @@ public static class Assets
         }
 
         throw new ContentLoadException($"Sound at '{path}' does not exist!");
+    }
+    #endregion
+    #region Animations
+    public static T LoadAnimation<T>(string name) where T : IAnimation
+    {
+        return LoadAnimation<T>(name, TexturePath);
+    }
+    public static T LoadAnimation<T>(string name, string root) where T : IAnimation
+    {
+        if (loadedAnimations.TryGetValue(name, out WeakReference<IAnimation> animRef) && animRef.TryGetTarget(out IAnimation anim))
+        {
+            if (anim.GetType() == typeof(T))
+                return (T)anim;
+            throw new ContentLoadException($"Animation with name '{name}' present in loaded assets, but it's not the right type!");
+        }
+        string path = Path.Combine(RootDirectory, root, name);
+        if (typeof(T) == typeof(SpriteAnimation))
+        { //TODO: Do this better - this'll get really ugly the more animation types we have.
+            anim = LoadSpriteAnimation(path);
+            if (loadedAnimations.ContainsKey(name))
+                loadedAnimations[name].SetTarget(anim);
+            else
+                loadedAnimations.Add(name, new WeakReference<IAnimation>(anim));
+            return (T)anim;
+        }
+        throw new ContentLoadException($"Animation at '{path}' does not exist, or is not of the appropriate type!");
+    }
+
+    private static SpriteAnimation LoadSpriteAnimation(string path)
+    {
+        return SpriteAnimLoader.Load(path);
     }
     #endregion
 }

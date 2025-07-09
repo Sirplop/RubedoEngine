@@ -4,7 +4,7 @@ using Rubedo.Lib;
 using System;
 using System.Reflection;
 
-namespace Rubedo.Graphics;
+namespace Rubedo.Graphics.Sprites;
 
 /// <summary>
 /// Extension methods for <see cref="SpriteBatch"/>
@@ -39,7 +39,7 @@ public static class SpriteBatchExtensions
     /// <param name="position">The position to draw the texture region.</param>
     /// <param name="color">The color to tint the texture region.</param>
     /// <param name="clippingRectangle">An optional clipping rectangle.</param>
-    public static void Draw(this SpriteBatch spriteBatch, Texture2DRegion textureRegion, Vector2 position, Color color, Rectangle? clippingRectangle = null)
+    public static void Draw(this SpriteBatch spriteBatch, TextureRegion2D textureRegion, Vector2 position, Color color, Rectangle? clippingRectangle = null)
     {
         spriteBatch.Draw(textureRegion, position, color, 0, Vector2.Zero, Vector2.One, SpriteEffects.None, 0, clippingRectangle);
     }
@@ -52,7 +52,7 @@ public static class SpriteBatchExtensions
     /// <param name="destinationRectangle">The destination rectangle.</param>
     /// <param name="color">The color to tint the texture region.</param>
     /// <param name="clippingRectangle">An optional clipping rectangle.</param>
-    public static void Draw(this SpriteBatch spriteBatch, Texture2DRegion textureRegion, Rectangle destinationRectangle, Color color, Rectangle? clippingRectangle = null)
+    public static void Draw(this SpriteBatch spriteBatch, TextureRegion2D textureRegion, Rectangle destinationRectangle, Color color, Rectangle? clippingRectangle = null)
     {
         spriteBatch.Draw(textureRegion.Texture, textureRegion.Bounds, destinationRectangle, color, clippingRectangle);
     }
@@ -70,18 +70,18 @@ public static class SpriteBatchExtensions
     /// <param name="effects">The sprite effects to apply.</param>
     /// <param name="layerDepth">The layer depth.</param>
     /// <param name="clippingRectangle">An optional clipping rectangle.</param>
-    public static void Draw(this SpriteBatch spriteBatch, Texture2DRegion textureRegion, Vector2 position, Color color,
+    public static void Draw(this SpriteBatch spriteBatch, TextureRegion2D textureRegion, Vector2 position, Color color,
     float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth, Rectangle? clippingRectangle = null)
     {
-        var sourceRectangle = textureRegion.Bounds;
+        Rectangle sourceRectangle = textureRegion.Bounds;
 
         if (clippingRectangle.HasValue)
         {
-            var x = (int)(position.X - origin.X);
-            var y = (int)(position.Y - origin.Y);
-            var width = (int)(textureRegion.Width * scale.X);
-            var height = (int)(textureRegion.Height * scale.Y);
-            var destinationRectangle = new Rectangle(x, y, width, height);
+            int x = (int)(position.X - origin.X);
+            int y = (int)(position.Y - origin.Y);
+            int width = (int)(textureRegion.Width * scale.X);
+            int height = (int)(textureRegion.Height * scale.Y);
+            Rectangle destinationRectangle = new Rectangle(x, y, width, height);
 
             if (!ClipRectangles(ref sourceRectangle, ref destinationRectangle, clippingRectangle))
             {
@@ -124,7 +124,7 @@ public static class SpriteBatchExtensions
 
     private static void DrawNineSliceScale(SpriteBatch spriteBatch, NineSlice nineSlice, Color color, Rectangle? clippingRectangle = null)
     {
-        ReadOnlySpan<Texture2DRegion> rawSlices = nineSlice.Slices;
+        ReadOnlySpan<TextureRegion2D> rawSlices = nineSlice.Slices;
 
         for (int i = 0; i < rawSlices.Length; i++)
         {
@@ -151,7 +151,7 @@ public static class SpriteBatchExtensions
     }
     private static void DrawNineSliceTile(SpriteBatch spriteBatch, NineSlice nineSlice, Color color, Rectangle? clippingRectangle = null)
     {
-        ReadOnlySpan<Texture2DRegion> rawSlices = nineSlice.Slices;
+        ReadOnlySpan<TextureRegion2D> rawSlices = nineSlice.Slices;
 
         for (int i = 0; i < rawSlices.Length; i++)
         {
@@ -198,7 +198,7 @@ public static class SpriteBatchExtensions
 
     private static void DrawNineSliceCenter(SpriteBatch spriteBatch, NineSlice nineSlice, int index, Color color, Rectangle? clippingRectangle = null)
     {
-        ReadOnlySpan<Texture2DRegion> rawSlices = nineSlice.Slices;
+        ReadOnlySpan<TextureRegion2D> rawSlices = nineSlice.Slices;
 
         Rectangle source = rawSlices[index].Bounds; //source is the unscaled texture slice
         Rectangle area = _sliceCache[index];        //area is the total area that slice texture must fill
@@ -238,7 +238,7 @@ public static class SpriteBatchExtensions
     }
     private static void DrawNineSliceXEdge(SpriteBatch spriteBatch, NineSlice nineSlice, int index, Color color, Rectangle? clippingRectangle = null)
     {
-        ReadOnlySpan<Texture2DRegion> rawSlices = nineSlice.Slices;
+        ReadOnlySpan<TextureRegion2D> rawSlices = nineSlice.Slices;
 
         Rectangle source = rawSlices[index].Bounds; //source is the unscaled texture slice
         Rectangle area = _sliceCache[index];        //area is the total area that slice texture must fill
@@ -271,7 +271,7 @@ public static class SpriteBatchExtensions
     }
     private static void DrawNineSliceYEdge(SpriteBatch spriteBatch, NineSlice nineSlice, int index, Color color, Rectangle? clippingRectangle = null)
     {
-        ReadOnlySpan<Texture2DRegion> rawSlices = nineSlice.Slices;
+        ReadOnlySpan<TextureRegion2D> rawSlices = nineSlice.Slices;
 
         Rectangle source = rawSlices[index].Bounds; //source is the unscaled texture slice
         Rectangle area = _sliceCache[index];        //area is the total area that slice texture must fill
@@ -337,7 +337,7 @@ public static class SpriteBatchExtensions
     }
     #endregion
     #region Tileable
-    public static void DrawTiled(this SpriteBatch spriteBatch, Texture2DRegion textureRegion, Rectangle destinationRectangle, Color color, Rectangle? clippingRectangle = null, float uvOffsetX = 0, float uvOffsetY = 0)
+    public static void DrawTiled(this SpriteBatch spriteBatch, TextureRegion2D textureRegion, Rectangle destinationRectangle, Color color, Rectangle? clippingRectangle = null, float uvOffsetX = 0, float uvOffsetY = 0)
     {
         Rectangle source = textureRegion.Bounds;    //source is the unscaled texture region
         Rectangle subDestination = new Rectangle();    //subDestination is where the source is drawn within the destinationRectangle

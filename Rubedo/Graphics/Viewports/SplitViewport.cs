@@ -87,7 +87,7 @@ public class SplitViewport : IVirtualViewport
 
         _viewport = new Viewport((int)(gWidth * _left), (int)(gHeight * _top), (int)(gWidth * (_right - _left)), (int)(gHeight * (_bottom - _top)));
 
-        _origin = new Vector2(_viewport.Width / 2f, _viewport.Height / 2f);
+        _origin = new Vector2(MathF.Round(_viewport.Width / 2f), MathF.Round(_viewport.Height / 2f));
         SizeChanged?.Invoke(this);
     }
 }

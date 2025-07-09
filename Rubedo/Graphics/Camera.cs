@@ -191,8 +191,8 @@ public class Camera : IDisposable
     }
     public Matrix GetProjection3D(float nearPlaneDistance = 0.01f, float farPlaneDistance = 100f)
     {
-        var aspect = VirtualViewport.VirtualWidth / (float)VirtualViewport.VirtualHeight;
-        var fov = (float)MathF.Atan(VirtualViewport.VirtualHeight / 2f / FocalLength) * 2f;
+        float aspect = VirtualViewport.VirtualWidth / (float)VirtualViewport.VirtualHeight;
+        float fov = MathF.Atan(VirtualViewport.VirtualHeight / 2f / FocalLength) * 2f;
 
         return Matrix.CreatePerspectiveFieldOfView(fov, aspect, nearPlaneDistance, farPlaneDistance);
     }

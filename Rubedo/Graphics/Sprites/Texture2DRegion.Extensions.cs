@@ -2,31 +2,31 @@
 using Rubedo.Lib;
 using System;
 
-namespace Rubedo.Graphics;
+namespace Rubedo.Graphics.Sprites;
 
 /// <summary>
-/// Extension methods for <see cref="Texture2DRegion"/>.
+/// Extension methods for <see cref="TextureRegion2D"/>.
 /// </summary>
 public static class Texture2DRegionExtensions
 {
-    public static Texture2DRegion GetSubregion(this Texture2DRegion source, in Rectangle region)
+    public static TextureRegion2D GetSubregion(this TextureRegion2D source, in Rectangle region)
     {
-        return GetSubregion(source, region.X, region.Y, region.Width, region.Height);
+        return source.GetSubregion(region.X, region.Y, region.Width, region.Height);
     }
-    public static Texture2DRegion GetSubregion(this Texture2DRegion source, int x, int y, int width, int height)
+    public static TextureRegion2D GetSubregion(this TextureRegion2D source, int x, int y, int width, int height)
     {
         ArgumentNullException.ThrowIfNull(source);
         Rectangle region = source.Bounds.GetRelativeRectangle(x, y, width, height);
-        return new Texture2DRegion(source.Texture, region);
+        return new TextureRegion2D(source.Texture, region);
     }
 
-    public static Texture2DRegion GetSubregionFromUVs(this Texture2DRegion source, float leftUV, float topUV, float width, float height)
+    public static TextureRegion2D GetSubregionFromUVs(this TextureRegion2D source, float leftUV, float topUV, float width, float height)
     {
         ArgumentNullException.ThrowIfNull(source);
 
         Rectangle region = source.Bounds.GetRelativeRectangle(Lib.Math.FloorToInt(source.Width * leftUV), Lib.Math.FloorToInt(source.Height * topUV),
             Lib.Math.FloorToInt(source.Width * width), Lib.Math.FloorToInt(source.Height * height));
-        return new Texture2DRegion(source.Texture, region);
+        return new TextureRegion2D(source.Texture, region);
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public static class Texture2DRegionExtensions
     /// <param name="top"></param>
     /// <param name="bottom"></param>
     /// <returns></returns>
-    public static NineSlice CreateNineSlice(this Texture2DRegion source, int left, int right, int top, int bottom)
+    public static NineSlice CreateNineSlice(this TextureRegion2D source, int left, int right, int top, int bottom)
     {
         ArgumentNullException.ThrowIfNull(source);
         int middleWidth = source.Width - left - right;
@@ -46,7 +46,7 @@ public static class Texture2DRegionExtensions
         int rightX = source.Width - right;
         int bottomY = source.Height - bottom;
 
-        Texture2DRegion[] slices = new Texture2DRegion[9];
+        TextureRegion2D[] slices = new TextureRegion2D[9];
 
         slices[0] = source.GetSubregion(0, 0, left, top);
         slices[1] = source.GetSubregion(left, 0, middleWidth, top);
@@ -67,15 +67,15 @@ public static class Texture2DRegionExtensions
     /// Constructs a new NineSlice from the texture region, with the given UV padding on all edges.
     /// </summary>
     /// <remarks>Slice lines are a percent of the texture region, from 0 to 1. Left less than Right, Top less than Bottom.</remarks>
-    public static NineSlice CreateNineSliceFromUVs(this Texture2DRegion source, float allUV)
+    public static NineSlice CreateNineSliceFromUVs(this TextureRegion2D source, float allUV)
     {
-        return CreateNineSliceFromUVs(source, allUV, 1 - allUV, allUV, 1 - allUV);
+        return source.CreateNineSliceFromUVs(allUV, 1 - allUV, allUV, 1 - allUV);
     }
     /// <summary>
     /// Constructs a new NineSlice from the texture region, using the given UV coordinate slice lines.
     /// </summary>
     /// <remarks>Slice lines are a percent of the texture region, from 0 to 1. Left less than Right, Top less than Bottom.</remarks>
-    public static NineSlice CreateNineSliceFromUVs(this Texture2DRegion source, float leftUV, float rightUV, float topUV, float bottomUV)
+    public static NineSlice CreateNineSliceFromUVs(this TextureRegion2D source, float leftUV, float rightUV, float topUV, float bottomUV)
     {
         ArgumentNullException.ThrowIfNull(source);
         if (leftUV < 0 || leftUV > rightUV)
@@ -91,7 +91,7 @@ public static class Texture2DRegionExtensions
         float bottomHeight = 1 - bottomUV;
 
         //construct all 9 slice regions from the UV regions.
-        Texture2DRegion[] slices = new Texture2DRegion[9];
+        TextureRegion2D[] slices = new TextureRegion2D[9];
 
         slices[0] = source.GetSubregionFromUVs(0, 0, leftUV, topUV);
         slices[1] = source.GetSubregionFromUVs(leftUV, 0, middleWidth, topUV);

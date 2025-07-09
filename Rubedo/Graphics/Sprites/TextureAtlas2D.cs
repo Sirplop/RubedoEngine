@@ -4,12 +4,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Rubedo.Graphics;
+namespace Rubedo.Graphics.Sprites;
 
 /// <summary>
-/// Represents a texture composed of many <see cref="Texture2DRegion"/>.
+/// Represents a texture composed of many <see cref="TextureRegion2D"/>.
 /// </summary>
-public class Texture2DAtlas : IEnumerable<Texture2DRegion>
+public class TextureAtlas2D : IEnumerable<TextureRegion2D>
 {
     /// <summary>
     /// The backing texture of this atlas.
@@ -21,10 +21,10 @@ public class Texture2DAtlas : IEnumerable<Texture2DRegion>
     /// </summary>
     public string Name { get; }
 
-    private readonly List<Texture2DRegion> _regionsByIndex = new List<Texture2DRegion>();
-    private readonly Dictionary<string, Texture2DRegion> _regionsByName = new Dictionary<string, Texture2DRegion>();
+    private readonly List<TextureRegion2D> _regionsByIndex = new List<TextureRegion2D>();
+    private readonly Dictionary<string, TextureRegion2D> _regionsByName = new Dictionary<string, TextureRegion2D>();
 
-    public Texture2DAtlas(Texture2D texture, string name = "")
+    public TextureAtlas2D(Texture2D texture, string name = "")
     {
         ArgumentNullException.ThrowIfNull(texture);
         if (texture.IsDisposed)
@@ -42,32 +42,32 @@ public class Texture2DAtlas : IEnumerable<Texture2DRegion>
     /// <summary>
     /// Constructs a new region, and adds it to the atlas.
     /// </summary>
-    public Texture2DRegion CreateRegion(int x, int y, int width, int height) => CreateRegion(new Rectangle(x, y, width, height), null);
+    public TextureRegion2D CreateRegion(int x, int y, int width, int height) => CreateRegion(new Rectangle(x, y, width, height), null);
     /// <summary>
     /// Constructs a new region, and adds it to the atlas.
     /// </summary>
-    public Texture2DRegion CreateRegion(int x, int y, int width, int height, string name) => CreateRegion(new Rectangle(x, y, width, height), name);
+    public TextureRegion2D CreateRegion(int x, int y, int width, int height, string name) => CreateRegion(new Rectangle(x, y, width, height), name);
     /// <summary>
     /// Constructs a new region, and adds it to the atlas.
     /// </summary>
-    public Texture2DRegion CreateRegion(Rectangle bounds, string name = "")
+    public TextureRegion2D CreateRegion(Rectangle bounds, string name = "")
     {
-        Texture2DRegion region = new Texture2DRegion(Texture, bounds, name);
+        TextureRegion2D region = new TextureRegion2D(Texture, bounds, name);
         AddRegion(region);
         return region;
     }
 
-    private void AddRegion(Texture2DRegion region)
+    private void AddRegion(TextureRegion2D region)
     {
         if (_regionsByName.ContainsKey(region.Name))
-            throw new InvalidOperationException($"{Name} already contains a {nameof(Texture2DRegion)} with the name '{region.Name}'!");
+            throw new InvalidOperationException($"{Name} already contains a {nameof(TextureRegion2D)} with the name '{region.Name}'!");
         _regionsByIndex.Add(region);
         _regionsByName.Add(region.Name, region);
     }
 
     public bool RemoveRegion(string name)
     {
-        if (TryGetRegion(name, out Texture2DRegion region))
+        if (TryGetRegion(name, out TextureRegion2D region))
         {
             return RemoveRegion(region);
         }
@@ -76,29 +76,29 @@ public class Texture2DAtlas : IEnumerable<Texture2DRegion>
     }
     public bool RemoveRegion(int index)
     {
-        if (TryGetRegion(index, out Texture2DRegion region))
+        if (TryGetRegion(index, out TextureRegion2D region))
         {
             return RemoveRegion(region);
         }
 
         return false;
     }
-    private bool RemoveRegion(Texture2DRegion region) => _regionsByIndex.Remove(region) && _regionsByName.Remove(region.Name);
+    private bool RemoveRegion(TextureRegion2D region) => _regionsByIndex.Remove(region) && _regionsByName.Remove(region.Name);
 
     /// <summary>
     /// Gets the region at the specified index.
     /// </summary>
-    public Texture2DRegion GetRegion(int index) => _regionsByIndex[index];
+    public TextureRegion2D GetRegion(int index) => _regionsByIndex[index];
 
     /// <summary>
     /// Gets the region with the specified name.
     /// </summary>
-    public Texture2DRegion GetRegion(string name) => _regionsByName[name];
+    public TextureRegion2D GetRegion(string name) => _regionsByName[name];
 
     /// <summary>
     /// Tries to get the region at the specified index.
     /// </summary>
-    public bool TryGetRegion(int index, out Texture2DRegion region)
+    public bool TryGetRegion(int index, out TextureRegion2D region)
     {
         if (index < 0 || index >= _regionsByIndex.Count)
         {
@@ -113,7 +113,7 @@ public class Texture2DAtlas : IEnumerable<Texture2DRegion>
     /// <summary>
     /// Tries to get the region with the specified name.
     /// </summary>
-    public bool TryGetRegion(string name, out Texture2DRegion region) => _regionsByName.TryGetValue(name, out region);
+    public bool TryGetRegion(string name, out TextureRegion2D region) => _regionsByName.TryGetValue(name, out region);
 
     /// <summary>
     /// Clears all regions from the atlas.
@@ -124,6 +124,6 @@ public class Texture2DAtlas : IEnumerable<Texture2DRegion>
         _regionsByName.Clear();
     }
 
-    public IEnumerator<Texture2DRegion> GetEnumerator() => _regionsByIndex.GetEnumerator();
+    public IEnumerator<TextureRegion2D> GetEnumerator() => _regionsByIndex.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

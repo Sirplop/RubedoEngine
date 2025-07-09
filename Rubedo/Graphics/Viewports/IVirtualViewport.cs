@@ -49,7 +49,6 @@ public interface IVirtualViewport : IDisposable
     /// </summary>
     float VirtualHeight { get; }
 
-
     /// <summary>
     /// Event called whenever this viewport updates its size.
     /// </summary>

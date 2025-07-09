@@ -3,12 +3,12 @@ using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Lib;
 using System;
 
-namespace Rubedo.Graphics;
+namespace Rubedo.Graphics.Sprites;
 
 /// <summary>
 /// A region of a <see cref="Texture2D"/>.
 /// </summary>
-public class Texture2DRegion
+public class TextureRegion2D
 {
     /// <summary>
     /// The backing texture of this region.
@@ -65,19 +65,19 @@ public class Texture2DRegion
     /// <summary>
     /// Constructs a new region representing the entire texture.
     /// </summary>
-    public Texture2DRegion(Texture2D texture, string name = "")
+    public TextureRegion2D(Texture2D texture, string name = "")
         : this(texture, 0, 0, texture.Width, texture.Height, name) { }
 
     /// <summary>
     /// Constructs a new region representing the given rectangle.
     /// </summary>
-    public Texture2DRegion(Texture2D texture, in Rectangle region, string name = "")
+    public TextureRegion2D(Texture2D texture, in Rectangle region, string name = "")
         : this(texture, region.X, region.Y, region.Width, region.Height, name) { }
 
     /// <summary>
     /// Constructs a new region representing the given rectangle.
     /// </summary>
-    public Texture2DRegion(Texture2D texture, int x, int y, int width, int height, string name = "")
+    public TextureRegion2D(Texture2D texture, int x, int y, int width, int height, string name = "")
     {
         ArgumentNullException.ThrowIfNull(texture);
         ObjectDisposedException.ThrowIf(texture.IsDisposed, texture);
@@ -100,9 +100,11 @@ public class Texture2DRegion
             Name = name;
     }
 
-    public static implicit operator Texture2DRegion(Texture2D texture)
+    public static implicit operator TextureRegion2D(Texture2D texture)
     {
-        return new Texture2DRegion(texture);
+        if (texture == null)
+            return null;
+        return new TextureRegion2D(texture);
     }
     public override string ToString()
     {

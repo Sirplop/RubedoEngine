@@ -41,7 +41,7 @@ public abstract class RenderableComponent : Component, IRenderable
             }
         }
     }
-    protected int _renderLayer = (int)Graphics.RenderLayer.Default;
+    protected int _renderLayer = (int)Graphics.Sprites.RenderLayer.Default;
 
     public virtual bool IsVisibleToCamera(Camera camera)
     {

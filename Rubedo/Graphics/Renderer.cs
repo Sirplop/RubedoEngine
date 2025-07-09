@@ -1,6 +1,7 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics.Sprites;
 using Rubedo.Object;
 using System;
 using System.Collections.Generic;
@@ -64,15 +65,15 @@ public class Renderer : IDisposable
         Sprites.End();
     }
 
-    public void Draw(Texture2DRegion texture, Vector2 position, Vector2 origin, Color color)
+    public void Draw(TextureRegion2D texture, Vector2 position, Vector2 origin, Color color)
     {
         Sprites.Draw(texture, position, color, 0, origin, Vector2.One, SpriteEffects.FlipVertically, 0);
     }
-    public void Draw(Texture2DRegion texture, Transform transform, Color color)
+    public void Draw(TextureRegion2D texture, Transform transform, Color color)
     {
         Sprites.Draw(texture, transform.Position, color, 0, Vector2.Zero, Vector2.One, SpriteEffects.FlipVertically, 0);
     }
-    public void Draw(Texture2DRegion texture, Transform transform, Rectangle? sourceRectangle, Color color, Vector2 origin, SpriteEffects effects, float layerDepth)
+    public void Draw(TextureRegion2D texture, Transform transform, Rectangle? sourceRectangle, Color color, Vector2 origin, SpriteEffects effects, float layerDepth)
     {
         //because we're rendering with +Y coordinates, all sprites are flipped,
         //so we need to invert any SpriteEffects' FlipVertically flags.
@@ -80,8 +81,8 @@ public class Renderer : IDisposable
             effects &= ~SpriteEffects.FlipVertically;
         else
             effects |= SpriteEffects.FlipVertically;
-
-        Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale, effects, layerDepth, sourceRectangle);
+        //scale is multiplied by a tiny value so that floating point conversions don't cause issues with source rectangles, causing the dreaded "jitter".
+        Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale * 1.0001f, effects, layerDepth, sourceRectangle);
     }
 
     public void Draw(Texture2D texture, Vector2 position, Vector2 origin, Color color)

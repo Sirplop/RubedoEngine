@@ -37,7 +37,7 @@ public class GUIRoot : UIComponent, IDisposable, IRenderable
     protected float _layerDepth = 0;
 
     public int RenderLayer { get => _renderLayer; set => _renderLayer = value; }
-    private int _renderLayer = (int)Rubedo.Graphics.RenderLayer.UI;
+    private int _renderLayer = (int)Rubedo.Graphics.Sprites.RenderLayer.UI;
 
     public Point TargetResolution 
     {

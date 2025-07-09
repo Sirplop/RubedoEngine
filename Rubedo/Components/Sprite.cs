@@ -4,12 +4,13 @@ using System;
 using Rubedo.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
+using Rubedo.Graphics.Sprites;
 
 namespace Rubedo.Components;
 
 public class Sprite : RenderableComponent
 {
-    protected Texture2DRegion _texture;
+    protected TextureRegion2D _texture;
     protected Color _color = Color.White;
     protected Vector2 _pivot;
     public Vector2 Pivot
@@ -18,7 +19,8 @@ public class Sprite : RenderableComponent
         set
         {
             _pivot = value;
-            _pixelPivot = new Vector2(_pivot.X * _texture.Width, _pivot.Y * _texture.Height);
+            if (_texture != null)
+                _pixelPivot = new Vector2(MathF.Floor(_pivot.X * _texture.Width), MathF.Floor(_pivot.Y * _texture.Height));
         }
     }
     public Vector2 PixelPivot
@@ -45,25 +47,29 @@ public class Sprite : RenderableComponent
             if (_boundsDirty)
             {
                 _boundsDirty = false;
-                Rectangle bounds = _texture.Bounds;
                 Vector2 position = Entity.Transform.Position;
                 Vector2 scale = Entity.Transform.Scale;
                 float rotation = Entity.Transform.Rotation;
 
-                Vector2 a = Lib.MathV.RotateRadians(new Vector2(bounds.Left, bounds.Top), rotation, scale.X, scale.Y);
-                Vector2 b = Lib.MathV.RotateRadians(new Vector2(bounds.Right, bounds.Top), rotation, scale.X, scale.Y);
-                Vector2 c = Lib.MathV.RotateRadians(new Vector2(bounds.Left, bounds.Bottom), rotation, scale.X, scale.Y);
-                Vector2 d = Lib.MathV.RotateRadians(new Vector2(bounds.Right, bounds.Bottom), rotation, scale.X, scale.Y);
+                float left = (-Pivot.X * Width);
+                float top = (-Pivot.Y * Height);
+                float right = (1 - Pivot.X) * Width;
+                float bottom = (1 - Pivot.Y) * Height;
 
-                float left = Lib.Math.Min(a.X, b.X, c.X, d.X);
-                float right = Lib.Math.Max(a.X, b.X, c.X, d.X);
-                float top = Lib.Math.Min(a.Y, b.Y, c.Y, d.Y);
-                float bottom = Lib.Math.Max(a.Y, b.Y, c.Y, d.Y);
+                Vector2 a = Lib.MathV.RotateRadians(new Vector2(left, top), rotation, scale.X, scale.Y);
+                Vector2 b = Lib.MathV.RotateRadians(new Vector2(right, top), rotation, scale.X, scale.Y);
+                Vector2 c = Lib.MathV.RotateRadians(new Vector2(left, bottom), rotation, scale.X, scale.Y);
+                Vector2 d = Lib.MathV.RotateRadians(new Vector2(right, bottom), rotation, scale.X, scale.Y);
+
+                left = Lib.Math.Min(a.X, b.X, c.X, d.X);
+                right = Lib.Math.Max(a.X, b.X, c.X, d.X);
+                top = Lib.Math.Min(a.Y, b.Y, c.Y, d.Y);
+                bottom = Lib.Math.Max(a.Y, b.Y, c.Y, d.Y);
 
                 float width = right - left;
                 float height = bottom - top;
 
-                _bounds = new RectF(position.X + left - width / 2, position.Y + top - height / 2, width, height);
+                _bounds = new RectF(position.X + left, position.Y + top , width, height);
             }
             return _bounds;
         }
@@ -71,6 +77,7 @@ public class Sprite : RenderableComponent
     private RectF _bounds;
     private bool _boundsDirty = true;
 
+    public Sprite(int layer, Color color) : this(string.Empty, layer, color) { }
     public Sprite(string texture) : this(Assets.LoadTexture(texture), 0, Color.White) { }
     public Sprite(string texture, int layer) : this(Assets.LoadTexture(texture), layer, Color.White) { }
     public Sprite(string texture, int layer, Color color) : this(Assets.LoadTexture(texture), layer, color) { }
@@ -78,10 +85,26 @@ public class Sprite : RenderableComponent
     public Sprite(Texture2D texture, int layerDepth) : this(texture, layerDepth, Color.White) { }
     public Sprite(Texture2D texture, int layerDepth, Color color) : base()
     {
-        _texture = texture ?? throw new NullReferenceException("Sprite texture cannot be null!");
+        _texture = texture;
         LayerDepth = layerDepth;
         Pivot = new Vector2(0.5f, 0.5f);
         SetColor(color);
+    }
+    public Sprite(TextureRegion2D texture) : this(texture, 0, Color.White) { }
+    public Sprite(TextureRegion2D texture, int layerDepth) : this(texture, layerDepth, Color.White) { }
+    public Sprite(TextureRegion2D texture, int layerDepth, Color color) : base()
+    {
+        _texture = texture;
+        LayerDepth = layerDepth;
+        Pivot = new Vector2(0.5f, 0.5f);
+        SetColor(color);
+    }
+
+    public void SetTexture(TextureRegion2D newTexture)
+    {
+        _texture = newTexture;
+        _pixelPivot = new Vector2(_pivot.X * _texture.Width, _pivot.Y * _texture.Height);
+        _boundsDirty = true;
     }
 
     public override void TransformChanged()
@@ -96,6 +119,9 @@ public class Sprite : RenderableComponent
 
     public override void Render(Renderer sb, Camera camera)
     {
+        if (_texture == null)
+            return; //nothing to render.
+
         if (!Visible || !IsVisibleToCamera(camera))
             return;
 
