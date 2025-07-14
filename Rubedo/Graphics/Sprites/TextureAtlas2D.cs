@@ -9,8 +9,10 @@ namespace Rubedo.Graphics.Sprites;
 /// <summary>
 /// Represents a texture composed of many <see cref="TextureRegion2D"/>.
 /// </summary>
-public class TextureAtlas2D : IEnumerable<TextureRegion2D>
+public class TextureAtlas2D : IEnumerable<TextureRegion2D>, IDisposable
 {
+    public bool Disposed { get; private set; }
+
     /// <summary>
     /// The backing texture of this atlas.
     /// </summary>
@@ -126,4 +128,13 @@ public class TextureAtlas2D : IEnumerable<TextureRegion2D>
 
     public IEnumerator<TextureRegion2D> GetEnumerator() => _regionsByIndex.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public void Dispose()
+    {
+        if (Disposed)
+            return;
+        Disposed = true;
+        Texture.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }

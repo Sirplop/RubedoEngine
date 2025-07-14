@@ -103,7 +103,7 @@ public class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale, effects, layerDepth);
+        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale * 1.0001f, effects, layerDepth);
     }
 
     public void Draw(Texture2D texture, Rectangle? sourceRectangle, Rectangle destinationRectangle, Color color)
@@ -120,7 +120,7 @@ public class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
+        Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale * 1.0001f, effects, layerDepth);
     }
     public void DrawString(SpriteFontBase spriteFont, Space space, string text, Vector2 position, Color color, float rotation, float scale, int layerDepth = 0,
         SpriteEffects effects = SpriteEffects.None, TextStyle style = TextStyle.None, FontSystemEffect fontEffect = FontSystemEffect.None, int effectAmount = 0)

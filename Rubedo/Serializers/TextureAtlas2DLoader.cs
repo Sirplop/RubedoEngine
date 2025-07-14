@@ -28,7 +28,7 @@ internal static class TextureAtlas2DLoader
             texture = Texture2D.FromStream(RubedoEngine.Graphics.GraphicsDevice, stream, DefaultColorProcessors.PremultiplyAlpha);
         }
 
-        TextureAtlas2D atlas = new TextureAtlas2D(texture, Path.GetFileNameWithoutExtension(atlasFile.Name));
+        TextureAtlas2D atlas = new TextureAtlas2D(texture, map);
         int lineNumber = 0;
         using (Stream stream = TitleContainer.OpenStream(map + ".atlasmap"))
         {

@@ -346,8 +346,15 @@ public static class SpriteBatchExtensions
 
         if (destinationRectangle.Width > 0 && destinationRectangle.Height > 0)
         {
-            uvOffsetX = MathF.Abs(uvOffsetX) - MathF.Floor(MathF.Abs(uvOffsetX));
-            uvOffsetY = MathF.Abs(uvOffsetY) - MathF.Floor(MathF.Abs(uvOffsetY));
+            if (uvOffsetX < 0)
+                uvOffsetX = 1 + (uvOffsetX - MathF.Ceiling(uvOffsetX));
+            else
+                uvOffsetX = uvOffsetX - MathF.Floor(uvOffsetX);
+
+            if (uvOffsetY < 0)
+                uvOffsetY = 1 + (uvOffsetY - MathF.Ceiling(uvOffsetY));
+            else
+                uvOffsetY = uvOffsetY - MathF.Floor(uvOffsetY);
 
             int endX = destinationRectangle.X + destinationRectangle.Width;
             int endY = destinationRectangle.Y + destinationRectangle.Height;
