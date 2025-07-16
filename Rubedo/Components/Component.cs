@@ -7,8 +7,15 @@ public abstract class Component : ITransformable, IDestroyable
 {
     public bool IsDestroyed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = false;
 
+    /// <summary>
+    /// The entity this component is attached to.
+    /// </summary>
     public Entity Entity { get; protected set; }
-    //public Transform Transform { get; protected set; }
+    /// <summary>
+    /// Gets the transform of the entity this component is attached to.
+    /// </summary>
+    public Transform Transform => Entity.Transform;
+
     public bool Active
     {
         get => Entity._active && _active;

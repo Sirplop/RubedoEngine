@@ -101,4 +101,12 @@ public struct RectF
 
         return X >= 0 && Y >= 0 && X <= width && Y <= height;
     }
+
+    public void GetExtents(out float left, out float right, out float top, out float bottom)
+    {
+        left = x;
+        right = x + width;
+        bottom = y;
+        top = y + height;
+    }
 }
