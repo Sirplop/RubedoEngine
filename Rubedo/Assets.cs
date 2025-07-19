@@ -3,12 +3,15 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Audio;
 using Rubedo.Graphics.Animation;
 using Rubedo.Graphics.Sprites;
 using Rubedo.Serializers;
+using SoLoud;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Rubedo;
 
@@ -17,13 +20,94 @@ namespace Rubedo;
 /// </summary>
 public static class Assets
 {
+    #region Monogame TitleContainer & CurrentPlatform
+    private enum OS
+    {
+        Windows,
+        Linux,
+        MacOSX,
+        Unknown
+    }
+
+    private static OS _os;
+
+    ///need to copy out parts of <see cref="TitleContainer"/> and CurrentPlatform  because they're internal. Grumble grumble.
+    internal static string Location { get; private set; }
+
+    [DllImport("libc")]
+    private static extern int uname(nint buf);
+    private static void PlatformInit()
+    {
+        switch (Environment.OSVersion.Platform)
+        {
+            case PlatformID.Win32S:
+            case PlatformID.Win32Windows:
+            case PlatformID.Win32NT:
+            case PlatformID.WinCE:
+                _os = OS.Windows;
+                break;
+            case PlatformID.MacOSX:
+                _os = OS.MacOSX;
+                break;
+            case PlatformID.Unix:
+                {
+                    _os = OS.MacOSX;
+                    nint num = IntPtr.Zero;
+                    try
+                    {
+                        num = Marshal.AllocHGlobal(8192);
+                        if (uname(num) == 0 && Marshal.PtrToStringAnsi(num) == "Linux")
+                        {
+                            _os = OS.Linux;
+                        }
+                    }
+                    catch
+                    {
+                    }
+                    finally
+                    {
+                        if (num != IntPtr.Zero)
+                        {
+                            Marshal.FreeHGlobal(num);
+                        }
+                    }
+
+                    break;
+                }
+            default:
+                _os = OS.Unknown;
+                break;
+        }
+
+        if (_os == OS.MacOSX)
+        {
+            Location = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources");
+            if (!Directory.Exists(Location))
+            {
+                Location = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "Resources");
+            }
+        }
+
+        if (!Directory.Exists(Location))
+        {
+            Location = AppDomain.CurrentDomain.BaseDirectory;
+        }
+    }
+
+    static Assets()
+    {
+        Location = string.Empty;
+        PlatformInit();
+    }
+#endregion
+
     /// <summary>
     /// The directory path appended to the root directory for textures.
     /// </summary>
     public static string TexturePath = "textures";
 
     /// <summary>
-    /// The directory path appended to the root directory for textures.
+    /// The directory path appended to the root directory for sounds.
     /// </summary>
     public static string SoundsPath = "sounds";
 
@@ -43,11 +127,11 @@ public static class Assets
         }
     }
     private static readonly string[] supportedTexture2DExtensions = new string[4] { ".png", ".jpg", ".jpeg", ".bmp" };
-    private static readonly string[] supportedAudioExtensions = new string[2] { ".wav", ".ogg" };
+    private static readonly string[] supportedAudioExtensions = new string[4] { ".wav", ".ogg", ".mp3", ".flac" };
 
     private static Dictionary<string, FontSystem> loadedFonts; //fonts don't use a weak reference, because we want this to be persistent.
     private static Dictionary<string, WeakReference<Texture2D>> loadedTextures;
-    private static Dictionary<string, WeakReference<SoundEffect>> loadedSounds;
+    private static Dictionary<string, WeakReference<Wav>> loadedSounds;
     private static Dictionary<string, WeakReference<TextureAtlas2D>> loadedAtlases;
     private static Dictionary<string, WeakReference<IAnimation>> loadedAnimations;
 
@@ -57,7 +141,7 @@ public static class Assets
         loadedFonts = new Dictionary<string, FontSystem>(StringComparer.OrdinalIgnoreCase);
         loadedTextures = new Dictionary<string, WeakReference<Texture2D>>(StringComparer.OrdinalIgnoreCase);
         loadedAtlases = new Dictionary<string, WeakReference<TextureAtlas2D>>(StringComparer.OrdinalIgnoreCase);
-        loadedSounds = new Dictionary<string, WeakReference<SoundEffect>>(StringComparer.OrdinalIgnoreCase);
+        loadedSounds = new Dictionary<string, WeakReference<Wav>>(StringComparer.OrdinalIgnoreCase);
         loadedAnimations = new Dictionary<string, WeakReference<IAnimation>>(StringComparer.OrdinalIgnoreCase);
     }
     #region Fonts
@@ -157,31 +241,28 @@ public static class Assets
     }
     #endregion
     #region Sounds
-    public static SoundEffect LoadSoundEffect(string name)
+    public static Wav LoadSoundEffect(string name)
     {
-        SoundEffect effect = null;
-        if (loadedSounds.TryGetValue(name, out WeakReference<SoundEffect> value) && value.TryGetTarget(out effect))
+        Wav effect = null;
+        if (loadedSounds.TryGetValue(name, out WeakReference<Wav> value) && value.TryGetTarget(out effect))
         {
             return effect;
         }
-
-        string path = Path.Combine(RootDirectory, SoundsPath, name);
+        effect = new Wav();
+        string path = Path.Combine(Location, RootDirectory, SoundsPath, name);
         foreach (string extension in supportedAudioExtensions)
         {
             try
             {
-                using (Stream stream = TitleContainer.OpenStream(Path.ChangeExtension(path, extension)))
-                {
-                    if (stream != null)
-                    {
-                        effect = SoundEffect.FromStream(stream);
-                        if (!loadedSounds.ContainsKey(name))
-                            loadedSounds.Add(name, new WeakReference<SoundEffect>(effect));
-                        else
-                            loadedSounds[name].SetTarget(effect);
-                        return effect;
-                    }
-                }
+                string extPath = Path.ChangeExtension(path, extension);
+                int returnCode = effect.load(extPath);
+                if (returnCode != (int)AudioCore.SoloudReturnCode.SO_NO_ERROR)
+                    continue;
+                if (!loadedSounds.TryGetValue(name, out value))
+                    loadedSounds.Add(name, new WeakReference<Wav>(effect));
+                else
+                    value.SetTarget(effect);
+                return effect;
             }
             catch { }
         }

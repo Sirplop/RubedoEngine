@@ -9,6 +9,7 @@ using Rubedo.Input;
 using Rubedo.EngineDebug;
 using Rubedo.Physics2D.Common;
 using Rubedo.Graphics;
+using Rubedo.Audio;
 
 namespace Rubedo;
 
@@ -22,6 +23,7 @@ public class RubedoEngine : Game
     public static RubedoEngine Instance { get; private set; }
     public static GraphicsDeviceManager Graphics { get; private set; }
     public static NLog.Logger Logger { get; protected set; }
+    public static AudioCore Audio { get; protected set; }
     public static StateManager StateManager => Instance._stateManager;
     public static GameState CurrentState => Instance._stateManager.CurrentState();
 
@@ -37,6 +39,7 @@ public class RubedoEngine : Game
     {
         Instance = this;
         Graphics = new GraphicsDeviceManager(this);
+        Audio = new AudioCore();
 
         SetupLogger();
 
@@ -70,10 +73,14 @@ public class RubedoEngine : Game
     {
         Time.UpdateTime(gameTime);
 
-        if (IsActive)
+        if (IsActive) //TODO: make a "LostFocus" event that fires whenever focus changes.
         {
+            Audio.outputBus.UnpausePlayback();
             InputManager.Update();
             GUI.Root?.UpdateStart(GUI.DoUIInput);
+        } else
+        {
+            Audio.outputBus.PausePlayback();
         }
 
         _stateManager.Update();
