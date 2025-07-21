@@ -14,6 +14,10 @@ public class SoundPlayer : Component
     public readonly AudioCore audioCore;
 
     /// <summary>
+    /// The mixing group this sound will play through.
+    /// </summary>
+    public int audioType;
+    /// <summary>
     /// The volume of this sound.
     /// </summary>
     public float volume = 1f;
@@ -35,15 +39,16 @@ public class SoundPlayer : Component
     public bool loop = false;
     /// <summary>
     /// Whether sounds this player is playing should keep playing after this has been destroyed.
-    /// Will be ignored if sounds are looping.
+    /// Will be ignored if sounds are looping, because otherwise sound references are lost.
     /// </summary>
     public bool persistAfterDestroy = false;
 
-    public SoundPlayer(string soundPath, int maxInstances, AudioCore audio)
+    public SoundPlayer(string soundPath, int audioType, int maxInstances, AudioCore audio)
     {
         sound = Assets.LoadSoundEffect(soundPath);
         _instances = new AudioInstance[maxInstances];
         audioCore = audio;
+        this.audioType = audioType;
     }
 
     /// <summary>
@@ -61,7 +66,7 @@ public class SoundPlayer : Component
                 float pitch = 1 + this.pitch;
                 if (randomizePitch)
                     pitch += Random.Range(-pitchRange, pitchRange);
-                AudioInstance ret = audioCore.CreateSound(sound, volume, pitch);
+                AudioInstance ret = audioCore.CreateSound(sound, audioType, volume, pitch);
                 if (loop)
                     ret.SetLoop(true);
                 ret.Play();
@@ -70,6 +75,26 @@ public class SoundPlayer : Component
             }
         }
         return null;
+    }
+
+    public void Stop(int index)
+    {
+        if (index > _instances.Length)
+            return; //nothing to stop.
+
+        AudioInstance instance = _instances[index];
+        if (instance != null && !instance.IsClosed())
+            instance.Stop();
+    }
+
+    public void StopAll()
+    {
+        for (int i = 0; i < _instances.Length; i++)
+        {
+            AudioInstance instance = _instances[i];
+            if (instance != null && !instance.IsClosed())
+                instance.Stop();
+        }
     }
 
     public override void OnDestroy()

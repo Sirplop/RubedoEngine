@@ -10,13 +10,20 @@ public class AudioInstance
     internal uint handle;
     private AudioCore _coreRef;
     private bool played = false;
-    private readonly Wav baseSoundRef; //this is here solely so that we don't accidentally unload the reference while playing this sound.
+    private readonly Wav baseSoundRef; //these are here solely so that we don't accidentally unload the reference while playing this sound.
+    private readonly WavStream baseSoundStreamRef;
 
     public AudioInstance(uint handle, AudioCore core, Wav baseSoundRef)
     {
         this.handle = handle;
         this._coreRef = core;
         this.baseSoundRef = baseSoundRef;
+    }
+    public AudioInstance(uint handle, AudioCore core, WavStream baseSoundStreamRef)
+    {
+        this.handle = handle;
+        this._coreRef = core;
+        this.baseSoundStreamRef = baseSoundStreamRef;
     }
 
     /// <summary>

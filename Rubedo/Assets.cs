@@ -1,6 +1,5 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Audio;
@@ -262,6 +261,29 @@ public static class Assets
                     loadedSounds.Add(name, new WeakReference<Wav>(effect));
                 else
                     value.SetTarget(effect);
+                return effect;
+            }
+            catch { }
+        }
+
+        throw new ContentLoadException($"Sound at '{path}' does not exist!");
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>This does not result in the caching of the stream.</remarks>
+    public static WavStream LoadSoundStream(string name)
+    {
+        WavStream effect = new WavStream();
+        string path = Path.Combine(Location, RootDirectory, SoundsPath, name);
+        foreach (string extension in supportedAudioExtensions)
+        {
+            try
+            {
+                string extPath = Path.ChangeExtension(path, extension);
+                int returnCode = effect.load(extPath);
+                if (returnCode != (int)AudioCore.SoloudReturnCode.SO_NO_ERROR)
+                    continue;
                 return effect;
             }
             catch { }
