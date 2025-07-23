@@ -11,6 +11,7 @@ using Rubedo.Physics2D.Common;
 using Rubedo.Graphics;
 using Rubedo.Audio;
 using System;
+using Rubedo.Lib.Coroutines;
 
 namespace Rubedo;
 
@@ -31,6 +32,7 @@ public class RubedoEngine : Game
     protected internal Renderer _renderer;
     protected StateManager _stateManager;
     protected PhysicsWorld _physicsWorld;
+    protected internal CoroutineManager _coroutineManager;
 
     public PhysicsWorld World => _physicsWorld;
 
@@ -46,6 +48,7 @@ public class RubedoEngine : Game
 
         _stateManager = new StateManager();
         _physicsWorld = new PhysicsWorld();
+        _coroutineManager = new CoroutineManager();
 
         Assets.Initialize("Content");
 
@@ -88,6 +91,8 @@ public class RubedoEngine : Game
             stepPhysics = false;
         }
         _physicsTimer.Stop();
+
+        _coroutineManager.Update();
 
         base.Update(gameTime);
     }

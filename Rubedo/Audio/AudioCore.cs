@@ -82,17 +82,4 @@ public class AudioCore
 
         return instance;
     }
-    public AudioInstance CreateSoundClocked(WavStream sourceSound, int audioType, float volume = 1f, float pitch = 1f, float pan = 0f, float delay = 0f)
-    {
-        if (audioType < 0 || audioType > audioMixers.Count)
-            throw new System.ArgumentOutOfRangeException(nameof(audioType));
-
-        uint handle = audioMixers[audioType].MixingBus.playClocked(delay, sourceSound, volume, pan);
-        _soLoudInstance.setRelativePlaySpeed(handle, pitch);
-        _soLoudInstance.setPause(handle, 1); //I don't think this works when using playClocked.
-
-        AudioInstance instance = new AudioInstance(handle, this, sourceSound);
-
-        return instance;
-    }
 }
