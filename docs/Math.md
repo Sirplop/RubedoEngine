@@ -1,3 +1,3 @@
-## [<< Colliders](Physics/Colliders.md)	|	[Time >>](Time.md)
+## [<< Input](Input.md)	|	[Time >>](Time.md)
 
 [<<< Contents](Contents.md)

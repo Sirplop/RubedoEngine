@@ -32,6 +32,7 @@ The docs are not finished yet, much is still WIP and may or may not exist at all
 	- [Bodies](Physics/Bodies.md)
 	- [Colliders](Physics/Colliders.md)
 - **Misc. But Important Functionality**
+	- [Input](Input.md)
 	- [Math Libraries](Math.md)
 	- [Time](Time.md)
 	- [Assets](Assets.md)
