@@ -2,7 +2,7 @@
   <img src="logo/logo_label.png" />
 </p>
 <p align="center">
-  <i>"Rubedo is a Latin word meaning "redness" that was adopted by alchemists to define the fourth and final major stage in their magnum opus. Rubedo signaled alchemical success, and the end of the great work."</i>
+  <i>"Rubedo is a Latin word meaning "redness" that was adopted by alchemists to define the fourth and final major stage in their magnum opus - Rubedo signaled alchemical success, and the end of the great work."</i>
 </p>
 
 ##
