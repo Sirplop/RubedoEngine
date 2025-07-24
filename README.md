@@ -1,5 +1,7 @@
 ![logo](logo/logo_label.png)
 #
+*"Rubedo is a Latin word meaning "redness" that was adopted by alchemists to define the fourth and final major stage in their magnum opus. Rubedo signaled alchemical success, and the end of the great work."*
+
 Rubedo is a game engine based on [Monogame](https://monogame.net/), with the goal of being extremely easy to work in while remaining completely open source. (That is, you'll never have to pay anyone to use any part of this!)
 It tries to be very Unity-like in structure, although deviates severely for several systems because I hate how Unity does certain things.
 Even though, if you've used Unity before, a good chunk of this should make sense.
@@ -24,8 +26,8 @@ Stuff. IDK I need to write this section. It doesn't use the Content Pipeline, th
 This allows the content compiler to run whenever you build the game, which it needs to so it can make sure all content is properly compiled.
 This does mean you'll need to build the [Rubedo Compiler](https://github.com/Sirplop/Rubedo.Compiler). Visit that to see how. Note that this will be automated in the future.
 
-# Can I use this?
-If you want. It's MIT liscenced, and no library it uses have a restrictive liscence, either.
+# Can I do?
+If you want. It's MIT licenced, and no library it uses have a restrictive licence, either.
 
 # Library Attribution
 [Monogame](https://monogame.net/)
@@ -35,7 +37,7 @@ If you want. It's MIT liscenced, and no library it uses have a restrictive lisce
 [NLog](https://nlog-project.org/)
 
 [SoLoud](https://github.com/jarikomppa/soloud)
-## The compiler uses these
+
 [SkiaSharp](https://github.com/mono/SkiaSharp)
 
 [AsepriteDotNet](https://github.com/AristurtleDev/AsepriteDotNet)
