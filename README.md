@@ -8,7 +8,7 @@
 ##
 Rubedo is a game engine based on [Monogame](https://monogame.net/), with the goal of being extremely easy to work in while remaining completely open source. (That is, you'll never have to pay anyone to use any part of this!)
 It tries to be very Unity-like in structure, although deviates severely for several systems because I hate how Unity does certain things.
-Even though, if you've used Unity before, a good chunk of this should make sense.
+Still, if you've used Unity before, a good chunk of this should be a little familiar.
 
  **[Documentation](docs/README.md)**
 
