@@ -1,7 +1,11 @@
-![logo](logo/logo_label.png)
-#
-*"Rubedo is a Latin word meaning "redness" that was adopted by alchemists to define the fourth and final major stage in their magnum opus. Rubedo signaled alchemical success, and the end of the great work."*
+<p align="center">
+  <img src="logo/logo_label.png" />
+</p>
+<p align="center">
+  <i>"Rubedo is a Latin word meaning "redness" that was adopted by alchemists to define the fourth and final major stage in their magnum opus. Rubedo signaled alchemical success, and the end of the great work."</i>
+</p>
 
+##
 Rubedo is a game engine based on [Monogame](https://monogame.net/), with the goal of being extremely easy to work in while remaining completely open source. (That is, you'll never have to pay anyone to use any part of this!)
 It tries to be very Unity-like in structure, although deviates severely for several systems because I hate how Unity does certain things.
 Even though, if you've used Unity before, a good chunk of this should make sense.
