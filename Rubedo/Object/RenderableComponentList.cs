@@ -1,4 +1,5 @@
 ﻿using Rubedo.Graphics;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Rubedo.Object;
@@ -8,8 +9,6 @@ namespace Rubedo.Object;
 /// </summary>
 public class RenderableComponentList
 {
-    //NOTE: In the future, there might need to be a layer sorter function if we implement our own batcher. For now, it's unnecessary. I think.
-
     /// <summary>
     /// Renderables are sorted into rendering layers, for easy drawing.
     /// </summary>
@@ -36,12 +35,32 @@ public class RenderableComponentList
     private void AddToRenderLayer(IRenderable component, int layer)
     {
         List<IRenderable> list = ComponentsWithLayer(layer);
-        if (!list.Contains(component))
-            list.Add(component);
-        else
-            RubedoEngine.Logger.Error("Renderable layer list aleady contains this component!");
+        int index = FindSortIndex(component, list);
+        list.Insert(index, component);
     }
 
+    private int FindSortIndex(IRenderable component, List<IRenderable> list)
+    {
+        int high = list.Count - 1;
+        int low = 0;
+        int mid = 0;
+        if (list.Count == 0 || list[0].LayerDepth >= component.LayerDepth)
+            return 0;
+        else if (list[high].LayerDepth <= component.LayerDepth)
+            return high;
+        else
+        {
+            while (low <= high)
+            {
+                mid = (high + low) / 2;
+                if (list[mid].LayerDepth >= component.LayerDepth)
+                    high = mid - 1;
+                else
+                    low = mid + 1;
+            }
+            return mid;
+        }
+    }
 
     public List<IRenderable> ComponentsWithLayer(int layer)
     {

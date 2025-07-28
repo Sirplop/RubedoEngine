@@ -33,14 +33,18 @@
 </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FontStashSharp.MonoGame" Version="1.3.10.1" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.3" />
-    <PackageReference Include="NLog" Version="5.4.0" />
-    <PackageReference Include="Sharploud" Version="2020.2.7" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4" />
+    <PackageReference Include="NLog" Version="6.0.2" />
+    <PackageReference Include="Rubedo.FontStashSharp" Version="1.3.10" />
+    <PackageReference Include="Rubedo.SoLoud" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Graphics\Particles\" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

@@ -9,18 +9,6 @@ namespace Rubedo.Audio;
 /// </summary>
 public class AudioCore
 {
-    public enum SoloudReturnCode
-    {
-        SO_NO_ERROR = 0,        // No error
-        INVALID_PARAMETER = 1,  // Some parameter is invalid
-        FILE_NOT_FOUND = 2,     // File not found
-        FILE_LOAD_FAILED = 3,   // File found, but could not be loaded
-        DLL_NOT_FOUND = 4,      // DLL not found, or wrong DLL
-        OUT_OF_MEMORY = 5,      // Out of memory
-        NOT_IMPLEMENTED = 6,    // Feature not implemented
-        UNKNOWN_ERROR = 7       // Other error
-    }
-
     internal Soloud _soLoudInstance;
     internal AudioMixer outputBus;
 
@@ -49,7 +37,7 @@ public class AudioCore
     /// </summary>
     /// <param name="name">The name of the new mixer.</param>
     /// <param name="outputTarget">The mixer this mixer will output to. If null, defaults to <see cref="outputBus"/>.</param>
-    /// <returns></returns>
+    /// <returns>The ID of the new audio mixer.</returns>
     public int CreateNewMixer(string name, AudioMixer outputTarget)
     {
         audioMixers.Add(new AudioMixer(name, this, outputTarget == null ? outputBus : outputTarget));
@@ -81,5 +69,14 @@ public class AudioCore
         AudioInstance instance = new AudioInstance(handle, this, sourceSound);
 
         return instance;
+    }
+
+    public void StopAll()
+    {
+        for (int i = 0; i < audioMixers.Count; i++)
+        {
+            audioMixers[i].StopAllSounds();
+            RubedoEngine.Logger.Debug("Playing mixers: " + outputBus.MixingBus.getActiveVoiceCount());
+        }
     }
 }

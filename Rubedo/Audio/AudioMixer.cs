@@ -8,7 +8,8 @@ namespace Rubedo.Audio;
 /// </summary>
 public class AudioMixer : IDisposable
 {
-    private readonly uint playHandle;
+    internal uint playHandle;
+    private AudioMixer outputTarget;
 
     public Bus MixingBus { get; private set; }
     public readonly AudioCore audioCore;
@@ -21,12 +22,11 @@ public class AudioMixer : IDisposable
         Name = name;
         audioCore = core;
         MixingBus = new Bus();
+        this.outputTarget = outputTarget;
         if (outputTarget != null)
             playHandle = outputTarget.MixingBus.play(MixingBus, 1f);
         else
             playHandle = core._soLoudInstance.play(MixingBus, 1f);
-
-        MixingBus.setVisualizationEnable(1);
     }
 
     public void PausePlayback()
@@ -58,5 +58,18 @@ public class AudioMixer : IDisposable
         audioCore._soLoudInstance.stop(playHandle);
         MixingBus = null;
         GC.SuppressFinalize(this);
+    }
+
+    internal bool StopAllSounds()
+    {
+        if (outputTarget == null) //top level players do nothing.
+            return true;
+
+        if (this.IsDisposed || outputTarget.IsDisposed)
+            return false; //this is trying to output to something that doesn't exist!
+
+        MixingBus.stopAllNonBusSounds();
+
+        return true;
     }
 }

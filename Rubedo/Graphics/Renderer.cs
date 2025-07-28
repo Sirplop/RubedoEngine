@@ -58,7 +58,7 @@ public class Renderer : IDisposable
         _effect.Projection = camera.GetProjection();
         _effect.World = Matrix.Identity;
 
-        Sprites.Begin(sortMode: SpriteSortMode.FrontToBack, blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: _effect);
+        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: _effect);
     }
     public void End()
     {

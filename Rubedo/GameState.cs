@@ -1,9 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Rubedo.Object;
 using Rubedo.UI;
-using Rubedo.Input;
-using Microsoft.Xna.Framework;
 using Rubedo.Graphics;
 
 namespace Rubedo;

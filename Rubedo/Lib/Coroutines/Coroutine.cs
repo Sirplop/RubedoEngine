@@ -9,6 +9,17 @@ public class Coroutine
 {
     public static Coroutine Start(IEnumerator func) => RubedoEngine.Instance._coroutineManager.StartCoroutine(func);
     public static object WaitForSeconds(float seconds) => Coroutines.WaitForSeconds.waiter.Wait(seconds);
+    /// <summary>
+    /// Stops all active coroutines. Can be called from within a coroutine, but will still execute that coroutine until the next yield.
+    /// Some coroutines might not be returned to the pool until the next update cycle.
+    /// </summary>
+    public static void StopAllCoroutines() => RubedoEngine.Instance._coroutineManager.StopAllCoroutines();
+
+    /// <summary>
+    /// Immediately clears all coroutines and returns them to the pool for reuse.
+    /// Do not to call this during coroutine updates.
+    /// </summary>
+    public static void ClearAllCoroutines() => RubedoEngine.Instance._coroutineManager.ClearAllCoroutines();
 
     internal Coroutine() { }
 
