@@ -24,7 +24,6 @@ public class RubedoEngine : Game
 
     public static RubedoEngine Instance { get; private set; }
     public static GraphicsDeviceManager Graphics { get; private set; }
-    public static NLog.Logger Logger { get; protected set; }
     public static AudioCore Audio { get; protected set; }
     public static StateManager StateManager => Instance._stateManager;
     public static GameState CurrentState => Instance._stateManager.CurrentState();
@@ -119,7 +118,7 @@ public class RubedoEngine : Game
         LoggingConfiguration config = new NLog.Config.LoggingConfiguration();
 
         // Nicer log output.
-        SimpleLayout layout = new SimpleLayout() { Text = "[${longdate}] [${level:uppercase=true}] ${literal:text=\\:} ${message:withexception=true}" };
+        SimpleLayout layout = new SimpleLayout("[${longdate}] [${level:uppercase=true}] ${literal:text=\\:} ${message:withexception=true}");
 
         // Targets where to log to: File and Console
         //FileTarget logfile = new NLog.Targets.FileTarget("logfile") { FileName = "gamelog.txt" };
@@ -139,7 +138,7 @@ public class RubedoEngine : Game
         NLog.LogManager.Configuration = config;
 
         //Load the logger.
-        Logger = NLog.LogManager.GetCurrentClassLogger();
+        Log.Logger = NLog.LogManager.GetCurrentClassLogger();
     }
 
     protected override void OnActivated(object sender, EventArgs args)

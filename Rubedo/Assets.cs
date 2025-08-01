@@ -255,7 +255,7 @@ public static class Assets
             {
                 string extPath = Path.ChangeExtension(path, extension);
                 int returnCode = effect.load(extPath);
-                if (returnCode != (int)AudioCore.SoloudReturnCode.SO_NO_ERROR)
+                if (returnCode != ReturnCode.SO_NO_ERROR)
                     continue;
                 if (!loadedSounds.TryGetValue(name, out value))
                     loadedSounds.Add(name, new WeakReference<Wav>(effect));
@@ -282,7 +282,7 @@ public static class Assets
             {
                 string extPath = Path.ChangeExtension(path, extension);
                 int returnCode = effect.load(extPath);
-                if (returnCode != (int)AudioCore.SoloudReturnCode.SO_NO_ERROR)
+                if (returnCode != ReturnCode.SO_NO_ERROR)
                     continue;
                 return effect;
             }

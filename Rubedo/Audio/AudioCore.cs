@@ -76,7 +76,7 @@ public class AudioCore
         for (int i = 0; i < audioMixers.Count; i++)
         {
             audioMixers[i].StopAllSounds();
-            RubedoEngine.Logger.Debug("Playing mixers: " + outputBus.MixingBus.getActiveVoiceCount());
+            Log.Debug("Playing mixers: " + outputBus.MixingBus.getActiveVoiceCount());
         }
     }
 }

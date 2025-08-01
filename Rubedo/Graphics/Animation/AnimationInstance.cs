@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace Rubedo.Graphics.Animation;
 
 /// <summary>
-/// TODO: I am AnimationController, and I don't have a summary yet.
+/// Represents an instance of an animation.
 /// </summary>
-public class AnimationController : IDisposable
+public class AnimationInstance : IDisposable
 {
     private readonly IAnimation _animation;
     private int _indexDirection;
@@ -36,8 +36,10 @@ public class AnimationController : IDisposable
     public int CurrentFrame => _animation.Frames[_currentFrame].FrameIndex;
     public int FrameCount => _animation.FrameCount;
 
+    public event Action<AnimationInstance, AnimationEvent.Trigger> OnAnimationEvent;
 
-    public AnimationController(IAnimation animation)
+
+    public AnimationInstance(IAnimation animation)
     {
         _animation = animation;
 
@@ -72,24 +74,25 @@ public class AnimationController : IDisposable
     public bool Play(int startingFrame = 0, bool startOnRandomFrame = false)
     {
         if (!startOnRandomFrame && (startingFrame < 0 || startingFrame >= FrameCount))
-            throw new ArgumentOutOfRangeException(nameof(startingFrame), $"{nameof(startingFrame)} cannot be less than zero or greater than the frame count of this {nameof(AnimationController)}.");
+            throw new ArgumentOutOfRangeException(nameof(startingFrame), $"{nameof(startingFrame)} cannot be less than zero or greater than the frame count of this {nameof(AnimationInstance)}.");
 
         if (IsAnimating)
             return false; //already playing.
 
         IsAnimating = true;
-        _currentFrame = Lib.Random.Range(0, FrameCount);
-        FrameTime = _animation.Frames[_currentFrame].Duration;
+        SetFrame(startOnRandomFrame ? Lib.Random.Range(0, FrameCount) : startingFrame);
         return true;
     }
 
-    public bool Stop()
+    public bool Stop() => Stop(AnimationEvent.Trigger.AnimationStopped);
+    public bool Stop(AnimationEvent.Trigger trigger)
     {
         if (!IsAnimating)
             return false;
 
         IsAnimating = false;
         IsPaused = true;
+        OnAnimationEvent?.Invoke(this, trigger);
         return true;
     }
 
@@ -97,11 +100,12 @@ public class AnimationController : IDisposable
     {
         if (frame < 0 || frame >= _animation.FrameCount)
         {
-            throw new ArgumentOutOfRangeException(nameof(frame), $"{nameof(frame)} cannot be less than zero or greater than the frame count of this {nameof(AnimationController)}.");
+            throw new ArgumentOutOfRangeException(nameof(frame), $"{nameof(frame)} cannot be less than zero or greater than the frame count of this {nameof(AnimationInstance)}.");
         }
 
         _currentFrame = frame;
         FrameTime = _animation.Frames[_currentFrame].Duration;
+        OnAnimationEvent?.Invoke(this, AnimationEvent.Trigger.FrameBegin);
     }
 
     public void Reset()
@@ -128,6 +132,8 @@ public class AnimationController : IDisposable
         { //make sure we can skip frames due to low framerate.
             remainingTime += -FrameTime;
 
+            OnAnimationEvent?.Invoke(this, AnimationEvent.Trigger.FrameEnd);
+
             if (!AdvanceFrame())
                 break;
             FrameTime -= remainingTime;
@@ -150,14 +156,17 @@ public class AnimationController : IDisposable
                 {
                     _currentFrame = IsReversed ? _animation.FrameCount - 1 : 0;
                 }
+                OnAnimationEvent?.Invoke(this, AnimationEvent.Trigger.AnimationLoop);
             }
             else
             {
                 _currentFrame -= _indexDirection;
+                Stop(AnimationEvent.Trigger.AnimationCompleted);
                 return false;
             }
         }
         FrameTime = _animation.Frames[_currentFrame].Duration;
+        OnAnimationEvent?.Invoke(this, AnimationEvent.Trigger.FrameBegin);
         return true;
     }
 
