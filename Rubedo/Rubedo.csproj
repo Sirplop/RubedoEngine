@@ -15,8 +15,11 @@
     <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Graphics\Particles\**" />
     <Compile Remove="Physics2D\Collision\Shapes\**" />
+    <EmbeddedResource Remove="Graphics\Particles\**" />
     <EmbeddedResource Remove="Physics2D\Collision\Shapes\**" />
+    <None Remove="Graphics\Particles\**" />
     <None Remove="Physics2D\Collision\Shapes\**" />
   </ItemGroup>
   <ItemGroup>
@@ -41,9 +44,6 @@
     <Content Include="Content\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Graphics\Particles\" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

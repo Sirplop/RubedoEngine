@@ -1,7 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Components;
 using Rubedo.Lib;
+using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Common;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Physics2D.Dynamics;
@@ -11,6 +14,11 @@ namespace Rubedo.Physics2D.Dynamics;
 /// </summary>
 public class PhysicsBody : Component
 {
+    /*private enum CollisionType { Solid, TriggerSolid, Trigger }
+    internal ConcurrentDictionary<PhysicsBody, Manifold> collidingWith = new ConcurrentDictionary<PhysicsBody, Manifold>();
+    internal ConcurrentDictionary<PhysicsBody, Manifold> newCollisions = new ConcurrentDictionary<PhysicsBody, Manifold>();
+    internal ConcurrentQueue<PhysicsBody> removeCollisions = new ConcurrentQueue<PhysicsBody>();*/
+
     internal Vector2 velocity = Vector2.Zero;
     internal float angularVelocity = 0;
 
@@ -116,4 +124,103 @@ public class PhysicsBody : Component
         MathV.Cross(ref contactRadius, ref impulse, out float lambda);
         angularVelocity += _invInertia * lambda;
     }
+
+
+    /*internal void RemoveAllContacts()
+    {
+        if (collidingWith.IsEmpty)
+            return;
+        foreach (PhysicsBody body in collidingWith.Keys)
+        {
+            removeCollisions.Enqueue(body);
+        }
+    }
+    internal void DoCollision(PhysicsBody other)
+    {
+        Manifold contact = collidingWith[other];
+        if (newCollisions.ContainsKey(other))
+        {
+            switch (GetCollisionType(contact))
+            {
+                case CollisionType.Solid:
+                    contact.B.collider.onCollisionEnterEventHandler?.Invoke(contact.B, this, contact);
+                    collider.onCollisionEnterEventHandler?.Invoke(this, contact.B, contact);
+                    break;
+                case CollisionType.TriggerSolid:
+                    if (collider.isTrigger)
+                        collider.onTriggerEnterEventHandler?.Invoke(this, contact.B, contact);
+                    else
+                        contact.B.collider.onTriggerEnterEventHandler?.Invoke(contact.B, this, contact);
+                    break;
+                case CollisionType.Trigger:
+                    contact.B.collider.onTriggerEnterEventHandler?.Invoke(contact.B, this, contact);
+                    collider.onTriggerEnterEventHandler?.Invoke(this, contact.B, contact);
+                    break;
+            }
+            return;
+        }
+        switch (GetCollisionType(contact))
+        {
+            case CollisionType.Solid:
+                contact.B.collider.onCollisionStayEventHandler?.Invoke(contact.B, this, contact);
+                collider.onCollisionStayEventHandler?.Invoke(this, contact.B, contact);
+                break;
+            case CollisionType.TriggerSolid:
+                if (collider.isTrigger)
+                    collider.onTriggerStayEventHandler?.Invoke(this, contact.B, contact);
+                else
+                    contact.B.collider.onTriggerStayEventHandler?.Invoke(contact.B, this, contact);
+                break;
+            case CollisionType.Trigger:
+                contact.B.collider.onTriggerStayEventHandler?.Invoke(contact.B, this, contact);
+                collider.onTriggerStayEventHandler?.Invoke(this, contact.B, contact);
+                break;
+        }
+    }
+    internal void FinalizeCollisions()
+    {
+        foreach (PhysicsBody body in removeCollisions)
+        {
+            collidingWith.Remove(body, out Manifold contact);
+            if (newCollisions.ContainsKey(body))
+                continue; //new collision to ignore.
+            if (contact == null)
+                continue;
+            switch (GetCollisionType(contact))
+            {
+                case CollisionType.Solid:
+                    contact.B.collider.onCollisionExitEventHandler?.Invoke(contact.B, this);
+                    collider.onCollisionExitEventHandler?.Invoke(this, contact.B);
+                    break;
+                case CollisionType.TriggerSolid:
+                    if (collider.isTrigger)
+                        collider.onTriggerExitEventHandler?.Invoke(this, contact.B);
+                    else
+                        contact.B.collider.onTriggerExitEventHandler?.Invoke(contact.B, this);
+                    break;
+                case CollisionType.Trigger:
+                    contact.B.collider.onTriggerExitEventHandler?.Invoke(contact.B, this);
+                    collider.onTriggerExitEventHandler?.Invoke(this, contact.B);
+                    break;
+            }
+        }
+        newCollisions.Clear();
+        removeCollisions.Clear();
+    }*/
+
+    /**
+     * Each collision type falls into 1 of 3 categories:
+     * - solid collider <-> solid collider
+     * - trigger collider <- solid collider
+     * - trigger collider <-> trigger collider
+     * trigger/solid collisions will only trigger the trigger collider's events.
+    **/
+    /*private static CollisionType GetCollisionType(Manifold m)
+    {
+        if (m.A.collider.isTrigger && m.B.collider.isTrigger)
+            return CollisionType.Trigger;
+        if (m.A.collider.isTrigger || m.B.collider.isTrigger)
+            return CollisionType.TriggerSolid;
+        return CollisionType.Solid;
+    }*/
 }

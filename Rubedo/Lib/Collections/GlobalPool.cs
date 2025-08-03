@@ -3,9 +3,10 @@
 namespace Rubedo.Lib.Collections;
 
 /// <summary>
-/// Static class that can be used to pool any object. Use with an <see cref="IPoolable"/> object for additional functionality.
+/// Static class that can be used to globally pool any object. Use with an <see cref="IPoolable"/> object for additional functionality.
+/// For instanced pools, use <see cref="ObjectPool"/>.
 /// </summary>
-public static class Pool<T> where T : new()
+public static class GlobalPool<T> where T : new()
 {
     private static Queue<T> _pool = new Queue<T>(10);
 

@@ -33,12 +33,18 @@ public static class Time
     /// </summary>
     public static float TimeScale => timeScale;
 
+    /// <summary>
+    /// The update rate for fixed updates. Defaults to 50 times per second.
+    /// </summary>
+    public static float FixedDeltaTime => fixedDeltaTime;
+
     private static float deltaTime;
     private static float deltaTimeMillis;
     private static double rawDeltaTime;
     private static double rawDeltaTimeMillis;
     private static double rawTime;
     private static float timeScale = 1.0f;
+    private static float fixedDeltaTime = 0.02f;
 
     internal static void UpdateTime(GameTime gameTime)
     {
@@ -56,5 +62,13 @@ public static class Time
     {
         scale = MathF.Max(scale, 0);
         timeScale = scale;
+    }
+
+    /// <summary>
+    /// Sets the fixed update rate.
+    /// </summary>
+    public static void SetFixedDeltaTime(float time)
+    {
+        fixedDeltaTime = time;
     }
 }

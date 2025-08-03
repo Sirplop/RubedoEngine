@@ -2,8 +2,9 @@
 using Rubedo.EngineDebug;
 using Rubedo.Graphics;
 using Rubedo.Lib;
+using Rubedo.Lib.Extensions;
+using Rubedo.Physics2D.Common;
 using Rubedo.Physics2D.Dynamics;
-using Rubedo.Physics2D.Math;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -100,40 +101,94 @@ internal class SpatialHashGrid : IBroadphase
         //can we figure out how to remove manifolds we didn't make without so many sets?
         foreach (List<PhysicsBody> body in cells.cells.Values)
         {
-            if (body.Count <= 1) //ignore cells with 1 thing in it.
+            if (body.Count <= 1) //ignore cells with 1 or less things in it.
                 continue;
             for (int i = 0; i < body.Count - 1; i++)
             {
+                PhysicsBody bodyA = body[i];
                 for (int j = i + 1; j < body.Count; j++)
                 {
-                    if (body[i].isStatic && body[j].isStatic)
-                        continue; //static bodies can't collide.
-                    if (body[i].IsDestroyed || body[j].IsDestroyed)
+                    PhysicsBody bodyB = body[j];
+
+                    if (!PhysicsLayer.LayersCollide(bodyA.collider.physicsLayer, bodyB.collider.physicsLayer))
+                        continue; //layers don't collide, so ignore.
+
+                    if ((bodyA.isStatic && bodyB.isStatic) &&
+                        !(bodyA.collider.isTrigger || bodyA.collider.isTrigger))
+                        continue; //non-trigger static colliders can't collide!
+
+                    if (bodyA.IsDestroyed || bodyB.IsDestroyed)
                         continue; //can't collide nonexistant things
-                    if (body[i].bounds.Overlaps(body[j].bounds))
+
+                    if (bodyA.bounds.Overlaps(bodyB.bounds))
                     {
                         //TODO: ManifoldPool class, please. Too many allocations.
-                        Manifold m = new Manifold(body[i], body[j]);
-                        if (pairs.Add(m) && manifoldSet.Add(m))
+                        Manifold m = new Manifold(bodyA, bodyB);
+                        if (pairs.Add(m) && manifoldSet.Add(m)) //also this add check is terribly slow.
                         {
-                            manifolds.Add(m);
+                            manifolds.Add(m); //only add if it doesn't exist already.
                         }
                     }
                 }
             }
         }
+        //TODO: this is very very slow, make it faster!
         for (int i = manifolds.Count - 1; i >= 0; i--)
         {
             Manifold m = manifolds[i];
             if (!pairs.Contains(m))
             {
                 manifoldSet.Remove(m);
-                manifolds[i] = manifolds[manifolds.Count - 1];
-                manifolds.RemoveAt(manifolds.Count - 1); //swap and remove to remove unecessary moves
+                manifolds.SwapAndRemove(i);
             }
+            else
+                m.noImpulse = m.A.collider.isTrigger || m.B.collider.isTrigger;
         }
         pairs.Clear();
     }
+
+    /*public void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> removals)
+    {
+        foreach (List<PhysicsBody> cell in cells.cells.Values)
+        {
+            if (cell.Count <= 1) //ignore cells with 1 or less things in it.
+                continue;
+            for (int i = 0; i < cell.Count - 1; i++)
+            {
+                PhysicsBody bodyA = cell[i];
+                for (int j = i + 1; j < cell.Count; j++)
+                {
+                    PhysicsBody bodyB = cell[j];
+
+                    if (!PhysicsLayer.LayersCollide(bodyA.collider.physicsLayer, bodyB.collider.physicsLayer))
+                        continue; //layers don't collide, so ignore.
+
+                    if ((bodyA.isStatic && bodyB.isStatic) &&
+                        !(bodyA.collider.isTrigger || bodyA.collider.isTrigger))
+                        continue; //non-trigger static colliders can't collide!
+
+                    if (bodyA.IsDestroyed || bodyB.IsDestroyed)
+                        continue; //can't collide nonexistant things
+
+                    if (bodyA.bounds.Overlaps(bodyB.bounds))
+                    {
+                        if (!bodyA.collidingWith.ContainsKey(bodyB))
+                        { //we only need to care about one body holding the collision.
+                            Manifold m = new Manifold(bodyA, bodyB);
+                            bodyA.newCollisions.TryAdd(bodyB, m);
+                            bodyA.collidingWith.TryAdd(bodyB, m);
+                            manifolds.Add(m);
+                        }
+                    } 
+                    else if (bodyA.collidingWith.TryGetValue(bodyB, out Manifold value))
+                    {
+                        bodyA.removeCollisions.Enqueue(bodyB);
+                        removals.Add(value);
+                    }
+                }
+            }
+        }
+    }*/
 
     public void Add(PhysicsBody body)
     {

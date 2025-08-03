@@ -95,9 +95,9 @@ public class CoroutineManager
         else
         {
             for (var i = 0; i < _unblockedCoroutines.Count; i++)
-                Pool<CoroutineInternal>.Release(_unblockedCoroutines[i]);
+                GlobalPool<CoroutineInternal>.Release(_unblockedCoroutines[i]);
             for (var i = 0; i < _shouldRunNextFrame.Count; i++)
-                Pool<CoroutineInternal>.Release(_shouldRunNextFrame[i]);
+                GlobalPool<CoroutineInternal>.Release(_shouldRunNextFrame[i]);
 
             _unblockedCoroutines.Clear();
             _shouldRunNextFrame.Clear();
@@ -110,7 +110,7 @@ public class CoroutineManager
     public Coroutine StartCoroutine(IEnumerator enumerator)
     {
         // find or create a coroutine
-        CoroutineInternal coroutine = Pool<CoroutineInternal>.Obtain();
+        CoroutineInternal coroutine = GlobalPool<CoroutineInternal>.Obtain();
         coroutine.PrepareForReuse();
 
         // setup the coroutine and add it
@@ -143,7 +143,7 @@ public class CoroutineManager
         // This coroutine has finished
         if (!coroutine.enumerator.MoveNext() || coroutine.isDone)
         {
-            Pool<CoroutineInternal>.Release(coroutine);
+            GlobalPool<CoroutineInternal>.Release(coroutine);
             return false;
         }
 
@@ -180,7 +180,7 @@ public class CoroutineManager
             // check for stopped coroutines
             if (coroutine.isDone)
             {
-                Pool<CoroutineInternal>.Release(coroutine);
+                GlobalPool<CoroutineInternal>.Release(coroutine);
                 continue;
             }
 

@@ -14,7 +14,6 @@ public class PhysicsWorld
     public static Vector2 gravity = new Vector2(0, -9.81f * RubedoEngine.SizeOfMeter);
     public static void ResetGravity() => gravity = new Vector2(0f, -9.81f * RubedoEngine.SizeOfMeter);
 
-    public static bool bruteForce = false;
     public static bool showContacts = false;
     public static bool drawBroadphase = false;
 
@@ -117,34 +116,12 @@ public class PhysicsWorld
             bodies[i].IntegrateForces(dt);
 
         timer.Start();
-        if (bruteForce)
-        {
-            for (i = 0; i < bodies.Count - 1; i++)
-            {
-                for (int j = i + 1; j < bodies.Count; j++)
-                {
-                    if (bodies[i].isStatic && bodies[j].isStatic)
-                        continue;
-                    if (bodies[i].bounds.Overlaps(bodies[j].bounds))
-                    {
-                        Manifold key = new Manifold(bodies[i], bodies[j]);
-                        if (manifoldSet.Add(key))
-                        {
-                            manifolds.Add(key);
-                        }
-                    }
-                }
-            }
-            timer.Step("B.BF: ");
-        }
-        else
-        {
-            //Broad phase
-            broadphase.Update(bodies);
-            timer.Step("B.U: ");
-            broadphase.ComputePairs(manifolds, manifoldSet);
-            timer.Step("B.C: ");
-        }
+
+        //Broad phase
+        broadphase.Update(bodies);
+        timer.Step("B.U: ");
+        broadphase.ComputePairs(manifolds, manifoldSet);
+        timer.Step("B.C: ");
 
         //Narrow phase
         SolveContacts();

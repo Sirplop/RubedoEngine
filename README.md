@@ -34,10 +34,11 @@ This does mean you'll need to build the [Rubedo Compiler](https://github.com/Sir
 If you want. It's MIT licenced, and no library it uses have a restrictive licence, either.
 
 # Library Attribution
-- [Monogame](https://monogame.net/)
+- [MonoGame](https://monogame.net/)
 - [FontStashSharp](https://github.com/Sirplop/FontStashSharp)
 - [NLog](https://nlog-project.org/)
 - [SoLoud](https://github.com/jarikomppa/soloud)
 - [FiniteStateMachine](https://github.com/UnterrainerInformatik/FiniteStateMachine)
+- [MonoGame.Particles](https://github.com/SjaakAlvarez/MonoGame.Particles)
 - [SkiaSharp](https://github.com/mono/SkiaSharp)
 - [AsepriteDotNet](https://github.com/AristurtleDev/AsepriteDotNet)

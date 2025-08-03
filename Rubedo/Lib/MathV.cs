@@ -329,7 +329,6 @@ public static class MathV
     {
         return MathF.Min(vec.X, vec.Y);
     }
-
     /// <summary>
     /// Gets the minimum value of the provided values.
     /// </summary>
@@ -338,6 +337,7 @@ public static class MathV
     {
         return MathF.Min(v1, v2);
     }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool NearlyEqual(Vector2 a, Vector2 b)
     {

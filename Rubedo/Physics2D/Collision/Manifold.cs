@@ -3,22 +3,26 @@ using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Rubedo.Physics2D.Collision;
 
 public class Contact
 {
-    public Vector2 position;
-    public float accumImpulse;
-    public float accumFriction;
+    public Vector2 Position => position;
+    public float Penetration => penetration;
+
+    internal Vector2 position;
+    internal float accumImpulse;
+    internal float accumFriction;
 
     //Bias based on penetration of bodies
-    public float penetration;
+    internal float penetration;
 
-    public float bias;
+    internal float bias;
 
-    public float normalMass;
-    public float tangentMass;
+    internal float normalMass;
+    internal float tangentMass;
 
     internal Vector2 ra;
     internal Vector2 rb;
@@ -39,6 +43,11 @@ public class Contact
 
 public class Manifold : IEquatable<Manifold>
 {
+    public Vector2 Normal => normal;
+    public Vector2 Tangent => tangent;
+    public ReadOnlyCollection<Contact> ContactPoints => contacts.AsReadOnly();
+    public int ContactCount => contactCount;
+
     public readonly PhysicsBody A;
     public readonly PhysicsBody B;
     internal Vector2 normal;
@@ -50,12 +59,14 @@ public class Manifold : IEquatable<Manifold>
 
     internal float friction;
     internal float restitution;
+    internal bool noImpulse;
 
     public Manifold(PhysicsBody bodyA, PhysicsBody bodyB)
     {
         A = bodyA;
         B = bodyB;
         normal = default;
+        noImpulse = bodyA.collider.isTrigger || bodyB.collider.isTrigger;
     }
 
     public void Update(Contact c)
@@ -94,31 +105,7 @@ public class Manifold : IEquatable<Manifold>
         contactCount = 2;
     }
 
-    [Obsolete]
-    public void Update(int numNewContacts, params Contact[] newContacts)
-    {
-        Contact[] mergedContacts = new Contact[2];
-
-        for (int i = 0; i < numNewContacts; i++)
-        {
-            Contact cOld = contacts[i];
-            Contact cNew = newContacts[i];
-            mergedContacts[i] = cNew.Clone();
-
-            if (cOld != null)
-            {
-                mergedContacts[i].accumFriction = cOld.accumFriction;
-                mergedContacts[i].accumImpulse = cOld.accumImpulse;
-            }
-        }
-
-        for (int i = 0; i < numNewContacts; ++i)
-            contacts[i] = mergedContacts[i].Clone();
-
-        contactCount = numNewContacts;
-    }
-
-    public bool SolveContact()
+    internal bool SolveContact()
     {
         //Check whether colliding and fill data in us
         return PhysicsCollisions.Collide(A.collider.shape, B.collider.shape, this);
