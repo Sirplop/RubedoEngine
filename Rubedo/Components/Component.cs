@@ -1,4 +1,5 @@
 ﻿using Rubedo.Object;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Components;
@@ -90,6 +91,11 @@ public abstract class Component : ITransformable, IDestroyable
     /// Called every frame while <see cref="Entity.active"/> and <see cref="active"/> are both true.
     /// </summary>
     public virtual void Update() { }
+
+    /// <summary>
+    /// Called every fixed time step, dictated by <see cref="Time.FixedDeltaTime"/>.
+    /// </summary>
+    public virtual void FixedUpdate() { }
     /// <summary>
     /// Called when this component's transform receives a change in a frame, I.E. the transform is marked "dirty".
     /// </summary>

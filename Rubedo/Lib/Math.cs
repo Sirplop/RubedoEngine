@@ -84,6 +84,14 @@ public static class Math
     {
         return MathF.Min(MathF.Min(v1, v2), MathF.Min(v3, v4));
     }
+    /// <summary>
+    /// Gets the minimum value of the provided values.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Min(in float v1, in float v2, in float v3, in float v4, in float v5)
+    {
+        return MathF.Min(v5, MathF.Min(MathF.Min(v1, v2), MathF.Min(v3, v4)));
+    }
 
     /// <summary>
     /// Gets the maximum value of the provided values.
@@ -108,6 +116,14 @@ public static class Math
     public static float Max(in float v1, in float v2, in float v3, in float v4)
     {
         return MathF.Max(MathF.Max(v1, v2), MathF.Max(v3, v4));
+    }
+    /// <summary>
+    /// Gets the maximum value of the provided values.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Max(in float v1, in float v2, in float v3, in float v4, in float v5)
+    {
+        return MathF.Max(v5, MathF.Max(MathF.Max(v1, v2), MathF.Max(v3, v4)));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

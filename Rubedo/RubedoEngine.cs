@@ -34,7 +34,6 @@ public class RubedoEngine : Game
     protected internal CoroutineManager _coroutineManager;
 
     public PhysicsWorld World => _physicsWorld;
-
     public Timer _physicsTimer;
 
     public RubedoEngine()
@@ -62,7 +61,6 @@ public class RubedoEngine : Game
         _renderer = new Renderer(this);
 
         GUI.Setup(this);
-
         _physicsTimer = new Timer();
 
         Lib.SDL2Extern.SDL_SetWindowMinimumSize(Window.Handle, 320, 320);
@@ -71,7 +69,6 @@ public class RubedoEngine : Game
     }
 
     public bool physicsOn = true;
-    public bool stepPhysics = false;
     protected override void Update(GameTime gameTime)
     {
         Time.UpdateTime(gameTime);
@@ -82,18 +79,32 @@ public class RubedoEngine : Game
             GUI.Root?.UpdateStart(GUI.DoUIInput);
         }
 
+        FixedUpdate(Time.DeltaTime);
         _stateManager.Update();
-        _physicsTimer.Start();
-        if (physicsOn || stepPhysics)
-        {
-            _physicsWorld.Tick(Time.DeltaTime);
-            stepPhysics = false;
-        }
-        _physicsTimer.Stop();
-
         _coroutineManager.Update();
 
         base.Update(gameTime);
+    }
+
+    private double accumulatedDelta = 0;
+    protected void FixedUpdate(float dt)
+    {
+        accumulatedDelta += dt;
+
+        // Avoid accumulator death spiral
+        if (accumulatedDelta > Time.FixedDeltaTime * 5)
+            accumulatedDelta = Time.FixedDeltaTime * 5;
+
+        _physicsTimer.Start();
+        while (accumulatedDelta > Time.FixedDeltaTime)
+        {
+            if (physicsOn)
+                _physicsWorld.Step(Time.FixedDeltaTime);
+
+            _stateManager.FixedUpdate();
+            accumulatedDelta -= Time.FixedDeltaTime;
+        }
+        _physicsTimer.Stop();
     }
 
 

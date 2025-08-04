@@ -3,6 +3,7 @@ using Rubedo;
 using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Physics2D.Math;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -140,6 +141,19 @@ public class Polygon : Shape
         // I = (mass/(6 * sum(cross))) * numer
         float iPoly = mass * numer / (6f * crossSum);
         return System.Math.Abs(iPoly);
+    }
+
+    public override Shape Clone()
+    {
+        Polygon poly = new Polygon();
+        poly.vertices = new Vector2[VertexCount];
+        poly.normals = new Vector2[VertexCount];
+        Array.Copy(vertices, poly.vertices, VertexCount);
+        Array.Copy(normals, poly.normals, VertexCount);
+        poly.type = ShapeType.Polygon;
+        poly.transformDirty = true;
+        poly.normalsDirty = true;
+        return poly;
     }
 
     public override bool Raycast(Ray2D ray, float distance, out RaycastResult result)

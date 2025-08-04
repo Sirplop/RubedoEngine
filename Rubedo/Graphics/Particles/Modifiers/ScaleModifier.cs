@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using MonoGame.Particles.Physics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,7 +22,8 @@ namespace MonoGame.Particles.Particles.Modifiers
         {
             if (p is Particle particle)
             {
-                particle.Scale = MathHelper.Lerp(_start, _end, (float)(p.Age / p.MaxAge));
+                float scale = MathHelper.Lerp(_start, _end, (float)(p.Age / p.MaxAge));
+                particle.Transform.Scale = new Vector2(scale, scale);
             }
         }
     }

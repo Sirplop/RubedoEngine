@@ -27,5 +27,6 @@ public abstract class Shape
     public abstract AABB GetBoundingBox();
     public abstract float GetArea();
     public abstract float GetMomentOfInertia(float mass);
+    public abstract Shape Clone();
     public abstract bool Raycast(Ray2D ray, float distance, out RaycastResult result);
 }

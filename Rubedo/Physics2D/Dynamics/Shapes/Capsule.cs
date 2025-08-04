@@ -55,6 +55,11 @@ public class Capsule : Shape
         return 0.5f * mass * radius * radius + mass * length / 3f;
     }
 
+    public override Shape Clone()
+    {
+        return new Capsule(length, radius);
+    }
+
     public override bool Raycast(Math.Ray2D ray, float distance, out RaycastResult result)
     {
         throw new NotImplementedException();

@@ -1,20 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Particles.Particles.Modifiers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using MonoGame.Particles.Particles.Origins;
 using System.Threading.Tasks;
 using Rubedo.Lib.Collections;
 using Rubedo.Graphics.Particles.Data;
+using Rubedo;
 
 namespace MonoGame.Particles.Particles
 {
     public class ParticleEmitter : Emitter
     {
-        private readonly World world;
-
         public ObjectPool<IParticle> ParticlePool { get; set; }
 
         public event ParticleDeathEventHandler ParticleDeath;
@@ -26,19 +23,16 @@ namespace MonoGame.Particles.Particles
             handler?.Invoke(this, e);
         }        
 
-        public ParticleEmitter(String name, World world, Vector2 position, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
+        public ParticleEmitter(String name, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
         {
             Name = name;
-            Position = position;
             this.speed = speed;
             this.maxAge = maxAge;
-            this.world = world;
             this.direction = direction;
             ParticlesPerSecond = particlesPerSecond;
             Modifiers = new List<Modifier>();
             BirthModifiers = new List<BirthModifier>();
-            Particles = new List<IParticle>(100);
-            world.emitters.Add(this);            
+            Particles = new List<IParticle>(100);     
 
             ParticlePool = new ObjectPool<IParticle>(50, new ParticlePooledObjectPolicy());
         }
@@ -48,13 +42,13 @@ namespace MonoGame.Particles.Particles
             return Particles.Count == 0 && state == EmitterState.STOPPED;
         }
 
-        public override void Update(double seconds)
+        public override void Update()
         {
-            base.Update(seconds);
+            base.Update();
 
             if (state==EmitterState.STARTED || state==EmitterState.STOPPING)
             {
-                releaseTime += seconds;
+                releaseTime += Time.DeltaTime;
 
                 double release = ParticlesPerSecond * releaseTime;
                 if (release > 1)
@@ -68,16 +62,15 @@ namespace MonoGame.Particles.Particles
                     }
                 }
             }
+            TotalSeconds += Time.DeltaTime;
+            float dampening = Math.Clamp(1.0f - Time.DeltaTime * LinearDamping, 0.0f, 1.0f);
 
-            TotalSeconds += seconds;
-            double milliseconds = seconds * 1000;
-            float dampening = Math.Clamp(1.0f - (float)seconds * LinearDamping, 0.0f, 1.0f);
-
-            
-            //Parallel.ForEach(Particles.ToArray(), p =>//
-            foreach (IParticle p in Particles)
+            //parallel might not be a good idea? IDK
+            //Parallel.For(0, Particles.Count, (i, a) =>
+            for (int i = 0; i < Particles.Count; i++)
             {
-                p.Age += milliseconds;
+                IParticle p = Particles[i];
+                p.Age += Time.DeltaTimeMillis;
 
                 if (p.Age > p.MaxAge)
                 {
@@ -86,22 +79,21 @@ namespace MonoGame.Particles.Particles
                 }
                 else
                 {
-                    p.Position += (p.Velocity * (float)seconds);
-                    p.Velocity += (Rubedo.Physics2D.Common.PhysicsWorld.gravity * (float)seconds);
+                    p.Transform.Position += (p.Velocity * Time.DeltaTime);
+                    p.Velocity += (Rubedo.Physics2D.Common.PhysicsWorld.gravity * GravityScale * Time.DeltaTime);
                     p.Velocity *= dampening;
-                    p.Orientation += p.AngularVelocity;
+                    p.Transform.Rotation += p.AngularVelocity;
 
                     foreach (Modifier m in Modifiers)
                     {
-                        m.Execute(this, seconds, p);
+                        m.Execute(this, Time.DeltaTime, p);
                     }
                 }
-
             }
             //);
-                                 
-            Particles.RemoveAll(p => p.Age > p.MaxAge);        
-            if (CanDestroy()) world.emitters.Remove(this);
+
+            Particles.RemoveAll(p => p.Age > p.MaxAge);
+            _boundsDirty = true;
         }
 
         public void AddParticle()
@@ -110,16 +102,16 @@ namespace MonoGame.Particles.Particles
 
             if (data != null)
             {
-                IParticle particle = ParticlePool.Obtain();               
+                IParticle particle = ParticlePool.Obtain();
 
                 Matrix matrix = Matrix.CreateRotationZ((float)direction.GetValue());
 
                 particle.Velocity = new Vector2((float)speed.GetValue(), 0);
                 particle.Velocity = Vector2.Transform(particle.Velocity, matrix);
-                particle.Position = Position + data.Position;
+                particle.Transform.Position = Transform.Position + data.Position;
                 if (Origin.UseColorData) particle.Color = data.Color;
                 particle.AngularVelocity = (float)av.GetValue();
-                particle.Orientation = (float)rotation.GetValue();
+                particle.Transform.Rotation = (float)rotation.GetValue();
                 particle.AngularVelocity = (float)av.GetValue();
                 particle.MaxAge = maxAge.GetValue();
                 particle.Age = 0;
@@ -127,16 +119,7 @@ namespace MonoGame.Particles.Particles
 
                 foreach (BirthModifier m in BirthModifiers) m.Execute(this, particle);
 
-                Particles.Add(particle);                            
-            }
-        }
-
-
-        public override void Draw(SpriteBatch spriteBatch)
-        {       
-            foreach (Particle p in Particles.OfType<Particle>())
-            {
-                spriteBatch.Draw(p.Texture, new Vector2(p.Position.X, p.Position.Y), new Rectangle(0, 0, p.Texture.Width, p.Texture.Height), p.Color * p.Alpha, p.Orientation, new Vector2(p.Texture.Width, p.Texture.Height) / 2, p.Scale, SpriteEffects.None, 0);
+                Particles.Add(particle);
             }
         }
     }

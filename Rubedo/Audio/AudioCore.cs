@@ -76,7 +76,6 @@ public class AudioCore
         for (int i = 0; i < audioMixers.Count; i++)
         {
             audioMixers[i].StopAllSounds();
-            Log.Debug("Playing mixers: " + outputBus.MixingBus.getActiveVoiceCount());
         }
     }
 }

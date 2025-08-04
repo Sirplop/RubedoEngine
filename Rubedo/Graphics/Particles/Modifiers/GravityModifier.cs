@@ -18,7 +18,7 @@ namespace MonoGame.Particles.Particles.Modifiers
 
         public override void Execute(Emitter e, double seconds, IParticle p)
         {
-            p.Velocity += _gravity * (float)seconds;
+            p.Velocity -= _gravity * (float)seconds;
         }
     }
 }

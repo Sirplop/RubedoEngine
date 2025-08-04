@@ -12,7 +12,7 @@ namespace MonoGame.Particles.Particles.Modifiers
         public override void Execute(Emitter e, IParticle p)
         {
             float v = p.Velocity.Length();
-            Vector2 temp = e.Position - p.Position;
+            Vector2 temp = e.Transform.Position - p.Transform.Position;
             temp.Normalize();
             p.Velocity = temp * v;
         }

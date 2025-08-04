@@ -3,7 +3,7 @@
 namespace Rubedo;
 
 /// <summary>
-/// TODO: I am Log, and I don't have a summary yet.
+/// Provides easy to use logging functions.
 /// </summary>
 public class Log
 {

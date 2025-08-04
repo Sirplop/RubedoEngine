@@ -98,6 +98,11 @@ public class GameState
         Entities.UpdateLists();
         Entities.Update();
     }
+    public virtual void FixedUpdate()
+    {
+        Entities.UpdateLists();
+        Entities.FixedUpdate();
+    }
 
     public virtual void Draw(Renderer sb)
     {

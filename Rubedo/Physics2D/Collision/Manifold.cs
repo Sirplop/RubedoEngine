@@ -41,6 +41,7 @@ public class Contact
     }
 }
 
+internal enum ManifoldState { New, Stay, Exit }
 public class Manifold : IEquatable<Manifold>
 {
     public Vector2 Normal => normal;
@@ -60,6 +61,7 @@ public class Manifold : IEquatable<Manifold>
     internal float friction;
     internal float restitution;
     internal bool noImpulse;
+    internal ManifoldState state;
 
     public Manifold(PhysicsBody bodyA, PhysicsBody bodyB)
     {
@@ -67,6 +69,7 @@ public class Manifold : IEquatable<Manifold>
         B = bodyB;
         normal = default;
         noImpulse = bodyA.collider.isTrigger || bodyB.collider.isTrigger;
+        state = ManifoldState.New;
     }
 
     public void Update(Contact c)

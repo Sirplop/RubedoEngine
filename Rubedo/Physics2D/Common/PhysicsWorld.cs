@@ -1,11 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.EngineDebug;
 using Rubedo.Graphics;
+using Rubedo.Lib.Extensions;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Collision.Broadphase;
 using Rubedo.Physics2D.Constraints;
 using Rubedo.Physics2D.Dynamics;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Rubedo.Physics2D.Common;
 
@@ -14,10 +16,9 @@ public class PhysicsWorld
     public static Vector2 gravity = new Vector2(0, -9.81f * RubedoEngine.SizeOfMeter);
     public static void ResetGravity() => gravity = new Vector2(0f, -9.81f * RubedoEngine.SizeOfMeter);
 
+    public static bool multithreadSolver = true;
     public static bool showContacts = false;
     public static bool drawBroadphase = false;
-
-    public float fixedDeltaTime = 0.02f;
 
     public List<PhysicsBody> bodies = new List<PhysicsBody>();
 
@@ -25,7 +26,6 @@ public class PhysicsWorld
     internal List<Manifold> manifolds = new List<Manifold>();
 
     private IBroadphase broadphase;
-    private double accumulatedDelta = 0;
 
     public Timer timer;
 
@@ -86,22 +86,7 @@ public class PhysicsWorld
         return broadphase.Raycast(ray, distance, out result);
     }
 
-    public void Tick(float dt)
-    {
-        accumulatedDelta += dt;
-
-        // Avoid accumulator death spiral
-        if (accumulatedDelta > 0.1f)
-            accumulatedDelta = 0.1f;
-
-        while (accumulatedDelta > fixedDeltaTime)
-        {
-            Update(fixedDeltaTime);
-            accumulatedDelta -= fixedDeltaTime;
-        }
-    }
-
-    private void Update(float dt)
+    internal void Step(float dt)
     {
         if (bodies.Count == 0)
             return; //nothing to update.
@@ -129,17 +114,20 @@ public class PhysicsWorld
 
         float invDT = 1f / dt;
         for (i = 0; i < manifolds.Count; i++)
-            ContactConstraintSolver.PresolveConstraint(manifolds[i], invDT);
+            if (!manifolds[i].noImpulse)
+                ContactConstraintSolver.PresolveConstraint(manifolds[i], invDT);
         timer.Step("N.PC: ");
 
         for (i = 0; i < manifolds.Count; i++)
-            ContactConstraintSolver.WarmStart(manifolds[i]);
+            if (!manifolds[i].noImpulse)
+                ContactConstraintSolver.WarmStart(manifolds[i]);
         timer.Step("N.WS: ");
 
         //Process maxIterations times for more stability
         for (int j = 0; j < maxIterations; j++)
             for (i = 0; i < manifolds.Count; i++)
-                ContactConstraintSolver.ApplyImpulse(manifolds[i]);
+                if (!manifolds[i].noImpulse)
+                    ContactConstraintSolver.ApplyImpulse(manifolds[i]);
 
         timer.Step("N.AI: ");
         //Integrate positions
@@ -148,16 +136,50 @@ public class PhysicsWorld
         timer.Stop("N.IV: ");
     }
 
+    private bool[] contacts = new bool[128];
     private void SolveContacts()
     {
-        for (int i = manifolds.Count - 1; i >= 0; i--)
+        if (multithreadSolver)
         {
-            Manifold m = manifolds[i];
-            if (!m.SolveContact())
+            if (contacts.Length < manifolds.Count)
+                contacts = new bool[Lib.Math.Power2Roundup(manifolds.Count)];
+
+            Parallel.For(0, manifolds.Count, (i, a) =>
             {
-                manifolds[i] = manifolds[manifolds.Count - 1];
-                manifolds.RemoveAt(manifolds.Count - 1); //swap and remove to remove unecessary moves
-                manifoldSet.Remove(m);
+                Manifold m = manifolds[i];
+                contacts[i] = m.SolveContact();
+            });
+
+            for (int i = manifolds.Count - 1; i >= 0; i--)
+            {
+                Manifold m = manifolds[i];
+                if (!contacts[i])
+                {
+                    m.A.FinalizeCollisions(m);
+                    manifolds.SwapAndRemove(i);
+                    manifoldSet.Remove(m);
+                }
+                else
+                {
+                    m.A.DoCollision(m);
+                }
+            }
+        }
+        else
+        {
+
+            for (int i = manifolds.Count - 1; i >= 0; i--)
+            {
+                Manifold m = manifolds[i];
+                if (!m.SolveContact())
+                {
+                    m.A.FinalizeCollisions(m);
+                    manifolds.SwapAndRemove(i); //swap and remove to remove unecessary moves
+                    manifoldSet.Remove(m);
+                } else
+                {
+                    m.A.DoCollision(m);
+                }
             }
         }
     }

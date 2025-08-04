@@ -18,6 +18,7 @@ public class Box : Polygon
     public float Top => vertices[2].Y;
     public float Bottom => vertices[0].Y;
 
+    protected Box() : base() { }
     public Box(float width, float height) : base()
     {
         type = ShapeType.Box;
@@ -36,5 +37,17 @@ public class Box : Polygon
     public override float GetMomentOfInertia(float mass)
     {
         return mass / 12f * (width * width + height * height);
+    }
+    public override Shape Clone()
+    {
+        Box box = new Box();
+        box.vertices = new Vector2[VertexCount];
+        box.normals = new Vector2[VertexCount];
+        Array.Copy(vertices, box.vertices, VertexCount);
+        Array.Copy(normals, box.normals, VertexCount);
+        box.type = ShapeType.Box;
+        box.transformDirty = true;
+        box.normalsDirty = true;
+        return box;
     }
 }

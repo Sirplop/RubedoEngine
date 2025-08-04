@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System;
 
 namespace Rubedo.Object;
 
@@ -101,6 +102,12 @@ public sealed class Entity : IEnumerable<Component>, IEnumerable, ITransformable
     {
         if (_active)
             Components.Update();
+    }
+
+    internal void FixedUpdate()
+    {
+        if (_active)
+            Components.FixedUpdate();
     }
     void ITransformable.TransformChanged()
     {

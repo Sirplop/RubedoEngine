@@ -96,6 +96,12 @@ public class EntityList : IEnumerable<Entity>
             if (entity._active)
                 entity.Update();
     }
+    internal void FixedUpdate()
+    {
+        foreach (var entity in entities)
+            if (entity._active)
+                entity.FixedUpdate();
+    }
 
     #region Add/Remove
     public void Add(Entity entity)

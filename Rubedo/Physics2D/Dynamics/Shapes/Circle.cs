@@ -32,6 +32,11 @@ public class Circle : Shape
         return 0.5f * mass * radius * radius;
     }
 
+    public override Shape Clone()
+    {
+        return new Circle(radius);
+    }
+
     public override bool Raycast(Math.Ray2D ray, float distance, out RaycastResult result)
     {
         result = new RaycastResult();

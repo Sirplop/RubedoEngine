@@ -19,7 +19,7 @@ namespace MonoGame.Particles.Particles.Modifiers
         {
             if (p is Particle particle)
             {
-                particle.Scale = (float)_interval.GetValue();
+                particle.Transform.Scale = new Microsoft.Xna.Framework.Vector2((float)_interval.GetValue());
             }
         }
     }

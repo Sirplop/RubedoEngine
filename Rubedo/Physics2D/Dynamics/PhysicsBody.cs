@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Components;
 using Rubedo.Lib;
+using Rubedo.Object;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Common;
 using System.Collections.Concurrent;
@@ -14,10 +15,8 @@ namespace Rubedo.Physics2D.Dynamics;
 /// </summary>
 public class PhysicsBody : Component
 {
-    /*private enum CollisionType { Solid, TriggerSolid, Trigger }
-    internal ConcurrentDictionary<PhysicsBody, Manifold> collidingWith = new ConcurrentDictionary<PhysicsBody, Manifold>();
-    internal ConcurrentDictionary<PhysicsBody, Manifold> newCollisions = new ConcurrentDictionary<PhysicsBody, Manifold>();
-    internal ConcurrentQueue<PhysicsBody> removeCollisions = new ConcurrentQueue<PhysicsBody>();*/
+    internal Transform TargetTransform { get; set; }
+    private enum CollisionType { Solid, TriggerSolid, Trigger }
 
     internal Vector2 velocity = Vector2.Zero;
     internal float angularVelocity = 0;
@@ -40,10 +39,11 @@ public class PhysicsBody : Component
 
     public bool isStatic = false;
     public float gravityScale = 1;
+    public bool IsParticle = false;
 
     public readonly Collider collider; //TODO: Handle linked colliders better.
 
-    public Vector2 Position => Entity.Transform.Position;
+    public Vector2 Position => TargetTransform.Position;
 
     public Vector2 LinearVelocity { get => velocity; internal set => velocity = value; }
     public float AngularVelocity { get => angularVelocity; internal set => angularVelocity = value; }
@@ -92,10 +92,10 @@ public class PhysicsBody : Component
         if (_invMass == 0)
             return;
 
-        Vector2 pos = Entity.Transform.Position;
+        Vector2 pos = TargetTransform.Position;
         MathV.MulAdd(ref pos, ref velocity, dt, out pos);
-        Entity.Transform.SetPosition(ref pos);
-        Entity.Transform.Rotation += angularVelocity * dt;
+        TargetTransform.SetPosition(ref pos);
+        TargetTransform.Rotation += angularVelocity * dt;
     }
 
     public override void Update()
@@ -108,6 +108,11 @@ public class PhysicsBody : Component
     public override void EntityRemoved(GameState state)
     {
         RubedoEngine.Instance.World.RemoveBody(this);
+    }
+    public override void Added(Entity entity)
+    {
+        base.Added(entity);
+        TargetTransform = entity.Transform;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -125,20 +130,9 @@ public class PhysicsBody : Component
         angularVelocity += _invInertia * lambda;
     }
 
-
-    /*internal void RemoveAllContacts()
+    internal void DoCollision(Manifold contact)
     {
-        if (collidingWith.IsEmpty)
-            return;
-        foreach (PhysicsBody body in collidingWith.Keys)
-        {
-            removeCollisions.Enqueue(body);
-        }
-    }
-    internal void DoCollision(PhysicsBody other)
-    {
-        Manifold contact = collidingWith[other];
-        if (newCollisions.ContainsKey(other))
+        if (contact.state == ManifoldState.New)
         {
             switch (GetCollisionType(contact))
             {
@@ -157,6 +151,7 @@ public class PhysicsBody : Component
                     collider.onTriggerEnterEventHandler?.Invoke(this, contact.B, contact);
                     break;
             }
+            contact.state = ManifoldState.Stay;
             return;
         }
         switch (GetCollisionType(contact))
@@ -177,15 +172,11 @@ public class PhysicsBody : Component
                 break;
         }
     }
-    internal void FinalizeCollisions()
+    internal void FinalizeCollisions(Manifold contact)
     {
-        foreach (PhysicsBody body in removeCollisions)
+        if (contact.state == ManifoldState.Stay)
         {
-            collidingWith.Remove(body, out Manifold contact);
-            if (newCollisions.ContainsKey(body))
-                continue; //new collision to ignore.
-            if (contact == null)
-                continue;
+            contact.state = ManifoldState.Exit;
             switch (GetCollisionType(contact))
             {
                 case CollisionType.Solid:
@@ -204,9 +195,7 @@ public class PhysicsBody : Component
                     break;
             }
         }
-        newCollisions.Clear();
-        removeCollisions.Clear();
-    }*/
+    }
 
     /**
      * Each collision type falls into 1 of 3 categories:
@@ -215,12 +204,12 @@ public class PhysicsBody : Component
      * - trigger collider <-> trigger collider
      * trigger/solid collisions will only trigger the trigger collider's events.
     **/
-    /*private static CollisionType GetCollisionType(Manifold m)
+    private static CollisionType GetCollisionType(Manifold m)
     {
         if (m.A.collider.isTrigger && m.B.collider.isTrigger)
             return CollisionType.Trigger;
         if (m.A.collider.isTrigger || m.B.collider.isTrigger)
             return CollisionType.TriggerSolid;
         return CollisionType.Solid;
-    }*/
+    }
 }

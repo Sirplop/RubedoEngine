@@ -48,6 +48,11 @@ public class StateManager
         if (_currentState != null)
             _currentState.Update();
     }
+    public void FixedUpdate()
+    {
+        if (_currentState != null)
+            _currentState.FixedUpdate();
+    }
 
     public void Draw(Renderer sb)
     {

@@ -160,6 +160,15 @@ public class ComponentList : IEnumerable<Component>
                 component.Update();
         LockState = LockStates.Open;
     }
+
+    internal void FixedUpdate()
+    {
+        LockState = LockStates.Locked;
+        foreach (var component in components)
+            if (component._active)
+                component.FixedUpdate();
+        LockState = LockStates.Open;
+    }
     internal void TransformChanged()
     {
         LockState = LockStates.Locked;
@@ -177,5 +186,4 @@ public class ComponentList : IEnumerable<Component>
     {
         return current.GetEnumerator();
     }
-
 }

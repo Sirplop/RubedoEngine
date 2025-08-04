@@ -15,11 +15,8 @@
     <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Graphics\Particles\**" />
     <Compile Remove="Physics2D\Collision\Shapes\**" />
-    <EmbeddedResource Remove="Graphics\Particles\**" />
     <EmbeddedResource Remove="Physics2D\Collision\Shapes\**" />
-    <None Remove="Graphics\Particles\**" />
     <None Remove="Physics2D\Collision\Shapes\**" />
   </ItemGroup>
   <ItemGroup>

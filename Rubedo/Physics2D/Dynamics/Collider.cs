@@ -69,6 +69,12 @@ public class Collider : Component
         remove { onTriggerExitEventHandler -= value; }
     }
 
+    protected Collider(Shape shape, bool isTrigger)
+    {
+        this.shape = shape;
+        this.isTrigger = isTrigger;
+    }
+
     protected Collider(float radius, bool isTrigger) : base()
     {
         shape = new Circle(radius);
@@ -136,6 +142,17 @@ public class Collider : Component
                 return CreatePolygon(vertices, isTrigger);
         }
         return null;
+    }
+
+    /// <summary>
+    /// Creates a collider by cloning the given <paramref name="shape"/>.
+    /// </summary>
+    /// <param name="shape"></param>
+    /// <param name="isTrigger"></param>
+    /// <returns></returns>
+    public static Collider CreateFromShape(Shape shape, bool isTrigger = false)
+    {
+        return new Collider(shape.Clone(), isTrigger);
     }
 
     public override void Added(Entity entity)

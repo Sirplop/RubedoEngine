@@ -358,7 +358,7 @@ public class Transform
             for (var i = 0; i < _children.Count; i++)
                 _children[i].SetDirty(dirt);
 
-            attached.TransformChanged();
+            attached?.TransformChanged();
         }
     }
 
