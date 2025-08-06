@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace Rubedo.Lib;
+namespace Rubedo.Lib.Extensions;
 
 /// <summary>
 /// Extension methods for <see cref="Rectangle"/>.
@@ -62,8 +62,8 @@ public static class RectangleExtensions
         int absoluteY = source.Y + y;
 
         Rectangle relative;
-        relative.X = Lib.Math.Clamp(absoluteX, source.Left, source.Right);
-        relative.Y = Lib.Math.Clamp(absoluteY, source.Top, source.Bottom);
+        relative.X = Math.Clamp(absoluteX, source.Left, source.Right);
+        relative.Y = Math.Clamp(absoluteY, source.Top, source.Bottom);
         relative.Width = System.Math.Max(System.Math.Min(absoluteX + width, source.Right) - relative.X, 0);
         relative.Height = System.Math.Max(System.Math.Min(absoluteY + height, source.Bottom) - relative.Y, 0);
 

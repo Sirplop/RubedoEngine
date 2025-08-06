@@ -1,5 +1,4 @@
-﻿using MonoGame.Particles.Particles;
-using Rubedo.Lib.Collections;
+﻿using Rubedo.Lib.Collections;
 
 namespace Rubedo.Graphics.Particles.Data;
 

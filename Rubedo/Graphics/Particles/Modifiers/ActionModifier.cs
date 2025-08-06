@@ -2,24 +2,23 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Particles.Particles.Modifiers
+namespace Rubedo.Graphics.Particles.Modifiers;
+
+public delegate void ParticleAction(Emitter e, IParticle p); 
+
+public class ActionModifier : Modifier
 {
-    public delegate void ParticleAction(Emitter e, IParticle p); 
+    private readonly ParticleAction _action;
 
-    public class ActionModifier : Modifier
+    public ActionModifier(ParticleAction action)
     {
-        private readonly ParticleAction _action;
+        _action = action;
+    }
 
-        public ActionModifier(ParticleAction action)
-        {
-            _action = action;
-        }
+    public override bool SupportsPhysics { get => true; }
 
-        public override bool SupportsPhysics { get => true; }
-
-        public override void Execute(Emitter e, double seconds, IParticle p)
-        {
-            _action.Invoke(e,p);
-        }
+    public override void Execute(Emitter e, double seconds, IParticle p)
+    {
+        _action.Invoke(e,p);
     }
 }

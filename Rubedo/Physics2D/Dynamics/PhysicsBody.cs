@@ -6,6 +6,7 @@ using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Common;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Physics2D.Dynamics;
@@ -56,6 +57,7 @@ public class PhysicsBody : Component
         torque = 0;
 
         _mass = collider.shape.GetArea() * material.density;
+        Debug.Assert(_mass != 0);
         _inertia = collider.shape.GetMomentOfInertia(_mass);
 
         _invMass = 1f / _mass;

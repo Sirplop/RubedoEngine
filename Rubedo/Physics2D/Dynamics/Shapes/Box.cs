@@ -2,6 +2,7 @@
 using Rubedo.Object;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Rubedo.Physics2D.Dynamics.Shapes;
 
@@ -10,8 +11,8 @@ namespace Rubedo.Physics2D.Dynamics.Shapes;
 /// </summary>
 public class Box : Polygon
 {
-    public readonly float width;
-    public readonly float height;
+    public float width;
+    public float height;
 
     public float Left => vertices[0].X;
     public float Right => vertices[2].X;
@@ -40,14 +41,20 @@ public class Box : Polygon
     }
     public override Shape Clone()
     {
-        Box box = new Box();
-        box.vertices = new Vector2[VertexCount];
-        box.normals = new Vector2[VertexCount];
+        Box box = new Box
+        {
+            height = height,
+            width = width,
+            vertices = new Vector2[VertexCount],
+            normals = new Vector2[VertexCount]
+        };
         Array.Copy(vertices, box.vertices, VertexCount);
         Array.Copy(normals, box.normals, VertexCount);
         box.type = ShapeType.Box;
         box.transformDirty = true;
         box.normalsDirty = true;
+        box.transformedVertices = new Vector2[VertexCount];
+        box.transformedNormals = new Vector2[VertexCount];
         return box;
     }
 }

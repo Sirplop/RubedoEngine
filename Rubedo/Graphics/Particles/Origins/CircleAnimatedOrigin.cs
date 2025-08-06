@@ -3,34 +3,33 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Particles.Particles.Origins
-{
-    public class CircleAnimatedOrigin : Origin
-    {                    
-        private readonly int _radius;
-        private readonly double _speed;
-        private readonly int _cycles;
+namespace Rubedo.Graphics.Particles.Origins;
 
-        public CircleAnimatedOrigin(int radius, double speed=1.0d, int cycles=0)
-        {                      
-             _radius = radius;
-            _speed = speed;
-            _cycles = cycles;
-        }
+public class CircleAnimatedOrigin : Origin
+{                    
+    private readonly int _radius;
+    private readonly double _speed;
+    private readonly int _cycles;
 
-        public override bool UseColorData { get => false; }
+    public CircleAnimatedOrigin(int radius, double speed=1.0d, int cycles=0)
+    {                      
+         _radius = radius;
+        _speed = speed;
+        _cycles = cycles;
+    }
 
-        public override OriginData GetPosition(Emitter e)
-        {
-            double angle = e.TotalSeconds;
+    public override bool UseColorData { get => false; }
 
-            if (_cycles > 0 && angle*_speed > MathHelper.TwoPi * _cycles) e.Stop();
+    public override OriginData GetPosition(Emitter e)
+    {
+        double angle = e.TotalSeconds;
 
-            Matrix rotation = Matrix.CreateRotationZ((float)(angle*_speed));
-            
-            Vector2 p = new Vector2(_radius, 0);
-            return new OriginData(Vector2.Transform(p, rotation));
-                      
-        }
+        if (_cycles > 0 && angle*_speed > MathHelper.TwoPi * _cycles) e.Stop();
+
+        Matrix rotation = Matrix.CreateRotationZ((float)(angle*_speed));
+        
+        Vector2 p = new Vector2(_radius, 0);
+        return new OriginData(Vector2.Transform(p, rotation));
+                  
     }
 }

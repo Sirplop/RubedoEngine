@@ -2,7 +2,7 @@ This is sourced from https://github.com/UnterrainerInformatik/FiniteStateMachine
 Big thanks to them for the lovely state machine system!
 
 The following is the original Unlicense. This does not reflect the current 
-licensing of this project in any way, and is included for solely posterity.
+licensing of this project in any way, and is included solely for posterity.
 
 
 This is free and unencumbered software released into the public domain.

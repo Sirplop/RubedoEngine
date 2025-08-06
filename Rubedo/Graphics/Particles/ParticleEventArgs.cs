@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Particles.Particles
-{
-    public class ParticleEventArgs
-    {
-        public IParticle Particle { get; set; }
+namespace Rubedo.Graphics.Particles;
 
-        public ParticleEventArgs(IParticle p)
-        {
-            Particle = p;
-        }
+public class ParticleEventArgs
+{
+    public IParticle Particle { get; set; }
+
+    public ParticleEventArgs(IParticle p)
+    {
+        Particle = p;
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo.Lib;
+using Rubedo.Lib.Extensions;
 using System;
 
 namespace Rubedo.Graphics.Sprites;

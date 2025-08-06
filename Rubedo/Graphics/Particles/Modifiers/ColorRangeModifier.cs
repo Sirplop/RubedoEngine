@@ -3,22 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Particles.Particles.Modifiers
+namespace Rubedo.Graphics.Particles.Modifiers;
+
+public class ColorRangeModifier : Modifier
 {
-    public class ColorRangeModifier : Modifier
+    private ColorInterval _colorInterval;
+
+    public override bool SupportsPhysics { get => true; }
+
+    public override void Execute(Emitter e, double seconds, IParticle p)
     {
-        private ColorInterval _colorInterval;
+        p.Color = _colorInterval.GetValue(p.Age / p.MaxAge);
+    }
 
-        public override bool SupportsPhysics { get => true; }
-
-        public override void Execute(Emitter e, double seconds, IParticle p)
-        {
-            p.Color = _colorInterval.GetValue(p.Age / p.MaxAge);
-        }
-
-        public ColorRangeModifier(params Color[] colors)
-        {
-            _colorInterval = new ColorInterval(colors);
-        }
+    public ColorRangeModifier(params Color[] colors)
+    {
+        _colorInterval = new ColorInterval(colors);
     }
 }

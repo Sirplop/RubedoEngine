@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Text;
 
-namespace Rubedo.Lib;
+namespace Rubedo.Lib.Extensions;
 
 /// <summary>
 /// Extension methods for Vector2.

@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Particles.Particles.Modifiers
+namespace Rubedo.Graphics.Particles.Modifiers;
+
+public abstract class BirthModifier
 {
-    public abstract class BirthModifier
-    {
-        public abstract void Execute(Emitter e, IParticle p);
-        public abstract bool SupportsPhysics { get; }
-    }
+    public abstract void Execute(Emitter e, IParticle p);
+    public abstract bool SupportsPhysics { get; }
 }

@@ -5,6 +5,7 @@ using Rubedo.Object;
 using Rubedo.Physics2D.Math;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Rubedo.Physics2D.Dynamics.Shapes;
@@ -151,6 +152,8 @@ public class Polygon : Shape
         Array.Copy(vertices, poly.vertices, VertexCount);
         Array.Copy(normals, poly.normals, VertexCount);
         poly.type = ShapeType.Polygon;
+        poly.transformedVertices = new Vector2[VertexCount];
+        poly.transformedNormals = new Vector2[VertexCount];
         poly.transformDirty = true;
         poly.normalsDirty = true;
         return poly;

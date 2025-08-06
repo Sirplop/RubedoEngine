@@ -7,18 +7,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Particles.Particles
+namespace Rubedo.Graphics.Particles;
+
+public interface IParticle : IPoolable
 {
-    public interface IParticle : IPoolable
-    {
-        Transform Transform { get; set; }
-        double Age { get; set; }
-        double MaxAge { get; set; }
-        float Alpha { get; set; } 
-        Color Color { get; set; }
-        bool IsParticle { get; set; }
-        Vector2 Velocity { get; set; }
-        float AngularVelocity { get; set; }    
-        TextureRegion2D Texture { get; set; }
-    }
+    Transform Transform { get; set; }
+    double Age { get; set; }
+    double MaxAge { get; set; }
+    float Alpha { get; set; } 
+    Color Color { get; set; }
+    bool IsParticle { get; set; }
+    Vector2 Velocity { get; set; }
+    float AngularVelocity { get; set; }    
+    TextureRegion2D Texture { get; set; }
 }

@@ -1,9 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using MonoGame.Particles.Particles.Modifiers;
-using MonoGame.Particles.Particles.Origins;
 using Rubedo;
-using Rubedo.Physics2D;
+using Rubedo.Graphics.Particles.Modifiers;
+using Rubedo.Graphics.Particles.Origins;
+using Rubedo.Lib.Extensions;
 using Rubedo.Physics2D.Collision;
+using Rubedo.Physics2D.Common;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Dynamics.Shapes;
 using System;
@@ -11,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MonoGame.Particles.Particles;
+namespace Rubedo.Graphics.Particles;
 public enum ContactAction { IGNORE, COLLIDE, DESTROY }
 
 public class PhysicsParticleEmitter : Emitter
@@ -28,46 +29,44 @@ public class PhysicsParticleEmitter : Emitter
     }
 
     public bool TriggerColliders { get; private set; }
+    public byte PhysicsLayer { get; private set; }
     public PhysicsMaterial Material { get; set; }
 
-    public PhysicsParticleEmitter(String name, Shape shape, PhysicsMaterial material, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge, bool triggerColliders)
+    public PhysicsParticleEmitter(string name, Shape shape, PhysicsMaterial material, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge, bool triggerColliders, byte physicsLayer = 0)
     {
-        this.Name = name;
-        this.Material = material;
+        Name = name;
+        Material = material;
         this.speed = speed;
         this.maxAge = maxAge;
         this.direction = direction;
-        this.ParticlesPerSecond = particlesPerSecond;
+        ParticlesPerSecond = particlesPerSecond;
         this.shape = shape;
-        this.TriggerColliders = triggerColliders;
+        TriggerColliders = triggerColliders;
         Modifiers = new List<Modifier>();
         BirthModifiers = new List<BirthModifier>();
         Particles = new List<IParticle>(100);
+        PhysicsLayer = physicsLayer;
     }
 
     public override void AddBirthModifier(BirthModifier modifier)
     {
-        if (!modifier.SupportsPhysics) throw new ArgumentException("Modifier does not support physics", modifier.GetType().Name);
+        if (!modifier.SupportsPhysics) 
+            throw new ArgumentException("Modifier does not support physics", modifier.GetType().Name);
         base.AddBirthModifier(modifier);
     }
 
     public override void AddModifier(Modifier modifier)
     {
-        if (!modifier.SupportsPhysics) throw new ArgumentException("Modifier does not support physics", modifier.GetType().Name);
+        if (!modifier.SupportsPhysics) 
+            throw new ArgumentException("Modifier does not support physics", modifier.GetType().Name);
         base.AddModifier(modifier);
     }
 
+    public override void Update() { }
+
     public override void FixedUpdate()
     {
-        if (state == EmitterState.STOPPING)
-        {
-            _stopTime += Time.FixedDeltaTime;
-            ParticlesPerSecond = MathHelper.SmoothStep(_stopCount, 0, (float)_stopTime);
-            if (ParticlesPerSecond <= 0)
-            {
-                state = EmitterState.STOPPED;
-            }
-        }
+        UpdateHelper(Time.FixedDeltaTime);
 
         if (state == EmitterState.STARTED || state == EmitterState.STOPPING)
         {
@@ -77,7 +76,7 @@ public class PhysicsParticleEmitter : Emitter
             if (release > 1)
             {
                 int r = (int)Math.Floor(release);
-                releaseTime -= (r / ParticlesPerSecond);
+                releaseTime -= r / ParticlesPerSecond;
 
                 for (int i = 0; i < r; i++)
                 {
@@ -98,18 +97,32 @@ public class PhysicsParticleEmitter : Emitter
             }
         }
 
-        List<IParticle> remove = Particles.FindAll(p => p.Age > p.MaxAge);
-
-        Parallel.Invoke(
-            () =>
+        for (int i = Particles.Count - 1; i >= 0; i--)
+        {
+            PhysicsParticle p = (PhysicsParticle)Particles[i];
+            if (p.Age > p.MaxAge)
             {
-                Particles.RemoveAll(p => p.Age > p.MaxAge);
-            },
-            () =>
-            {
-                foreach (PhysicsParticle p in remove.OfType<PhysicsParticle>()) RubedoEngine.Instance.World.RemoveBody(p.Body);
+                Particles.SwapAndRemove(i);
+                RubedoEngine.Instance.World.RemoveBody(p.Body);
             }
-        );
+        }
+
+        if (CanDestroy() && DestroyOnNoParticles)
+        {
+            Stop();
+            this.Destroy();
+        }
+    }
+    public override void PlayBurst(int particleCount)
+    {
+        if (state != EmitterState.STARTED)
+        {
+            state = EmitterState.BURST; //it's not currently playing.
+        }
+        for (int i = 0; i < particleCount; i++)
+        {
+            AddParticle();
+        }
     }
 
     public void AddParticle()
@@ -117,7 +130,7 @@ public class PhysicsParticleEmitter : Emitter
         OriginData data = Origin.GetPosition(this);
         if (data != null)
         {
-            PhysicsParticle particle = new PhysicsParticle(Material, shape, Transform.Position + data.Position, TriggerColliders);
+            PhysicsParticle particle = new PhysicsParticle(this, Material, shape, Transform.Position + data.Position);
 
             Matrix matrix = Matrix.CreateRotationZ((float)direction.GetValue());
 
@@ -148,7 +161,7 @@ public class PhysicsParticleEmitter : Emitter
         }
         if (action == ContactAction.DESTROY)
         {
-            (sender).Age = (sender).MaxAge;
+            sender.Age = sender.MaxAge;
             return ContactAction.IGNORE;
         }
         //Let the other object determine if it wants to collide

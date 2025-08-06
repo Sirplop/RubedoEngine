@@ -16,7 +16,7 @@ public class PhysicsWorld
     public static Vector2 gravity = new Vector2(0, -9.81f * RubedoEngine.SizeOfMeter);
     public static void ResetGravity() => gravity = new Vector2(0f, -9.81f * RubedoEngine.SizeOfMeter);
 
-    public static bool multithreadSolver = true;
+    public static bool multithreadSolver = false;
     public static bool showContacts = false;
     public static bool drawBroadphase = false;
 
@@ -42,7 +42,7 @@ public class PhysicsWorld
     public PhysicsWorld()
     {
         // Switch the collision system here:
-        broadphase = new SpatialHashGrid(2);
+        broadphase = new SpatialHashGrid(30);
         timer = new Timer();
     }
 

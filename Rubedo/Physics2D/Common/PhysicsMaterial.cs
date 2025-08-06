@@ -1,4 +1,4 @@
-﻿namespace Rubedo.Physics2D;
+﻿namespace Rubedo.Physics2D.Common;
 
 /// <summary>
 /// Contains information about the properties of physics objects.

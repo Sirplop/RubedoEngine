@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Rubedo.Lib;
+namespace Rubedo.Lib.Collections;
 
 public class WeightedList<T>
 {

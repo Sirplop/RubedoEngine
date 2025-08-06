@@ -2,6 +2,7 @@
 using Rubedo.Lib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Object;
@@ -157,7 +158,6 @@ public class Transform
 
                 _worldPositionDirty = false;
             }
-
             return _position;
         }
         set => SetPosition(ref value);

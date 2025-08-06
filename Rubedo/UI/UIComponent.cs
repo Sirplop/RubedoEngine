@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using Rubedo.Lib;
+using Rubedo.Lib.Extensions;
 using Rubedo.Object;
 using System;
 using System.Collections.Generic;

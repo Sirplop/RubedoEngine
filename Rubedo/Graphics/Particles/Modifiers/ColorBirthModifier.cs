@@ -3,22 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MonoGame.Particles.Particles.Modifiers
+namespace Rubedo.Graphics.Particles.Modifiers;
+
+public class ColorBirthModifier : BirthModifier
 {
-    public class ColorBirthModifier : BirthModifier
+    private ColorInterval _colorInterval;
+
+    public override bool SupportsPhysics { get => true; }
+
+    public ColorBirthModifier(params Color[] colors)
     {
-        private ColorInterval _colorInterval;
+        _colorInterval = new ColorInterval(colors);
+    }
 
-        public override bool SupportsPhysics { get => true; }
-
-        public ColorBirthModifier(params Color[] colors)
-        {
-            _colorInterval = new ColorInterval(colors);
-        }
-
-        public override void Execute(Emitter e, IParticle p)
-        {
-            p.Color = _colorInterval.GetValue(e.TotalSeconds - Math.Truncate(e.TotalSeconds));
-        }
+    public override void Execute(Emitter e, IParticle p)
+    {
+        p.Color = _colorInterval.GetValue(e.TotalSeconds - Math.Truncate(e.TotalSeconds));
     }
 }
