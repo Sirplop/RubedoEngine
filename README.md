@@ -12,26 +12,42 @@ Still, if you've used Unity before, a good chunk of this should be a little fami
 
  **[Documentation](docs/README.md)**
 
- # What does it do?
-Stuff. IDK I need to write this section. It doesn't use the Content Pipeline, that's for sure.
+# What does it do?
+Everything Monogame does, and more:
+  - Entity-Component system (NOT ECS, IT'S EC)
+  - Basic 2D physics
+  - Particles
+  - Automatic content compilation
+  - Auto texture packing
+  - Input management
+  - Coroutines
+  - Audio System using SoLoud
+  - Animation systems
+  - A lot more things that I can't think of right now!
 
- # How do I do?
- I really need to make a standard way of setting up the project. This currently is very annoying. I will make a Visual Studio template in the future for easy installation.
- For now, though, What's important is that your csproj file has this:
- ```csproj
-  <Target Name="BuildContent" AfterTargets="PostBuildEvent">
-    <Exec Command="Rubedo.Compiler.exe $(ProjectDir) $(TargetDir) textures" WorkingDirectory="$(ProjectDir)\ContentBuilder" />
-  </Target>
-  
-  <PropertyGroup>
-    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-  </PropertyGroup>
-```
-This allows the content compiler to run whenever you build the game, which it needs to so it can make sure all content is properly compiled.
-This does mean you'll need to build the [Rubedo Compiler](https://github.com/Sirplop/Rubedo.Compiler). Visit that to see how. Note that this will be automated in the future.
+# How do I do?
+To install, you'll need to do the following:
+  1. Install [Visual Studio](https://visualstudio.microsoft.com/)
+  2. Install [Monogame's package](https://docs.monogame.net/articles/tutorials/building_2d_games/02_getting_started/index.html) and create a new Cross-Platform Monogame project.
+  3. Download and add the [Rubedo package](https://github.com/Sirplop/RubedoEngine/tree/master/Rubedo) to your project.
+  4. Make your `Game1.cs` (or whatever you're calling your game class) subclass `RubedoEngine`.
+  5. Download the latest release of the [Content Compiler](https://github.com/Sirplop/Rubedo.Compiler/releases/tag/Release) and put it in a folder called `ContentBuilder` inside of your project folder.
+  6. Open your game's .csproj, and add the following:
+       ```csproj
+        <Target Name="BuildContent" AfterTargets="PostBuildEvent">
+          <Exec Command="Rubedo.Compiler.exe $(ProjectDir) $(TargetDir) textures" WorkingDirectory="$(ProjectDir)\ContentBuilder" />
+        </Target>
+        
+        <PropertyGroup>
+          <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+        </PropertyGroup>
+      ```
+  7. Go read the documentation and have fun!
+
+Hopefully all of that will one day be relegated to a script to do it for you, but for now you'll have to make do with the dreaded _manual work!_
 
 # Can I do?
-If you want. It's MIT licenced, and no library it uses have a restrictive licence, either.
+Of course! It's MIT licenced, and no library it uses have a restrictive licence, so you are completely free to do whatever you want with it! (an attribution is always nice, but not necessary!)
 
 # Library Attribution
 - [MonoGame](https://monogame.net/)
