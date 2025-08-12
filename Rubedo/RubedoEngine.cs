@@ -28,7 +28,7 @@ public class RubedoEngine : Game
     public static StateManager StateManager => Instance._stateManager;
     public static GameState CurrentState => Instance._stateManager.CurrentState();
 
-    protected internal Renderer _renderer;
+    public Renderer Renderer { get; protected set; }
     protected StateManager _stateManager;
     protected PhysicsWorld _physicsWorld;
     protected internal CoroutineManager _coroutineManager;
@@ -58,7 +58,7 @@ public class RubedoEngine : Game
 
     protected override void Initialize()
     {
-        _renderer = new Renderer(this);
+        Renderer = new Renderer(this);
 
         GUI.Setup(this);
         _physicsTimer = new Timer();
@@ -110,7 +110,7 @@ public class RubedoEngine : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        _stateManager.Draw(_renderer);
+        _stateManager.Draw(Renderer);
 
         base.Draw(gameTime);
     }

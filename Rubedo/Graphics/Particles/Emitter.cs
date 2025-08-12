@@ -2,9 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo;
 using Rubedo.Components;
-using Rubedo.Graphics;
 using Rubedo.Graphics.Particles.Modifiers;
 using Rubedo.Graphics.Particles.Origins;
+using Rubedo.Graphics.Sprites;
 using Rubedo.Lib;
 using System.Collections.Generic;
 
@@ -15,18 +15,18 @@ public abstract class Emitter : RenderableComponent
     public enum EmitterState { INIT, BURST, STARTED, STOPPING, STOPPED }
 
     public List<IParticle> Particles { get; set; }
-    public Texture2D Texture { get; set; }
+    public TextureRegion2D Texture { get; set; }
     public string Name { get; set; }
     public float ParticlesPerSecond;
     public float LinearDamping { get; set; }
-    public float GravityScale { get; set; } = 1;
+    public float GravityScale { get; set; } = 0;
     public Origin Origin { get; set; } = new PointOrigin();
     public double TotalSeconds { get; set; }
     public bool DestroyOnNoParticles { get; set; }
 
-    protected Interval speed;
-    protected List<Modifier> Modifiers { get; set; }
-    protected List<BirthModifier> BirthModifiers { get; set; }
+    protected internal Interval speed;
+    protected internal List<Modifier> Modifiers { get; set; }
+    protected internal List<BirthModifier> BirthModifiers { get; set; }
 
     public override RectF Bounds
     {
@@ -69,12 +69,12 @@ public abstract class Emitter : RenderableComponent
     private RectF _bounds;
     protected bool _boundsDirty = true;
 
-    protected Interval maxAge;
-    protected EmitterState state = EmitterState.INIT;
+    protected internal Interval maxAge;
+    protected internal EmitterState state = EmitterState.INIT;
     protected double releaseTime = 0;
-    protected Interval direction;
-    protected Interval rotation = new Interval(-System.Math.PI, System.Math.PI);
-    protected Interval av = new Interval(-0.1f, 0.1f);
+    protected internal Interval direction;
+    protected internal Interval rotation = new Interval(-System.Math.PI, System.Math.PI);
+    protected internal Interval av = new Interval(-0.1f, 0.1f);
 
     protected double _stopTime;
     protected float _stopCount;

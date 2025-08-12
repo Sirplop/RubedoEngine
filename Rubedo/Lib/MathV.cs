@@ -354,4 +354,12 @@ public static class MathV
     {
         return a.LengthSquared() <= Math.EPSILON;
     }
+    /// <summary>
+    /// Gets the angle between 2 normalized vectors.
+    /// </summary>
+    /// <returns></returns>
+    public static float AngleBetween(in Vector2 a, in Vector2 b)
+    {
+        return (float)System.Math.Acos(Vector2.Dot(a, b));
+    }
 }

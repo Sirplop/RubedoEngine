@@ -7,11 +7,11 @@ namespace Rubedo.Graphics.Particles.Origins;
 
 public class CircleAnimatedOrigin : Origin
 {                    
-    private readonly int _radius;
+    private readonly float _radius;
     private readonly double _speed;
     private readonly int _cycles;
 
-    public CircleAnimatedOrigin(int radius, double speed=1.0d, int cycles=0)
+    public CircleAnimatedOrigin(float radius, double speed=1.0d, int cycles=0)
     {                      
          _radius = radius;
         _speed = speed;

@@ -24,7 +24,7 @@ public class SoundPlayer : Component
     /// <summary>
     /// The pitch offset of this sound.
     /// </summary>
-    public float pitch = 0f;
+    public float pitch = 1f;
     /// <summary>
     /// The +- range of this sound. Only used if <see cref="randomizePitch"/> is true.
     /// </summary>
@@ -52,6 +52,40 @@ public class SoundPlayer : Component
     }
 
     /// <summary>
+    /// Sets the playback volume and pitch of this sound. This does not randomize the pitch.
+    /// </summary>
+    /// <param name="volume">The volume of playback</param>
+    /// <param name="pitch">The pitch of playback</param>
+    /// <returns></returns>
+    public SoundPlayer SetInfo(float volume, float pitch)
+    {
+        this.volume = volume;
+        this.pitch = pitch;
+        this.pitchRange = 0;
+        this.randomizePitch = false;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the playback volume and pitch of this sound. 
+    /// The pitch is chosen randomly between <paramref name="pitchMin"/> and <paramref name="pitchMax"/> for each sound instance.
+    /// </summary>
+    /// <param name="volume">The volume of playback</param>
+    /// <param name="pitchMin">The minimum pitch of playback</param>
+    /// <param name="pitchMax">The maximum pitch of playback</param>
+    /// <returns></returns>
+    public SoundPlayer SetRandomInfo(float volume, float pitchMin, float pitchMax)
+    {
+        this.volume = volume;
+        this.randomizePitch = true;
+        float halfRange = System.MathF.Abs(pitchMax - pitchMin) * 0.5f;
+        this.pitch = pitchMin + halfRange;
+        this.pitchRange = halfRange;
+
+        return this;
+    }
+
+    /// <summary>
     /// Attempts to play this sound.
     /// </summary>
     /// <param name="volume">The volume to play at.</param>
@@ -63,9 +97,11 @@ public class SoundPlayer : Component
         {
             if (_instances[i] == null || _instances[i].IsClosed())
             {
-                float pitch = 1 + this.pitch;
+                float pitch = this.pitch;
                 if (randomizePitch)
                     pitch += Random.Range(-pitchRange, pitchRange);
+                if (pitch < 0)
+                    pitch = 0;
                 AudioInstance ret = audioCore.CreateSound(sound, audioType, volume, pitch);
                 if (loop)
                     ret.SetLoop(true);

@@ -89,7 +89,7 @@ public struct RectF
     }
     public static bool Intersects(in RectF first, in AABB second)
     {
-        return first.x < second.max.X && first.x + first.width > second.min.Y &&
+        return first.x < second.max.X && first.x + first.width > second.min.X &&
                first.y < second.max.Y && first.y + first.height > second.min.Y;
     }
 

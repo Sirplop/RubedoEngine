@@ -163,6 +163,15 @@ public class Camera : IDisposable
     {
         VirtualViewport.Reset();
     }
+    /// <summary>
+    /// Sets the zoom level of this camera so that the viewing window is <paramref name="unitHeight"/> units tall.
+    /// </summary>
+    /// <example>At a window height of 1080, and a desired height of 10, zoom will be set to 108.</example>
+    /// <param name="unitHeight"></param>
+    public void SetZoomToUnitHeight(float unitHeight)
+    {
+        Zoom = VirtualViewport.VirtualHeight / unitHeight;
+    }
 
     public Matrix View => GetView(0);
     public Matrix ViewInvert => GetViewInvert(0);

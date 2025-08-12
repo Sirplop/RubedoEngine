@@ -1,8 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using Rubedo.Graphics;
+﻿using Rubedo.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
-using System;
 
 namespace Rubedo.Components;
 

@@ -82,7 +82,19 @@ public static class Random
     /// </summary>
     public static float Angle => rnd.Range(0f, 360f);
 
-    public static float Next => rnd.Next();
+    public static float Next()
+    {
+        return rnd.Next();
+    }
+
+    public static float Next(float max)
+    {
+        return rnd.Range(0f, max);
+    }
+    public static int Next(int max)
+    {
+        return rnd.Range(0, max);
+    }
 
     /// <summary>
     /// Gets a random float between the min and max  (inclusive)

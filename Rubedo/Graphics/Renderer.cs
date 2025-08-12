@@ -23,6 +23,11 @@ public class Renderer : IDisposable
     private Game _game;
     private BasicEffect _effect;
 
+    /// <summary>
+    /// The scale at which all things are rendered at.
+    /// </summary>
+    public float GlobalScale = 1 / 24f;
+
     public SpriteBatch Sprites { get; }
 
     public Renderer(Game game)
@@ -67,11 +72,11 @@ public class Renderer : IDisposable
 
     public void Draw(TextureRegion2D texture, Vector2 position, Vector2 origin, Color color)
     {
-        Sprites.Draw(texture, position, color, 0, origin, Vector2.One, SpriteEffects.FlipVertically, 0);
+        Sprites.Draw(texture, position, color, 0, origin, Vector2.One * GlobalScale, SpriteEffects.FlipVertically, 0);
     }
     public void Draw(TextureRegion2D texture, Transform transform, Color color)
     {
-        Sprites.Draw(texture, transform.Position, color, 0, Vector2.Zero, Vector2.One, SpriteEffects.FlipVertically, 0);
+        Sprites.Draw(texture, transform.Position, color, 0, Vector2.Zero, Vector2.One * GlobalScale, SpriteEffects.FlipVertically, 0);
     }
     public void Draw(TextureRegion2D texture, Transform transform, Rectangle? sourceRectangle, Color color, Vector2 origin, SpriteEffects effects, float layerDepth)
     {
@@ -82,7 +87,7 @@ public class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
         //scale is multiplied by a tiny value so that floating point conversions don't cause issues with source rectangles, causing the dreaded "jitter".
-        Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale * 1.0001f, effects, layerDepth, sourceRectangle);
+        Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale * 1.0001f * GlobalScale, effects, layerDepth, sourceRectangle);
     }
     public void Draw(TextureRegion2D texture, Vector2 position, Rectangle? sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
     {
@@ -93,16 +98,16 @@ public class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
         //scale is multiplied by a tiny value so that floating point conversions don't cause issues with source rectangles, causing the dreaded "jitter".
-        Sprites.Draw(texture, position, color, rotation, origin, scale * 1.0001f, effects, layerDepth, sourceRectangle);
+        Sprites.Draw(texture, position, color, rotation, origin, scale * 1.0001f * GlobalScale, effects, layerDepth, sourceRectangle);
     }
 
     public void Draw(Texture2D texture, Vector2 position, Vector2 origin, Color color)
     {
-        Sprites.Draw(texture, position, null, color, 0, origin, 1, SpriteEffects.FlipVertically, 0);
+        Sprites.Draw(texture, position, null, color, 0, origin, GlobalScale, SpriteEffects.FlipVertically, 0);
     }
     public void Draw(Texture2D texture, Transform transform, Color color)
     {
-        Sprites.Draw(texture, transform.Position, null, color, transform.Rotation, Vector2.Zero, transform.Scale, SpriteEffects.FlipVertically, 0);
+        Sprites.Draw(texture, transform.Position, null, color, transform.Rotation, Vector2.Zero, transform.Scale * GlobalScale, SpriteEffects.FlipVertically, 0);
     }
 
     public void Draw(Texture2D texture, Transform transform, Rectangle? sourceRectangle, Color color, Vector2 origin, SpriteEffects effects, float layerDepth)
@@ -114,7 +119,7 @@ public class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale * 1.0001f, effects, layerDepth);
+        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale * 1.0001f * GlobalScale, effects, layerDepth);
     }
 
     public void Draw(Texture2D texture, Rectangle? sourceRectangle, Rectangle destinationRectangle, Color color)
@@ -131,7 +136,7 @@ public class Renderer : IDisposable
         else
             effects |= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale * 1.0001f, effects, layerDepth);
+        Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale * 1.0001f * GlobalScale, effects, layerDepth);
     }
     public void DrawString(SpriteFontBase spriteFont, Space space, string text, Vector2 position, Color color, float rotation, float scale, int layerDepth = 0,
         SpriteEffects effects = SpriteEffects.None, TextStyle style = TextStyle.None, FontSystemEffect fontEffect = FontSystemEffect.None, int effectAmount = 0)
@@ -148,7 +153,7 @@ public class Renderer : IDisposable
             color,
             rotation,
             Vector2.Zero,
-            scaleVec,
+            scaleVec * GlobalScale,
             layerDepth,
             textStyle: style,
             effect: fontEffect,

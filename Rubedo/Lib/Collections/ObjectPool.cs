@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Rubedo.Lib.Collections;
 
@@ -7,13 +8,13 @@ namespace Rubedo.Lib.Collections;
 /// </summary>
 public class ObjectPool<T> where T : IPoolable
 {
-    private Queue<T> _pool;
+    private ConcurrentQueue<T> _pool;
     private IObjectPoolPolicy<T> policy;
 
     public ObjectPool(int initialSize, IObjectPoolPolicy<T> policy)
     {
         this.policy = policy;
-        _pool = new Queue<T>(initialSize);
+        _pool = new ConcurrentQueue<T>();
         Warm(initialSize);
     }
 
@@ -44,8 +45,8 @@ public class ObjectPool<T> where T : IPoolable
     /// </summary>
     public T Obtain()
     {
-        if (_pool.Count > 0)
-            return _pool.Dequeue();
+        if (_pool.TryDequeue(out T val))
+            return val;
 
         return policy.Create();
     }

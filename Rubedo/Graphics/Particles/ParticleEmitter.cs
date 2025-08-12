@@ -7,6 +7,7 @@ using Rubedo.Graphics.Particles.Data;
 using Rubedo;
 using Rubedo.Graphics.Particles.Modifiers;
 using Rubedo.Graphics.Particles.Origins;
+using Rubedo.Lib.Extensions;
 
 namespace Rubedo.Graphics.Particles;
 
@@ -21,7 +22,7 @@ public class ParticleEmitter : Emitter
     {
         ParticleDeathEventHandler handler = ParticleDeath;
         handler?.Invoke(this, e);
-    }        
+    }
 
     public ParticleEmitter(string name, Interval speed, Interval direction, float particlesPerSecond, Interval maxAge)
     {
@@ -78,8 +79,8 @@ public class ParticleEmitter : Emitter
         float dampening = Math.Clamp(1.0f - Time.DeltaTime * LinearDamping, 0.0f, 1.0f);
 
         //parallel might not be a good idea? IDK
-        //Parallel.For(0, Particles.Count, (i, a) =>
-        for (int i = 0; i < Particles.Count; i++)
+        Parallel.For(0, Particles.Count, (i, a) =>
+        //for (int i = 0; i < Particles.Count; i++)
         {
             IParticle p = Particles[i];
             p.Age += Time.DeltaTimeMillis;
@@ -101,8 +102,7 @@ public class ParticleEmitter : Emitter
                     m.Execute(this, Time.DeltaTime, p);
                 }
             }
-        }
-        //);
+        });
 
         Particles.RemoveAll(p => p.Age > p.MaxAge);
         if (CanDestroy() && DestroyOnNoParticles)

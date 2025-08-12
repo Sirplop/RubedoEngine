@@ -5,7 +5,7 @@ namespace Rubedo;
 /// <summary>
 /// Provides easy to use logging functions.
 /// </summary>
-public class Log
+public static class Log
 {
     /// <summary>
     /// The NLog backend. You probably don't need to bother with this unless you're doing setup.

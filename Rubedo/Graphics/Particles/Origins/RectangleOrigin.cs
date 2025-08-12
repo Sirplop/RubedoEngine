@@ -10,13 +10,12 @@ public class RectangleOrigin : Origin
     private readonly Interval x;
     private readonly Interval y;
     private readonly bool _edge;
-    private readonly int _width;
-    private readonly int _height;
-    private static Random rand = new Random();
+    private readonly float _width;
+    private readonly float _height;
 
     public override bool UseColorData => false;
 
-    public RectangleOrigin(int width, int height, bool edge = false)
+    public RectangleOrigin(float width, float height, bool edge = false)
     {
         _edge = edge;
         _width = width;
@@ -29,27 +28,27 @@ public class RectangleOrigin : Origin
     {
         if (_edge)
         {
-            int n = rand.Next(_width + _height);
+            float n = Lib.Random.Next(_width + _height);
 
             if (n < _width)
             {
 
-                if (rand.Next(2) == 1)
-                    return new OriginData(new Vector2((int)x.GetValue(), -_height / 2));
+                if (Lib.Random.Flip)
+                    return new OriginData(new Vector2((float)x.GetValue(), -_height / 2));
                 else
-                    return new OriginData(new Vector2((int)x.GetValue(), _height / 2));
+                    return new OriginData(new Vector2((float)x.GetValue(), _height / 2));
             }
             else
             {
-                if (rand.Next(2) == 1)
-                    return new OriginData(new Vector2(-_width / 2, (int)y.GetValue()));
+                if (Lib.Random.Flip)
+                    return new OriginData(new Vector2(-_width / 2, (float)y.GetValue()));
                 else
-                    return new OriginData(new Vector2(_width / 2, (int)y.GetValue()));
+                    return new OriginData(new Vector2(_width / 2, (float)y.GetValue()));
             }
         }
         else
         {
-            return new OriginData(new Vector2((int)x.GetValue(), (int)y.GetValue()));
+            return new OriginData(new Vector2((float)x.GetValue(), (float)y.GetValue()));
         }
     }
 }
