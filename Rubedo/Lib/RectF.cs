@@ -41,6 +41,12 @@ public struct RectF
         this.width = size.X; this.height = size.Y;
     }
 
+    public RectF(Point xyMin, Point xyMax) : this()
+    {
+        this.x = xyMin.X; this.y = xyMin.Y;
+        this.width = xyMax.X - this.x; this.height = xyMax.Y - this.y;
+    }
+
     public static implicit operator RectF(Rectangle rectangle)
     {
         return new RectF(rectangle.Left, rectangle.Top, rectangle.Size.X, rectangle.Size.Y);

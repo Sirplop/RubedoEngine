@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Loyc;
+using Microsoft.Xna.Framework;
+using System;
 
 namespace Rubedo.Lib.Extensions;
 
@@ -68,5 +70,22 @@ public static class RectangleExtensions
         relative.Height = System.Math.Max(System.Math.Min(absoluteY + height, source.Bottom) - relative.Y, 0);
 
         return relative;
+    }
+
+    /// <summary>
+    /// Grows the rectangle to include the given point.
+    /// </summary>
+    /// <param name="source">The rectangle to grow</param>
+    /// <param name="x">X of the point to include</param>
+    /// <param name="y">Y of the point to include</param>
+    public static void Union(ref this Rectangle source, int x, int y)
+    {
+        int numX = System.Math.Min(source.X, x);
+        int numY = System.Math.Min(source.Y, y);
+
+        source.Width = System.Math.Max(source.X + source.Width, x) - numX;
+        source.Height = System.Math.Max(source.Y + source.Height, y) - numY;
+        source.X = numX;
+        source.Y = numY;
     }
 }

@@ -58,3 +58,4 @@ Of course! It's MIT licenced, and no library it uses have a restrictive licence,
 - [MonoGame.Particles](https://github.com/SjaakAlvarez/MonoGame.Particles)
 - [SkiaSharp](https://github.com/mono/SkiaSharp)
 - [AsepriteDotNet](https://github.com/AristurtleDev/AsepriteDotNet)
+- [LoycCore](https://core.loyc.net/)

@@ -34,6 +34,30 @@ public static class Math
         return (int)MathF.Round(val);
     }
     /// <summary>
+    /// Floors the value, then casts it to an int.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int FloorToInt(double val)
+    {
+        return (int)System.Math.Floor(val);
+    }
+    /// <summary>
+    /// Ceilings the value, then casts it to an int.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CeilToInt(double val)
+    {
+        return (int)System.Math.Ceiling(val);
+    }
+    /// <summary>
+    /// Rounds the value, then casts it to an int.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int RoundToInt(double val)
+    {
+        return (int)System.Math.Round(val);
+    }
+    /// <summary>
     /// Clamps the value between <paramref name="min"/> and <paramref name="max"/>.
     /// </summary>
     /// <remarks> Does not check if min is less than max. </remarks>

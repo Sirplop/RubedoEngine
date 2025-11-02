@@ -424,15 +424,12 @@ public sealed class Shapes : IDisposable
     }
     #endregion
     #region Line
-    public void DrawLine(Vector2 a, Vector2 b, Color color)
+    public void DrawLine(Vector2 a, Vector2 b, Color color, float thickness = 2f)
     {
-        DrawLine(a.X, a.Y, b.X, b.Y, color);
+        DrawLine(a.X, a.Y, b.X, b.Y, color, thickness);
     }
-    public void DrawLine(float x1, float y1, float x2, float y2, Color color)
+    public void DrawLine(float x1, float y1, float x2, float y2, Color color, float thickness = 2f)
     {
-        // Default thickness with no zoom.
-        float thickness = 2f;
-
         // If we are using the world camera then we need to adjust the "thickness" of the line
         //  so no matter how far we have "zoomed" into the world the line will look the same.
 
@@ -556,19 +553,19 @@ public sealed class Shapes : IDisposable
         DrawLine(c, a, color);
     }
 
-    public void DrawBox(Vector2 min, Vector2 max, Color color)
+    public void DrawBox(Vector2 min, Vector2 max, Color color, float thickness = 2f)
     {
-        DrawLine(min.X, max.Y, max.X, max.Y, color);
-        DrawLine(max.X, max.Y, max.X, min.Y, color);
-        DrawLine(max.X, min.Y, min.X, min.Y, color);
-        DrawLine(min.X, min.Y, min.X, max.Y, color);
+        DrawLine(min.X, max.Y, max.X, max.Y, color, thickness);
+        DrawLine(max.X, max.Y, max.X, min.Y, color, thickness);
+        DrawLine(max.X, min.Y, min.X, min.Y, color, thickness);
+        DrawLine(min.X, min.Y, min.X, max.Y, color, thickness);
     }
-    public void DrawBox(Rectangle rect, Color color)
+    public void DrawBox(Rectangle rect, Color color, float thickness = 2f)
     {
-        DrawLine(rect.Left, rect.Top, rect.Right, rect.Top, color);
-        DrawLine(rect.Right, rect.Top, rect.Right, rect.Bottom, color);
-        DrawLine(rect.Right, rect.Bottom, rect.Left, rect.Bottom, color);
-        DrawLine(rect.Left, rect.Bottom, rect.Left, rect.Top, color);
+        DrawLine(rect.Left, rect.Top, rect.Right, rect.Top, color, thickness);
+        DrawLine(rect.Right, rect.Top, rect.Right, rect.Bottom, color, thickness);
+        DrawLine(rect.Right, rect.Bottom, rect.Left, rect.Bottom, color, thickness);
+        DrawLine(rect.Left, rect.Bottom, rect.Left, rect.Top, color, thickness);
     }
 
     public void DrawBox(Transform transform, float width, float height, Color color)
@@ -576,12 +573,12 @@ public sealed class Shapes : IDisposable
         DrawBox(transform.Position, width, height, transform.Rotation, transform.Scale, color);
     }
 
-    public void DrawBox(float x, float y, float width, float height, Color color)
+    public void DrawBox(float x, float y, float width, float height, Color color, float thickness)
     {
         Vector2 min = new Vector2(x, y);
         Vector2 max = new Vector2(x + width, y + height);
 
-        DrawBox(min, max, color);
+        DrawBox(min, max, color, thickness);
     }
 
     public void DrawBox(Vector2 center, float width, float height, Color color)

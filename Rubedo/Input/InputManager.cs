@@ -183,6 +183,20 @@ public static class InputManager
     }
 
     /// <summary>
+    /// Returns the change in scroll value for this frame.
+    /// </summary>
+    /// <returns></returns>
+    public static int MouseScroll()
+    {
+        return (_currentMouseState.ScrollWheelValue - _previousMouseState.ScrollWheelValue);
+    }
+
+    public static int RawMouseScroll()
+    {
+        return _currentMouseState.ScrollWheelValue;
+    }
+
+    /// <summary>
     /// Gets the mouse cursor's position in world-space, according to a camera.
     /// </summary>
     /// <param name="camera">The camera to position by. If null, the <see cref="GameState.MainCamera"/> will be used.</param>
@@ -203,6 +217,29 @@ public static class InputManager
         if (camera == null)
             camera = RubedoEngine.CurrentState.MainCamera;
         return _currentMouseState.Position.ToVector2() - camera.VirtualViewport.XY;
+    }
+
+    /// <summary>
+    /// Gets the mouse cursor's position in world-space, according to a camera.
+    /// </summary>
+    /// <param name="camera">The camera to position by. If null, the <see cref="GameState.MainCamera"/> will be used.</param>
+    /// <returns></returns>
+    public static Vector2 PreviousMouseWorldPosition(Camera camera = null)
+    {
+        if (camera == null)
+            return RubedoEngine.CurrentState.MainCamera.ScreenToWorld(_previousMouseState.Position.ToVector2());
+        return camera.ScreenToWorld(_previousMouseState.Position.ToVector2());
+    }
+    /// <summary>
+    /// Gets the mouse cursor's position in screen-space, according to a camera.
+    /// </summary>
+    /// <param name="camera">The camera to position by. If null, the <see cref="GameState.MainCamera"/> will be used.</param>
+    /// <returns></returns>
+    public static Vector2 PreviousMouseScreenPosition(Camera camera = null)
+    {
+        if (camera == null)
+            camera = RubedoEngine.CurrentState.MainCamera;
+        return _previousMouseState.Position.ToVector2() - camera.VirtualViewport.XY;
     }
     /// <summary>
     /// Position-agnostic screen-space movement vector for the mouse.

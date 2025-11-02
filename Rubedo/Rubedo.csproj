@@ -32,6 +32,7 @@
     </EmbeddedResource>
 </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Loyc.Collections" Version="30.1.3" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4" />
     <PackageReference Include="NLog" Version="6.0.2" />
     <PackageReference Include="Rubedo.FontStashSharp" Version="1.3.10.1" />

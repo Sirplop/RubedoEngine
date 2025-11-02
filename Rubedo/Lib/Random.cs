@@ -22,10 +22,10 @@ public struct Squirrel3
         _seed = seed;
     }
 
-    public float Next()
+    public double Next()
     {
         ++_n;
-        return Rnd(_n, _seed) / (float)CAP;
+        return Rnd(_n, _seed) / (double)CAP;
     }
 
     public long NextRaw()
@@ -36,11 +36,11 @@ public struct Squirrel3
 
     public float Range(float min, float max)
     {
-        return Next() * (max - min) + min;
+        return (float)(Next() * (max - min) + min);
     }
     public int Range(int min, int max)
     {
-        return Math.FloorToInt(Next() * (max - min) + min);
+        return Math.FloorToInt((Next() * (max - min) + min));
     }
 
     private static long Rnd(long n, long seed = 0)
@@ -52,7 +52,7 @@ public struct Squirrel3
         n ^= n << 8;
         n *= NOISE3;
         n ^= n >> 8;
-        return n % CAP;
+        return n % (CAP - 1); //CAP-1 / CAP, even in double precision, equals 1. Insanity.
     }
 }
 
@@ -70,6 +70,10 @@ public static class Random
     /// </summary>
     public static bool Flip => rnd.Range(0f, 1f) < 0.5f;
     /// <summary>
+    /// Randomly returns 0 or 1.
+    /// </summary>
+    public static int FlipInt => rnd.Range(0, 2);
+    /// <summary>
     /// Uses Flip to yield either a positive or negative 1.
     /// </summary>
     public static int PosNeg => Flip ? -1 : 1;
@@ -82,7 +86,7 @@ public static class Random
     /// </summary>
     public static float Angle => rnd.Range(0f, 360f);
 
-    public static float Next()
+    public static double Next()
     {
         return rnd.Next();
     }
