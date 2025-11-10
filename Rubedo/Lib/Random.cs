@@ -78,9 +78,9 @@ public static class Random
     /// </summary>
     public static int PosNeg => Flip ? -1 : 1;
     /// <summary>
-    /// Gets an integer between 1 and 100 (inclusive).
+    /// Gets an integer between 0 and 100 (exclusive).
     /// </summary>
-    public static int Percent => Math.CeilToInt(rnd.Range(0f, 100f));
+    public static int Percent => Math.FloorToInt(rnd.Range(0f, 100f));
     /// <summary>
     /// Gets a float between 0 and 360f.
     /// </summary>

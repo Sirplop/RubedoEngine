@@ -25,7 +25,7 @@ public class NotCondition : ICondition
         }
         return !pressed;
     }
-    public bool Held(bool consume = true)
+    public bool Held(bool consume = false)
     {
         bool held = false;
         for (int i = 0; i < _conditions.Length; i++)
@@ -38,7 +38,7 @@ public class NotCondition : ICondition
         }
         return !held;
     }
-    public bool Released(bool consume = true)
+    public bool Released(bool consume = false)
     {
         bool released = false;
         for (int i = 0; i < _conditions.Length; i++)
