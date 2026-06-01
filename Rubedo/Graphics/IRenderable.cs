@@ -18,6 +18,11 @@ public interface IRenderable
     bool Visible { get; set; }
 
     /// <summary>
+    /// If this should always be drawn to all cameras, regardless of if it's visible or not.
+    /// </summary>
+    bool AlwaysDraw { get; set; }
+
+    /// <summary>
     /// The depth of this renderable inside its layer. Higher is in front.
     /// </summary>
     /// <remarks>Range is from ~-400,000 to ~400,000.</remarks>

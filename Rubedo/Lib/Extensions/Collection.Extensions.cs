@@ -42,11 +42,11 @@ public static class CollectionExtensions
     /// <summary>
     /// O(n) Fisher-Yates shuffle.
     /// </summary>
-    public static List<T> FYShuffle<T>(this List<T> list)
+    public static List<T> FYShuffle<T>(this List<T> list, ref Squirrel3 rnd)
     {
         for (int i = list.Count - 1; i > 0; i--)
         {
-            int k = Random.Range(0, i + 1);
+            int k = rnd.Range(0, i + 1);
             (list[i], list[k]) = (list[k], list[i]);
         }
         return list;
@@ -54,11 +54,11 @@ public static class CollectionExtensions
     /// <summary>
     /// O(n) Fisher-Yates shuffle.
     /// </summary>
-    public static T[] FYShuffle<T>(this T[] arr)
+    public static T[] FYShuffle<T>(this T[] arr, ref Squirrel3 rnd)
     {
         for (int i = arr.Length - 1; i > 0; i--)
         {
-            int k = Random.Range(0, i + 1);
+            int k = rnd.Range(0, i + 1);
             (arr[i], arr[k]) = (arr[k], arr[i]);
         }
         return arr;
@@ -66,11 +66,11 @@ public static class CollectionExtensions
     /// <summary>
     /// Fisher-Yates shuffle on a subsection of the array.
     /// </summary>
-    public static T[] FYSubShuffle<T>(this T[] arr, int start, int length)
+    public static T[] FYSubShuffle<T>(this T[] arr, int start, int length, ref Squirrel3 rnd)
     {
         for (int i = start + length - 1; i > start; i--)
         {
-            int k = Random.Range(start, i + 1);
+            int k = rnd.Range(start, i + 1);
             (arr[i], arr[k]) = (arr[k], arr[i]);
         }
         return arr;
@@ -78,14 +78,14 @@ public static class CollectionExtensions
     /// <summary>
     /// Fisher-Yates shuffle on a rectangular cut of the array.
     /// </summary>
-    public static T[] FYRectShuffle<T>(this T[] arr, int x, int y, int width, int height)
+    public static T[] FYRectShuffle<T>(this T[] arr, int x, int y, int width, int height, ref Squirrel3 rnd)
     {
         for (int mY = y + height - 1; mY >= y; mY--)
         {
             for (int mX = x + width - 1; mX >= x; mX--)
             {
-                int rY = Random.Range(y, mY + 1);
-                int rX = Random.Range(x, mX + 1);
+                int rY = rnd.Range(y, mY + 1);
+                int rX = rnd.Range(x, mX + 1);
                 (arr[mY * width + mX], arr[rY * width + rX])
                     = (arr[rY * width + rX], arr[mY * width + mX]);
             }

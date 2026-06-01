@@ -14,6 +14,7 @@ public abstract class RenderableComponent : Component, IRenderable
     protected GameState attachedState = null;
 
     public abstract RectF Bounds { get; }
+    public bool AlwaysDraw { get; set; }
 
     public int LayerDepth 
     {
@@ -39,11 +40,13 @@ public abstract class RenderableComponent : Component, IRenderable
             }
         }
     }
+
+
     protected int _renderLayer = (int)Graphics.Sprites.RenderLayer.Default;
 
     public virtual bool IsVisibleToCamera(Camera camera)
     {
-        return camera.Intersects(Bounds);
+        return AlwaysDraw || camera.Intersects(Bounds);
     }
 
     public abstract void Render(Renderer renderer, Camera camera);

@@ -40,7 +40,7 @@ public struct Squirrel3
     }
     public int Range(int min, int max)
     {
-        return Math.FloorToInt((Next() * (max - min) + min));
+        return Math.FloorToInt(Next() * (max - min) + min);
     }
 
     private static long Rnd(long n, long seed = 0)
@@ -54,11 +54,38 @@ public struct Squirrel3
         n ^= n >> 8;
         return n % (CAP - 1); //CAP-1 / CAP, even in double precision, equals 1. Insanity.
     }
+
+    /// <summary>
+    /// Gets a random value in the range 0..1
+    /// </summary>
+    public float Value() => Range(0f, 1f);
+
+    /// <summary>
+    /// Returns true or false, with equal chance for either.
+    /// </summary>
+    public bool Flip() => Range(0f, 1f) < 0.5f;
+    /// <summary>
+    /// Randomly returns 0 or 1.
+    /// </summary>
+    public int FlipInt() => Range(0, 2);
+    /// <summary>
+    /// Uses Flip to yield either a positive or negative 1.
+    /// </summary>
+    public int PosNeg() => Flip() ? -1 : 1;
+    /// <summary>
+    /// Gets an integer between 0 and 100 (exclusive).
+    /// </summary>
+    public int Percent() => Range(0, 100);
+    /// <summary>
+    /// Gets a float between 0 and 360f.
+    /// </summary>
+    public float Angle() => Range(0f, 360f);
 }
 
 public static class Random
 {
     private static Squirrel3 rnd = new Squirrel3(DateTime.Now.Ticks);
+    public static ref Squirrel3 GetRND => ref rnd;
 
     /// <summary>
     /// Gets a random value in the range 0..1
@@ -80,7 +107,7 @@ public static class Random
     /// <summary>
     /// Gets an integer between 0 and 100 (exclusive).
     /// </summary>
-    public static int Percent => Math.FloorToInt(rnd.Range(0f, 100f));
+    public static int Percent => rnd.Range(0, 100);
     /// <summary>
     /// Gets a float between 0 and 360f.
     /// </summary>

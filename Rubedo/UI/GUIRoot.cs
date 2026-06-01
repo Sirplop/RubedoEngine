@@ -22,6 +22,8 @@ public class GUIRoot : UIComponent, IDisposable, IRenderable
     public bool Visible { get => _visible; set => _visible = value; }
     private bool _visible = true;
 
+    public bool AlwaysDraw { get; set; }
+
     public int LayerDepth
     {
         get => _realLayerDepth;

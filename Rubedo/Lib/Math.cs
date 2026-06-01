@@ -57,6 +57,21 @@ public static class Math
     {
         return (int)System.Math.Round(val);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="v"></param>
+    /// <param name="shift"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int FloorShift(int v, int shift)
+    {
+        int mask = (1 << shift) - 1;
+        int adj = (v >> 31) & mask;
+        return (v + adj) >> shift;
+    }
+
     /// <summary>
     /// Clamps the value between <paramref name="min"/> and <paramref name="max"/>.
     /// </summary>
@@ -222,5 +237,18 @@ public static class Math
         x |= x >> 8;    // The result is a number of 1 bits equal to the number
         x |= x >> 16;   // of bits in the original number, plus 1. That's the
         return x + 1;   // next highest power of 2.
+    }
+
+    /// <summary>
+    /// Converts a power of 2 into the exponent, useful for bit shifting.
+    /// </summary>
+    /// <param name="x">The power of 2</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException">If the provided number is not a power of 2.</exception>
+    public static int GetPower2Exponent(int x)
+    {
+        if (!IsPowerOf2(x))
+            throw new ArgumentException($"Value {x} is not a power of 2!");
+        return (int)System.Math.Log2(x);
     }
 }
