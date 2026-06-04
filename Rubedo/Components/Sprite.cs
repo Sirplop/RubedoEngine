@@ -5,6 +5,7 @@ using Rubedo.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Graphics.Sprites;
+using Rubedo.Resources;
 
 namespace Rubedo.Components;
 
@@ -78,9 +79,9 @@ public class Sprite : RenderableComponent
     private bool _boundsDirty = true;
 
     public Sprite(int layer, Color color) : this(string.Empty, layer, color) { }
-    public Sprite(string texture) : this(Assets.LoadTexture(texture), 0, Color.White) { }
-    public Sprite(string texture, int layer) : this(Assets.LoadTexture(texture), layer, Color.White) { }
-    public Sprite(string texture, int layer, Color color) : this(Assets.LoadTexture(texture), layer, color) { }
+    public Sprite(string texture) : this(Assets.GetResource<Texture2D>(texture), 0, Color.White) { }
+    public Sprite(string texture, int layer) : this(Assets.GetResource<Texture2D>(texture), layer, Color.White) { }
+    public Sprite(string texture, int layer, Color color) : this(Assets.GetResource<Texture2D>(texture), layer, color) { }
     public Sprite(Texture2D texture) : this(texture, 0, Color.White) { }
     public Sprite(Texture2D texture, int layerDepth) : this(texture, layerDepth, Color.White) { }
     public Sprite(Texture2D texture, int layerDepth, Color color) : base()

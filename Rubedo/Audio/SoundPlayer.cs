@@ -1,5 +1,7 @@
-﻿using Rubedo.Components;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Components;
 using Rubedo.Lib;
+using Rubedo.Resources;
 using SoLoud;
 
 namespace Rubedo.Audio;
@@ -45,7 +47,7 @@ public class SoundPlayer : Component
 
     public SoundPlayer(string soundPath, int audioType, int maxInstances, AudioCore audio)
     {
-        sound = Assets.LoadSoundEffect(soundPath);
+        sound = Assets.GetResource<Wav>(soundPath);
         _instances = new AudioInstance[maxInstances];
         audioCore = audio;
         this.audioType = audioType;

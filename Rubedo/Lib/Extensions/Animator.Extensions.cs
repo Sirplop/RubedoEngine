@@ -1,6 +1,7 @@
 ﻿using Rubedo.Components;
 using Rubedo.Graphics.Animation;
 using Rubedo.Lib.StateMachine;
+using Rubedo.Resources;
 using System.Collections.Generic;
 
 namespace Rubedo.Lib.Extensions;
@@ -17,7 +18,7 @@ public static class AnimatorExtensions
     /// <param name="speed">The speed at which to play the animation.</param>
     /// <param name="target">The sprite component to target with this animation.</param>
     public static Animator CreateSpriteAnimation(string animation, float speed, Sprite target)
-        => CreateSpriteAnimation(new AnimationInstance(Assets.LoadAnimation<SpriteAnimation>(animation)), speed, target);
+        => CreateSpriteAnimation(new AnimationInstance(Assets.GetResource<SpriteAnimation>(animation)), speed, target);
 
     /// <summary>
     /// Creates an animator with a single state of the given sprite animation.

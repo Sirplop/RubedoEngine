@@ -1,11 +1,12 @@
 ﻿using Microsoft.Xna.Framework.Content;
 using Rubedo.Graphics.Animation;
 using Rubedo.Graphics.Sprites;
+using Rubedo.Resources;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Rubedo.Serializers;
+namespace Rubedo.Resources.Serializers;
 
 /// <summary>
 /// TODO: I am SpriteAnimLoader, and I don't have a summary yet.
@@ -23,7 +24,7 @@ internal static class SpriteAnimLoader
         JsonObject obj = node.AsObject();
 
         obj.TryGetPropertyValue("atlas", out JsonNode atlasNode);
-        TextureAtlas2D atlas = Assets.LoadAtlas(atlasNode.GetValue<string>());
+        TextureAtlas2D atlas = Assets.GetResource<TextureAtlas2D>(atlasNode.GetValue<string>());
 
         bool loops, pingpong, reversed = false;
 

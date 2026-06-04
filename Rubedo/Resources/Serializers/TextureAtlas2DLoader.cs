@@ -2,10 +2,11 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Graphics.Sprites;
+using Rubedo.Resources;
 using System;
 using System.IO;
 
-namespace Rubedo.Serializers;
+namespace Rubedo.Resources.Serializers;
 
 /// <summary>
 /// Loads a spriteatlas file, and processes it into a useable <see cref="TextureAtlas2D"/>
@@ -14,29 +15,28 @@ internal static class TextureAtlas2DLoader
 {
     internal static TextureAtlas2D Load(string path)
     {
-        string map = Path.Combine(Assets.RootDirectory, Assets.TexturePath, path);
-        FileInfo atlasMap = new FileInfo(map + ".atlasmap");
-        FileInfo atlasFile = new FileInfo(map + ".png");
+        FileInfo atlasMap = new FileInfo(path + ".atlasmap");
+        FileInfo atlasFile = new FileInfo(path + ".png");
 
         if (!atlasMap.Exists || !atlasFile.Exists)
         {
             throw new ContentLoadException($"Atlas '{path}' does not exist!");
         }
         Texture2D texture = null;
-        using (Stream stream = TitleContainer.OpenStream(map + ".png"))
+        using (Stream stream = TitleContainer.OpenStream(path + ".png"))
         {
             texture = Texture2D.FromStream(RubedoEngine.Graphics.GraphicsDevice, stream, DefaultColorProcessors.PremultiplyAlpha);
         }
 
-        TextureAtlas2D atlas = new TextureAtlas2D(texture, map);
+        TextureAtlas2D atlas = new TextureAtlas2D(texture, path);
         int lineNumber = 0;
-        using (Stream stream = TitleContainer.OpenStream(map + ".atlasmap"))
+        using (Stream stream = TitleContainer.OpenStream(path + ".atlasmap"))
         {
             using (TextReader file = new StreamReader(stream))
             {
                 while (true)
                 {
-                    string? lineRead = file.ReadLine();
+                    string lineRead = file.ReadLine();
                     if (lineRead == null)
                     {
                         break;
