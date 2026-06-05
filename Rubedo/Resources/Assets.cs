@@ -128,7 +128,7 @@ public static class Assets
         _assets.Remove(key);
     }
 
-    public static IAssetBox GetAssetBox(string key)
+    public static IAssetBox? GetAssetBox(string key)
     {
         if (_assets.TryGetValue(key, out IAssetBox assetType))
         {

@@ -63,6 +63,13 @@ public abstract class StrongAssetBox<T> : IAssetBox, IEnumerable<KeyValuePair<st
     /// </summary>
     public void Clear() => _assets.Clear();
 
+    public List<string> GetAssets()
+    {
+        List<string> assets = new List<string>();
+        assets.AddRange(_assets.Keys);
+        return assets;
+    }
+
     IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
     {
         return ((IEnumerable<KeyValuePair<string, T>>)_assets).GetEnumerator();

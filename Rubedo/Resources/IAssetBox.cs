@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Rubedo.Resources;
 
@@ -19,4 +20,9 @@ public interface IAssetBox
     /// Unload an asset at the given path from this AssetType.
     /// </summary>
     void UnloadAsset(string key);
+
+    /// <summary>
+    /// Gets a list of all asset keys loaded by this asset box.
+    /// </summary>
+    List<string> GetAssets();
 }
