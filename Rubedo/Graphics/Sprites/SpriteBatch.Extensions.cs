@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics.Sprites;
 using Rubedo.Lib.Extensions;
 using System;
 using System.Reflection;

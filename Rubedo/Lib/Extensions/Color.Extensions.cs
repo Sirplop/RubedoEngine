@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Globalization;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Lib.Extensions;
@@ -67,5 +69,54 @@ public static class ColorExtensions
         r = (int)((r1 + m) * 255);
         g = (int)((g1 + m) * 255);
         b = (int)((b1 + m) * 255);
+    }
+
+    /// <summary>
+    /// Converts an ARGB hexadecimal representation of a color into an actual color object.
+    /// </summary>
+    public static Color FromHexARGB(string hex)
+    {
+        uint argb = Convert.ToUInt32(hex.TrimStart('#').ToUpper(), 16);
+        return new Color(ArgbToAbgr(argb));
+    }
+    /// <summary>
+    /// Converts an RGBA hexadecimal representation of a color into an actual color object.
+    /// </summary>
+    public static Color FromHexRGBA(string hex)
+    {
+        uint rgba = Convert.ToUInt32(hex.TrimStart('#').ToUpper(), 16);
+        return new Color(RgbaToAbgr(rgba));
+    }
+    /// <summary>
+    /// Converts from ARGB to RGBA and back.
+    /// </summary>
+    public static uint ArgbToRgba(uint argb)
+    {
+        return (argb << 8) | (argb >> 24);
+    }
+
+    /// <summary>
+    /// Converts from ARGB to ABGR and back.
+    /// </summary>
+    public static uint ArgbToAbgr(uint argb)
+    {
+        // Input:  [AA RR GG BB]
+        // Output: [AA BB GG RR]
+        return ( argb & 0xFF00FF00) |          // A and G stay in place
+               ((argb & 0x00FF0000) >> 16) |  // R → byte 0 (LSB)
+               ((argb & 0x000000FF) << 16);   // B → byte 3 (MSB, after A)
+    }
+
+    /// <summary>
+    /// Converts from RGBA to ABGR and back.
+    /// </summary>
+    public static uint RgbaToAbgr(uint rgba)
+    {
+        // Input:  [RR GG BB AA]
+        // Output: [AA BB GG RR]
+        return ((rgba & 0xFF000000) >> 24) |  // R → byte 0 (LSB)
+               ((rgba & 0x00FF0000) >> 8 ) |  // G → byte 1
+               ((rgba & 0x0000FF00) << 8 ) |  // B → byte 2
+               ((rgba & 0x000000FF) << 24);   // A → byte 3 (MSB)
     }
 }

@@ -165,6 +165,29 @@ public static class Assets
         return null;
     }
 
+    public static bool TryGetResource<T>(string resourceKey, out T value, string typeKey = "") where T : class
+    {
+        if (typeKey == string.Empty)
+        {
+            typeKey = typeof(T).Name.ToLower();
+        }
+
+        if (_assets.TryGetValue(typeKey, out IAssetBox assetType))
+        {
+            if (assetType.IsWeakReference)
+            {
+                return ((WeakAssetBox<T>)assetType).TryGetAsset(resourceKey, out value);
+            }
+            else
+            {
+                return ((StrongAssetBox<T>)assetType).TryGetAsset(resourceKey, out value);
+            }
+        }
+
+        value = default;
+        return false;
+    }
+
     public static void Initialize(string rootDirectory)
     {
         RootDirectory = rootDirectory;

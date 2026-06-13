@@ -82,10 +82,7 @@ public class Renderer : IDisposable
     {
         //because we're rendering with +Y coordinates, all sprites are flipped,
         //so we need to invert any SpriteEffects' FlipVertically flags.
-        if (effects.HasFlag(SpriteEffects.FlipVertically))
-            effects &= ~SpriteEffects.FlipVertically;
-        else
-            effects |= SpriteEffects.FlipVertically;
+        effects ^= SpriteEffects.FlipVertically;
         //scale is multiplied by a tiny value so that floating point conversions don't cause issues with source rectangles, causing the dreaded "jitter".
         Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale * 1.0001f * GlobalScale, effects, layerDepth, sourceRectangle);
     }
@@ -93,10 +90,7 @@ public class Renderer : IDisposable
     {
         //because we're rendering with +Y coordinates, all sprites are flipped,
         //so we need to invert any SpriteEffects' FlipVertically flags.
-        if (effects.HasFlag(SpriteEffects.FlipVertically))
-            effects &= ~SpriteEffects.FlipVertically;
-        else
-            effects |= SpriteEffects.FlipVertically;
+        effects ^= SpriteEffects.FlipVertically;
         //scale is multiplied by a tiny value so that floating point conversions don't cause issues with source rectangles, causing the dreaded "jitter".
         Sprites.Draw(texture, position, color, rotation, origin, scale * 1.0001f * GlobalScale, effects, layerDepth, sourceRectangle);
     }
@@ -114,10 +108,7 @@ public class Renderer : IDisposable
     {
         //because we're rendering with +Y coordinates, all sprites are flipped,
         //so we need to invert any SpriteEffects' FlipVertically flags.
-        if (effects.HasFlag(SpriteEffects.FlipVertically))
-            effects &= ~SpriteEffects.FlipVertically;
-        else
-            effects |= SpriteEffects.FlipVertically;
+        effects ^= SpriteEffects.FlipVertically;
 
         Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale * 1.0001f * GlobalScale, effects, layerDepth);
     }
@@ -131,10 +122,7 @@ public class Renderer : IDisposable
     {
         //because we're rendering with +Y coordinates, all sprites are flipped,
         //so we need to invert any SpriteEffects' FlipVertically flags.
-        if (effects.HasFlag(SpriteEffects.FlipVertically))
-            effects &= ~SpriteEffects.FlipVertically;
-        else
-            effects |= SpriteEffects.FlipVertically;
+        effects ^= SpriteEffects.FlipVertically;
 
         Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale * 1.0001f * GlobalScale, effects, layerDepth);
     }

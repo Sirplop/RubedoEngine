@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Graphics.Sprites;
+using Rubedo.Resources;
 
 namespace Rubedo.UI.Graphics;
 
@@ -78,7 +80,7 @@ public class Image : UIComponent, IColorable
         {
             case DrawMode.Default:
                 Vector2 pos = new Vector2(Clip.Left, Clip.Top);
-                GUI.SpriteBatch.Draw(Region, pos, Color);
+                GUI.SpriteBatch.Draw(Region, pos, Color, 0, Vector2.Zero, new Vector2(_prefWidth, _prefHeight), SpriteEffects.None, 0);
                 break;
             case DrawMode.Tiled:
                 Rectangle destination = new Rectangle(Clip.Left, Clip.Top, (int)Width, (int)Height);
@@ -86,5 +88,12 @@ public class Image : UIComponent, IColorable
                 break;
         }
         base.Draw();
+    }
+
+    public static Image CreateSolidColorImage(int prefWidth, int prefHeight, Color color)
+    {
+        Texture2D texture = Texture2DExtensions.CreateSolidColor();
+        Image image = new Image(texture, prefWidth, prefHeight, color);
+        return image;
     }
 }

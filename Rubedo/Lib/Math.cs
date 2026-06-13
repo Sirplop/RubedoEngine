@@ -251,4 +251,58 @@ public static class Math
             throw new ArgumentException($"Value {x} is not a power of 2!");
         return (int)System.Math.Log2(x);
     }
+
+    public static int ChangeToBaseTen(string number, int fromBase)
+    {
+        const string Digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        int baseTenValue = 0;
+        int power = 1;
+        bool negate = number[0] == '-';
+        for (int i = number.Length - 1; i > (negate ? 0 : -1); i--)
+        {
+            int val = Digits.IndexOf(number[i]);
+            if (val < 0)
+            {
+                throw new ArgumentException($"The value '{number[i]}' is out of range of {Digits.Length}");
+            }
+            else
+            {
+                baseTenValue += val * power;
+                power *= fromBase;
+            }
+        }
+        return negate ? -baseTenValue : baseTenValue;
+    }
+    public static string DecimalToArbitrarySystem(long decimalNumber, int radix)
+    {
+        const int BitsInLong = 64;
+        const string Digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        if (radix < 2 || radix > Digits.Length)
+            throw new ArgumentException("The radix must be >= 2 and <= " +
+                Digits.Length.ToString());
+
+        if (decimalNumber == 0)
+            return "0";
+
+        int index = BitsInLong - 1;
+        long currentNumber = System.Math.Abs(decimalNumber);
+        char[] charArray = new char[BitsInLong];
+
+        while (currentNumber != 0)
+        {
+            int remainder = (int)(currentNumber % radix);
+            charArray[index--] = Digits[remainder];
+            currentNumber /= radix;
+        }
+
+        string result = new string(charArray, index + 1, BitsInLong - index - 1);
+        if (decimalNumber < 0)
+        {
+            result = "-" + result;
+        }
+
+        return result;
+    }
 }

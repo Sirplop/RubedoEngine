@@ -78,14 +78,14 @@ public abstract class WeakAssetBox<T> : IAssetBox, IEnumerable<KeyValuePair<stri
     /// <summary>
     /// Returns true, if the box contains asset with provided key.
     /// </summary>
-    protected bool ContainsAsset(string key) => _assets.ContainsKey(key);
+    public bool ContainsAsset(string key) => _assets.ContainsKey(key);
 
-    protected bool AssetExists(string key)
+    public bool AssetExists(string key)
     {
         return _assets.TryGetValue(key, out WeakReference<T> value) && value.TryGetTarget(out _);
     }
 
-    protected void AddAsset(string key, T asset)
+    public void AddAsset(string key, T asset)
     {
         if (ContainsAsset(key))
         {
@@ -97,7 +97,7 @@ public abstract class WeakAssetBox<T> : IAssetBox, IEnumerable<KeyValuePair<stri
         }
     }
 
-    protected void RemoveAsset(string key) => _assets.Remove(key);
+    public void RemoveAsset(string key) => _assets.Remove(key);
 
     /// <summary>
     /// Removes all assets from the box.
