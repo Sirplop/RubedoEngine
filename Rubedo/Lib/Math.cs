@@ -170,6 +170,29 @@ public static class Math
     {
         return MathF.Abs(a - b) < EPSILON;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool NearlyZero(in float a, in float zeroLimit = 0.1f)
+    {
+        return a >= -zeroLimit || a <= zeroLimit;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int RoundAwayFromZero(in float a, in float zeroLimit = 0.1f)
+    {
+        if (a < -zeroLimit)
+        {
+            return FloorToInt(a);
+        }
+        else if (a > zeroLimit)
+        {
+            return CeilToInt(a);
+        }
+        else
+        {
+            return 0;
+        }
+    }
     
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

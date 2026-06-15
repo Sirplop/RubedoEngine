@@ -132,16 +132,26 @@ public class TextLine
                 Vector2 size = fontR.MeasureString(currentLine);
                 if (size.X > maxWidth) //this word doesn't fit!
                 {
-                    currentLine = chars[curStartIndex..(curWordStart - 1)];
+                    if (curWordStart == 0)
+                    { //this is just one big word.
+                        currentLine = chars;
+                    }
+                    else
+                    {
+                        currentLine = chars[curStartIndex..(curWordStart - 1)];
+                    }
                     size = fontR.MeasureString(currentLine);
                     if (!tight)
                         size.Y = fontSize;
                     lines.Add(new TextLine(currentLine, size));
-                    currentLine = chars[curWordStart..(i + 1)];
-                    size = fontR.MeasureString(currentLine);
-                    if (!tight)
-                        size.Y = fontSize;
-                    lines.Add(new TextLine(currentLine, size));
+                    if (curWordStart != 0) //only do this if it isn't just a big fat word.
+                    {
+                        currentLine = chars[curWordStart..(i + 1)];
+                        size = fontR.MeasureString(currentLine);
+                        if (!tight)
+                            size.Y = fontSize;
+                        lines.Add(new TextLine(currentLine, size));
+                    }
                 } else //it all fits into one line!
                 {
                     if (!tight)
