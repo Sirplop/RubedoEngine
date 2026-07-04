@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.Lib;
 
@@ -12,6 +13,7 @@ public struct Squirrel3
     private const uint NOISE2 = 0x68e31da4;
     private const uint NOISE3 = 0x1b56c4e9;
     private const uint CAP = uint.MaxValue;
+    private const double CAP_DOUBLE = (double)CAP;
 
     private int _n;
     private long _seed;
@@ -22,22 +24,26 @@ public struct Squirrel3
         _seed = seed;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public double Next()
     {
         ++_n;
-        return Rnd(_n, _seed) / (double)CAP;
+        return Rnd(_n, _seed) / CAP_DOUBLE;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public long NextRaw()
     {
         ++_n;
         return Rnd(_n, _seed);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
     public float Range(float min, float max)
     {
         return (float)(Next() * (max - min) + min);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Range(int min, int max)
     {
         return Math.FloorToInt(Next() * (max - min) + min);
@@ -58,27 +64,33 @@ public struct Squirrel3
     /// <summary>
     /// Gets a random value in the range 0..1
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public float Value() => Range(0f, 1f);
 
     /// <summary>
     /// Returns true or false, with equal chance for either.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Flip() => Range(0f, 1f) < 0.5f;
     /// <summary>
     /// Randomly returns 0 or 1.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int FlipInt() => Range(0, 2);
     /// <summary>
     /// Uses Flip to yield either a positive or negative 1.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PosNeg() => Flip() ? -1 : 1;
     /// <summary>
     /// Gets an integer between 0 and 100 (exclusive).
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Percent() => Range(0, 100);
     /// <summary>
     /// Gets a float between 0 and 360f.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public float Angle() => Range(0f, 360f);
 }
 

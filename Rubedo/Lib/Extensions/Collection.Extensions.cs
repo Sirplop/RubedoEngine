@@ -42,52 +42,81 @@ public static class CollectionExtensions
     /// <summary>
     /// O(n) Fisher-Yates shuffle.
     /// </summary>
-    public static List<T> FYShuffle<T>(this List<T> list, ref Squirrel3 rnd)
+    public static List<T> FYShuffle<T>(this List<T> list, ref readonly Squirrel3 rnd)
     {
+        T swap;
         for (int i = list.Count - 1; i > 0; i--)
         {
             int k = rnd.Range(0, i + 1);
-            (list[i], list[k]) = (list[k], list[i]);
+            swap = list[k];
+            list[k] = list[i];
+            list[i] = swap;
         }
         return list;
     }
     /// <summary>
     /// O(n) Fisher-Yates shuffle.
     /// </summary>
-    public static T[] FYShuffle<T>(this T[] arr, ref Squirrel3 rnd)
+    public static T[] FYShuffle<T>(this T[] arr, ref readonly Squirrel3 rnd)
     {
+        T swap;
         for (int i = arr.Length - 1; i > 0; i--)
         {
             int k = rnd.Range(0, i + 1);
-            (arr[i], arr[k]) = (arr[k], arr[i]);
+            swap = arr[k];
+            arr[k] = arr[i];
+            arr[i] = swap;
         }
         return arr;
     }
     /// <summary>
     /// Fisher-Yates shuffle on a subsection of the array.
     /// </summary>
-    public static T[] FYSubShuffle<T>(this T[] arr, int start, int length, ref Squirrel3 rnd)
+    public static T[] FYSubShuffle<T>(this T[] arr, int start, int length, ref readonly Squirrel3 rnd)
     {
+        T swap;
         for (int i = start + length - 1; i > start; i--)
         {
             int k = rnd.Range(start, i + 1);
-            (arr[i], arr[k]) = (arr[k], arr[i]);
+            swap = arr[k];
+            arr[k] = arr[i];
+            arr[i] = swap;
+        }
+        return arr;
+    }    
+    /// <summary>
+    /// Fisher-Yates shuffle on a row of the multidimensional array.
+    /// </summary>
+    public static T[,] FYSubShuffle<T>(this T[,] arr, int y, int start, int length, ref readonly Squirrel3 rnd)
+    {
+        T swap;
+        for (int i = start + length - 1; i > start; i--)
+        {
+            int k = rnd.Range(start, i + 1);
+            swap = arr[y,k];
+            arr[y,k] = arr[y,i];
+            arr[y,i] = swap;
         }
         return arr;
     }
     /// <summary>
     /// Fisher-Yates shuffle on a rectangular cut of the array.
     /// </summary>
-    public static T[] FYRectShuffle<T>(this T[] arr, int x, int y, int width, int height, ref Squirrel3 rnd)
+    public static T[] FYRectShuffle<T>(this T[] arr, int x, int y, int width, int height, ref readonly Squirrel3 rnd)
     {
+        T swap;
         for (int mY = y + height - 1; mY >= y; mY--)
         {
             for (int mX = x + width - 1; mX >= x; mX--)
             {
                 int rY = rnd.Range(y, mY + 1);
                 int rX = rnd.Range(x, mX + 1);
-                (arr[mY * width + mX], arr[rY * width + rX])
-                    = (arr[rY * width + rX], arr[mY * width + mX]);
+                int i = mY * width + mX;
+                int k = rY * width + rX;
+
+                swap = arr[i];
+                arr[i] = arr[k];
+                arr[k] = swap;
             }
         }
         return arr;
