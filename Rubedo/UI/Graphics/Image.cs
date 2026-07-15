@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Graphics.Sprites;
+using Rubedo.Lib.Extensions;
 using Rubedo.Resources;
 
 namespace Rubedo.UI.Graphics;
@@ -46,6 +47,23 @@ public class Image : UIComponent, IColorable
     }
     private int _prefHeight = 0;
 
+    /// <summary>
+    /// Images can be rotated, but will result in clipping.
+    /// </summary>
+    public int Rotation
+    {
+        get => _rotation;
+        set
+        {
+            if (_rotation != value)
+            {
+                _rotation = value;
+                MarkLayoutAsDirty();
+            }
+        }
+    }
+    private int _rotation = 0;
+
     public DrawMode drawMode = DrawMode.Default;
     public Vector2 uvOffset = Vector2.Zero;
 
@@ -80,7 +98,8 @@ public class Image : UIComponent, IColorable
         {
             case DrawMode.Default:
                 Vector2 pos = new Vector2(Clip.Left, Clip.Top);
-                GUI.SpriteBatch.Draw(Region, pos, Color, 0, Vector2.Zero, new Vector2(_prefWidth, _prefHeight), SpriteEffects.None, 0);
+                Vector2 scale = new Vector2(Region.Width / Width, Region.Height / Height);
+                GUI.SpriteBatch.Draw(Region, pos, Color, _rotation, Vector2.Zero, scale, SpriteEffects.None, 0);
                 break;
             case DrawMode.Tiled:
                 Rectangle destination = new Rectangle(Clip.Left, Clip.Top, (int)Width, (int)Height);

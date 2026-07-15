@@ -13,6 +13,12 @@ namespace Rubedo.Graphics;
 /// </summary>
 public class Renderer : IDisposable
 {
+    /// <summary>
+    /// Because the position is cast down to an int much later, floating point rounding issues with scale being = 1 means
+    /// that occasionally sprites can be nudged over a pixel. It looks bad. This fixes that by making the scale never below 1, but close enough.
+    /// </summary>
+    public const float FIX_FLOATING_ROUNDING = 1.0001f;
+
     public enum Space
     {
         World,
@@ -84,7 +90,7 @@ public class Renderer : IDisposable
         //so we need to invert any SpriteEffects' FlipVertically flags.
         effects ^= SpriteEffects.FlipVertically;
         //scale is multiplied by a tiny value so that floating point conversions don't cause issues with source rectangles, causing the dreaded "jitter".
-        Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale * 1.0001f * GlobalScale, effects, layerDepth, sourceRectangle);
+        Sprites.Draw(texture, transform.Position, color, transform.Rotation, origin, transform.Scale * FIX_FLOATING_ROUNDING * GlobalScale, effects, layerDepth, sourceRectangle);
     }
     public void Draw(TextureRegion2D texture, Vector2 position, Rectangle? sourceRectangle, Color color, float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth)
     {
@@ -92,7 +98,7 @@ public class Renderer : IDisposable
         //so we need to invert any SpriteEffects' FlipVertically flags.
         effects ^= SpriteEffects.FlipVertically;
         //scale is multiplied by a tiny value so that floating point conversions don't cause issues with source rectangles, causing the dreaded "jitter".
-        Sprites.Draw(texture, position, color, rotation, origin, scale * 1.0001f * GlobalScale, effects, layerDepth, sourceRectangle);
+        Sprites.Draw(texture, position, color, rotation, origin, scale * FIX_FLOATING_ROUNDING * GlobalScale, effects, layerDepth, sourceRectangle);
     }
 
     public void Draw(Texture2D texture, Vector2 position, Vector2 origin, Color color)
@@ -110,7 +116,7 @@ public class Renderer : IDisposable
         //so we need to invert any SpriteEffects' FlipVertically flags.
         effects ^= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale * 1.0001f * GlobalScale, effects, layerDepth);
+        Sprites.Draw(texture, transform.Position, sourceRectangle, color, transform.Rotation, origin, transform.Scale * FIX_FLOATING_ROUNDING * GlobalScale, effects, layerDepth);
     }
 
     public void Draw(Texture2D texture, Rectangle? sourceRectangle, Rectangle destinationRectangle, Color color)
@@ -124,7 +130,7 @@ public class Renderer : IDisposable
         //so we need to invert any SpriteEffects' FlipVertically flags.
         effects ^= SpriteEffects.FlipVertically;
 
-        Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale * 1.0001f * GlobalScale, effects, layerDepth);
+        Sprites.Draw(texture, position, sourceRectangle, color, rotation, origin, scale * FIX_FLOATING_ROUNDING * GlobalScale, effects, layerDepth);
     }
     public void DrawString(SpriteFontBase spriteFont, Space space, string text, Vector2 position, Color color, float rotation, float scale, int layerDepth = 0,
         SpriteEffects effects = SpriteEffects.None, TextStyle style = TextStyle.None, FontSystemEffect fontEffect = FontSystemEffect.None, int effectAmount = 0)

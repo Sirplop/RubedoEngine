@@ -1,6 +1,7 @@
 ﻿using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics.Sprites;
 using System.Collections.Generic;
 
 namespace Rubedo.UI;
@@ -35,15 +36,42 @@ public static class GUI
     /// </summary>
     public static GUIRoot Root { get; set; } = null!;
 
+    /// <summary>
+    /// If true, draws colorful rectangles around each sublevel of UI.
+    /// </summary>
+    public static bool DebugDraw { get; set; } = false;
+    public static int DebugDrawDepthMin { get; set; } = 1;
+
     private static readonly RasterizerState _rasterState = new RasterizerState { ScissorTestEnable = true };
     private static bool _beginCalled = false;
     private static readonly Stack<(Rectangle, bool)> _scissorStack = new Stack<(Rectangle, bool)>();
 
     internal static Matrix offsetMatrix;
 
+    private static Texture2D testWhite;
+    private static int _colorDepth = 0;
+    private static Color _assemblyColor = new Color(1, 1, 1, 0.05f);
+    private static Color[] _colorDepthColors = new Color[]
+        {
+            Color.DarkGray * _assemblyColor,
+            Color.Blue * _assemblyColor,
+            Color.Red * _assemblyColor,
+            Color.Yellow * _assemblyColor,
+            Color.Orange * _assemblyColor,
+            Color.Purple * _assemblyColor,
+            Color.Teal * _assemblyColor,
+            Color.Beige * _assemblyColor,
+            Color.Lime * _assemblyColor,
+            Color.Magenta * _assemblyColor,
+            Color.Cyan * _assemblyColor,
+            Color.GhostWhite * _assemblyColor,
+        };
+
     public static void Setup(Game game)
     {
         SpriteBatch = new SpriteBatch(game.GraphicsDevice);
+        testWhite = new Texture2D(game.GraphicsDevice, 1, 1);
+        testWhite.SetData(new[] { Color.White });
     }
 
     /* //immediate mode scissoring.
@@ -87,12 +115,22 @@ public static class GUI
         _scissorStack.Push((SpriteBatch.GraphicsDevice.ScissorRectangle, wasBeginCalled));
         SpriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(x, y, w, h);
         Begin();
+        if (DebugDraw)
+        {
+            int depth = _colorDepth++;
+            if (depth > DebugDrawDepthMin)
+                SpriteBatch.Draw(testWhite, SpriteBatch.GraphicsDevice.ScissorRectangle, _colorDepthColors[depth]);
+        }
     }
     /// <summary>
     /// Uses a rectangle to limit the area that the spritebatch is allowed to draw to.
     /// </summary>
     public static void PopScissor()
     {
+        if (DebugDraw)
+        {
+            _colorDepth--;
+        }
         if (_beginCalled)
             End();
 
