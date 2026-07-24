@@ -13,7 +13,10 @@ internal interface IBroadphase
 
     bool Raycast(Ray2D ray, float distance, out RaycastResult result);
 
-    void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> manifoldSet);
+    void ComputePairs(List<Manifold> manifolds);
+
+    void RemoveManifold(in Manifold manifold);
+
     void Clear();
 
     void DebugDraw(Shapes shapes);

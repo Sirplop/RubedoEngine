@@ -30,32 +30,35 @@ public class Polygon : Shape
 
     protected Polygon() { }
 
-    public Polygon(IEnumerable<Vector2> verts)
+    public Polygon(IEnumerable<Vector2> verts, bool useCentroid = true)
     {
-        SetVertices(verts);
+        SetVertices(verts, useCentroid);
         type = ShapeType.Polygon;
         transformDirty = true;
         normalsDirty = true;
     }
 
-    public Polygon(float halfWidth, float halfHeight)
+    public Polygon(float halfWidth, float halfHeight, bool useCentroid = true)
     {
-        SetBox(halfWidth, halfHeight);
+        SetBox(halfWidth, halfHeight, useCentroid);
         type = ShapeType.Polygon;
         transformDirty = true;
         normalsDirty = true;
     }
 
-    public void SetVertices(IEnumerable<Vector2> verts)
+    public void SetVertices(IEnumerable<Vector2> verts, bool useCentroid)
     {
         vertices = verts.ToArray();
 
         normals = new Vector2[VertexCount]; 
         
-        Vector2 centroid = ShapeUtility.ComputeCentroid(vertices);
-        for (int i = 0; i < VertexCount; i++)
+        if (useCentroid)
         {
-            vertices[i] -= centroid;
+            Vector2 centroid = ShapeUtility.ComputeCentroid(vertices);
+            for (int i = 0; i < VertexCount; i++)
+            {
+                vertices[i] -= centroid;
+            }
         }
 
         for (int i = 0; i < VertexCount; i++)
@@ -69,11 +72,11 @@ public class Polygon : Shape
         transformedNormals = new Vector2[VertexCount];
     }
 
-    public void SetBox(float halfWidth, float halfHeight)
+    public void SetBox(float halfWidth, float halfHeight, bool useCentroid)
     {
         Vector2 min = new Vector2(-halfWidth, -halfHeight);
         Vector2 topLeft = new Vector2(-halfWidth, halfHeight);
-        SetVertices(new List<Vector2>() { min, -topLeft, -min, topLeft });
+        SetVertices(new List<Vector2>() { min, -topLeft, -min, topLeft }, useCentroid);
     }
 
     //Generate bounding box for this polygon

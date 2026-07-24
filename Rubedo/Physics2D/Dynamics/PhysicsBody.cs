@@ -4,8 +4,6 @@ using Rubedo.Lib;
 using Rubedo.Object;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Common;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -16,7 +14,9 @@ namespace Rubedo.Physics2D.Dynamics;
 /// </summary>
 public class PhysicsBody : Component
 {
-    internal Transform TargetTransform { get; set; }
+    protected static uint ID_Master = 0;
+
+    internal virtual Transform TargetTransform { get; set; }
     private enum CollisionType { Solid, TriggerSolid, Trigger }
 
     internal Vector2 velocity = Vector2.Zero;
@@ -42,7 +42,9 @@ public class PhysicsBody : Component
     public float gravityScale = 1;
     public bool IsParticle = false;
 
-    public readonly Collider collider; //TODO: Handle linked colliders better.
+    public readonly Collider collider;
+
+    public readonly uint ID;
 
     public Vector2 Position => TargetTransform.Position;
 
@@ -51,6 +53,8 @@ public class PhysicsBody : Component
 
     public PhysicsBody(Collider collider, PhysicsMaterial material) : base()
     {
+        ID = ID_Master++;
+
         this.material = material;
         this.collider = collider;
         force = Vector2.Zero;

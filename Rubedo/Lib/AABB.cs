@@ -71,9 +71,9 @@ public struct AABB : IEquatable<AABB>
         return new AABB(min - Vector2.One * increase, max + Vector2.One * increase);
     }
 
-    public readonly bool Overlaps(AABB other)
+    public readonly bool Overlaps(in AABB other)
     {
-        return Overlaps(this, other);
+        return Overlaps(in this, in other);
     }
 
     public readonly AABB Union(AABB other)
@@ -111,7 +111,7 @@ public struct AABB : IEquatable<AABB>
         };
     }
 
-    public static bool Overlaps(AABB a, AABB b)
+    public static bool Overlaps(in AABB a, in AABB b)
     {
         if (a.max.X < b.min.X || a.min.X > b.max.X) return false;
         if (a.max.Y < b.min.Y || a.min.Y > b.max.Y) return false;

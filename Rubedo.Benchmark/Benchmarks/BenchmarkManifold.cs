@@ -20,7 +20,7 @@ public class BenchmarkManifold
     [Benchmark(Baseline = true)]
     public Manifold ManifoldOld()
     {
-        manifold.Update(2, contact1, contact2);
+        manifold.Update(contact1, contact2);
         return manifold;
     }
     [Benchmark]

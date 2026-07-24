@@ -22,7 +22,6 @@ public class PhysicsWorld
 
     public List<PhysicsBody> bodies = new List<PhysicsBody>();
 
-    internal HashSet<Manifold> manifoldSet = new HashSet<Manifold>();
     internal List<Manifold> manifolds = new List<Manifold>();
 
     private IBroadphase broadphase;
@@ -42,7 +41,7 @@ public class PhysicsWorld
     public PhysicsWorld()
     {
         // Switch the collision system here:
-        broadphase = new SpatialHashGrid(30);
+        broadphase = new SpatialHashGrid(3);
         timer = new Timer();
     }
 
@@ -62,7 +61,6 @@ public class PhysicsWorld
     {
         bodies.Clear();
         manifolds.Clear();
-        manifoldSet.Clear();
         broadphase.Clear();
     }
 
@@ -105,7 +103,7 @@ public class PhysicsWorld
         //Broad phase
         broadphase.Update(bodies);
         timer.Step("B.U: ");
-        broadphase.ComputePairs(manifolds, manifoldSet);
+        broadphase.ComputePairs(manifolds);
         timer.Step("B.C: ");
 
         //Narrow phase
@@ -157,7 +155,7 @@ public class PhysicsWorld
                 {
                     m.A.FinalizeCollisions(m);
                     manifolds.SwapAndRemove(i);
-                    manifoldSet.Remove(m);
+                    broadphase.RemoveManifold(in m);
                 }
                 else
                 {
@@ -175,7 +173,7 @@ public class PhysicsWorld
                 {
                     m.A.FinalizeCollisions(m);
                     manifolds.SwapAndRemove(i); //swap and remove to remove unecessary moves
-                    manifoldSet.Remove(m);
+                    broadphase.RemoveManifold(in m);
                 } else
                 {
                     m.A.DoCollision(m);

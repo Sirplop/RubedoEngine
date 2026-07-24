@@ -8,5 +8,6 @@ public enum ShapeType
     Circle = 0,
     Capsule = 1,
     Box = 2,
-    Polygon = 3
+    Polygon = 3,
+    Compound = 4
 }

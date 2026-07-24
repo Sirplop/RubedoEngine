@@ -35,68 +35,68 @@ public class BenchmarkCollisions
         Transform twosTransform = new Transform(new Vector2(-0.25f, -0.2f), -25f);
         Transform cap1Transform = new Transform(new Vector2(0.2f, 0), 0);
         Transform cap2Transform = new Transform(new Vector2(-0.2f, 0), 0);
-        circle1 = new Circle(onesTransform, 1f);
-        circle2 = new Circle(twosTransform, 1f);
-        capsule1 = new Capsule(cap1Transform, 2f, 1f);
-        capsule2 = new Capsule(cap2Transform, 2f, 1f);
-        box1 = new Box(onesTransform, 1f, 1f);
-        box2 = new Box(twosTransform, 1f, 1f);
+        circle1 = new Circle(1f);
+        circle2 = new Circle(1f);
+        capsule1 = new Capsule(2f, 1f);
+        capsule2 = new Capsule(2f, 1f);
+        box1 = new Box(1f, 1f);
+        box2 = new Box(1f, 1f);
 
-        Collider p1 = Collider.CreateUnitShape(ShapeType.Polygon, 4);
-        Collider p2 = Collider.CreateUnitShape(ShapeType.Polygon, 4);
+        Collider p1 = Collider.CreateUnitShape(ShapeType.Polygon, false, 4);
+        Collider p2 = Collider.CreateUnitShape(ShapeType.Polygon, false, 4);
 
-        poly1 = new Polygon(onesTransform, ((Polygon)p1.shape).vertices);
-        poly2 = new Polygon(twosTransform, ((Polygon)p2.shape).vertices);
+        poly1 = new Polygon(((Polygon)p1.shape).vertices);
+        poly2 = new Polygon(((Polygon)p2.shape).vertices);
     }
 
     //[Benchmark]
     public void BenchCircleCircle()
     {
-        PhysicsCollisions.CircleToCircle(manifold, circle1, circle2);
+        PhysicsCollisions.CircleToCircle(ref manifold, circle1, circle2);
     }
    // [Benchmark]
     public void BenchCircleCapsule()
     {
-        PhysicsCollisions.CircleToCapsule(manifold, circle1, capsule2);
+        PhysicsCollisions.CircleToCapsule(ref manifold, circle1, capsule2);
     }
     //[Benchmark]
     public void BenchCircleBox()
     {
-        PhysicsCollisions.CircleToBox(manifold, circle1, box2);
+        PhysicsCollisions.CircleToBox(ref manifold, circle1, box2);
     }
    // [Benchmark]
     public void BenchCirclePoly()
     {
-        PhysicsCollisions.CircleToPolygon(manifold, circle1, poly2);
+        PhysicsCollisions.CircleToPolygon(ref manifold, circle1, poly2);
     }
    // [Benchmark]
     public void BenchCapsuleCapsule()
     {
-        PhysicsCollisions.CapsuleToCapsule(manifold, capsule1, capsule2);
+        PhysicsCollisions.CapsuleToCapsule(ref manifold, capsule1, capsule2);
     }
     //[Benchmark]
     public void BenchCapsuleBox()
     {
-        PhysicsCollisions.CapsuleToBox(manifold, capsule1, box2);
+        PhysicsCollisions.CapsuleToBox(ref manifold, capsule1, box2);
     }
  //   [Benchmark]
     public void BenchCapsulePoly()
     {
-        PhysicsCollisions.CapsuleToPolygon(manifold, capsule1, poly2);
+        PhysicsCollisions.CapsuleToPolygon(ref manifold, capsule1, poly2);
     }
     //[Benchmark]
     public void BenchBoxBox()
     {
-        PhysicsCollisions.BoxToBox(manifold, box1, box2);
+        PhysicsCollisions.BoxToBox(ref manifold, box1, box2);
     }
     //[Benchmark]
     public void BenchBoxPoly()
     {
-        PhysicsCollisions.BoxToPolygon(manifold, box1, poly2);
+        PhysicsCollisions.BoxToPolygon(ref manifold, box1, poly2);
     }
     [Benchmark]
     public void BenchPolyPoly()
     {
-        PhysicsCollisions.PolygonToPolygon(manifold, poly1, poly2);
+        PhysicsCollisions.PolygonToPolygon(ref manifold, poly1, poly2);
     }
 }

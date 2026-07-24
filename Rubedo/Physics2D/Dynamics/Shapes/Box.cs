@@ -20,13 +20,13 @@ public class Box : Polygon
     public float Bottom => vertices[0].Y;
 
     protected Box() : base() { }
-    public Box(float width, float height) : base()
+    public Box(float width, float height, bool useCentroid = true) : base()
     {
         type = ShapeType.Box;
         this.width = width;
         this.height = height;
 
-        SetBox(width * 0.5f, height * 0.5f);
+        SetBox(width * 0.5f, height * 0.5f, useCentroid);
         transformDirty = true;
         normalsDirty = true;
     }

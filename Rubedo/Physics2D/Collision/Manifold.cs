@@ -49,6 +49,8 @@ public class Manifold : IEquatable<Manifold>
     public ReadOnlyCollection<Contact> ContactPoints => contacts.AsReadOnly();
     public int ContactCount => contactCount;
 
+    internal int lastModifiedFrame;
+
     public readonly PhysicsBody A;
     public readonly PhysicsBody B;
     internal Vector2 normal;
@@ -70,6 +72,15 @@ public class Manifold : IEquatable<Manifold>
         normal = default;
         noImpulse = bodyA.collider.isTrigger || bodyB.collider.isTrigger;
         state = ManifoldState.New;
+    }
+
+    public void Reset()
+    {
+        normal = default;
+        contacts[0] = null;
+        contacts[1] = null;
+        contactCount = 0;
+
     }
 
     public void Update(Contact c)
@@ -123,6 +134,6 @@ public class Manifold : IEquatable<Manifold>
     //Required for Broad Phase
     public override int GetHashCode()
     {
-        return A.GetHashCode() + B.GetHashCode();
+        return HashCode.Combine(A.GetHashCode(), B.GetHashCode());
     }
 }

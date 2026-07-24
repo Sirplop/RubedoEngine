@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Loyc;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Rubedo.EngineDebug;
 using Rubedo.Graphics;
 using Rubedo.Lib;
@@ -95,9 +97,12 @@ internal class SpatialHashGrid : IBroadphase
             }
         }
     }
-    private readonly HashSet<Manifold> pairs = new HashSet<Manifold>();
-    public void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> manifoldSet)
+    public readonly Dictionary<long, Manifold> collisionPairs = new Dictionary<long, Manifold>();
+    private int frame = 0;
+    public void ComputePairs(List<Manifold> manifolds)
     {
+        frame++;
+
         //can we figure out how to remove manifolds we didn't make without so many sets?
         foreach (List<PhysicsBody> body in cells.cells.Values)
         {
@@ -114,81 +119,57 @@ internal class SpatialHashGrid : IBroadphase
                         continue; //layers don't collide, so ignore.
 
                     if ((bodyA.isStatic && bodyB.isStatic) &&
-                        !(bodyA.collider.isTrigger || bodyA.collider.isTrigger))
+                        !(bodyA.collider.isTrigger || bodyB.collider.isTrigger))
                         continue; //non-trigger static colliders can't collide!
 
                     if (bodyA.IsDestroyed || bodyB.IsDestroyed)
                         continue; //can't collide nonexistant things
+                    if (!bodyA.bounds.Overlaps(in bodyB.bounds))
+                        continue;
 
-                    if (bodyA.bounds.Overlaps(bodyB.bounds))
+                    long pairKey = PairKey(in bodyA.ID, in bodyB.ID);
+
+                    if (collisionPairs.TryGetValue(pairKey, out Manifold existing))
                     {
-                        //TODO: ManifoldPool class, please. Too many allocations.
-                        Manifold m = new Manifold(bodyA, bodyB);
-                        if (pairs.Add(m) && manifoldSet.Add(m)) //also this add check is terribly slow.
-                        {
-                            manifolds.Add(m); //only add if it doesn't exist already.
-                        }
+                        existing.lastModifiedFrame = frame;
+                    }
+                    else
+                    {
+                        Manifold m = new Manifold(bodyA, bodyB); // TODO: ManifoldPool
+                        m.lastModifiedFrame = frame;
+                        collisionPairs.Add(pairKey, m);
+                        manifolds.Add(m);
                     }
                 }
             }
         }
-        //TODO: this is very very slow, make it faster!
         for (int i = manifolds.Count - 1; i >= 0; i--)
         {
             Manifold m = manifolds[i];
-            if (!pairs.Contains(m))
+            if (m.lastModifiedFrame != frame)
             {
-                manifoldSet.Remove(m);
+                collisionPairs.Remove(PairKey(in m.A.ID, in m.B.ID));
                 manifolds.SwapAndRemove(i);
             }
             else
-                m.noImpulse = m.A.collider.isTrigger || m.B.collider.isTrigger;
-        }
-        pairs.Clear();
-    }
-
-    /*public void ComputePairs(List<Manifold> manifolds, HashSet<Manifold> removals)
-    {
-        foreach (List<PhysicsBody> cell in cells.cells.Values)
-        {
-            if (cell.Count <= 1) //ignore cells with 1 or less things in it.
-                continue;
-            for (int i = 0; i < cell.Count - 1; i++)
             {
-                PhysicsBody bodyA = cell[i];
-                for (int j = i + 1; j < cell.Count; j++)
-                {
-                    PhysicsBody bodyB = cell[j];
-
-                    if (!PhysicsLayer.LayersCollide(bodyA.collider.physicsLayer, bodyB.collider.physicsLayer))
-                        continue; //layers don't collide, so ignore.
-
-                    if ((bodyA.isStatic && bodyB.isStatic) &&
-                        !(bodyA.collider.isTrigger || bodyA.collider.isTrigger))
-                        continue; //non-trigger static colliders can't collide!
-
-                    if (bodyA.IsDestroyed || bodyB.IsDestroyed)
-                        continue; //can't collide nonexistant things
-
-                    if (bodyA.bounds.Overlaps(bodyB.bounds))
-                    {
-                        if (!bodyA.collidingWith.ContainsKey(bodyB))
-                        { //we only need to care about one body holding the collision.
-                            Manifold m = new Manifold(bodyA, bodyB);
-                            bodyA.newCollisions.TryAdd(bodyB, m);
-                            bodyA.collidingWith.TryAdd(bodyB, m);
-                            manifolds.Add(m);
-                        }
-                    } 
-                    else if (bodyA.collidingWith.TryGetValue(bodyB, out Manifold value))
-                    {
-                        bodyA.removeCollisions.Enqueue(bodyB);
-                        removals.Add(value);
-                    }
-                }
+                m.noImpulse = m.A.collider.isTrigger || m.B.collider.isTrigger;
             }
         }
-    }*/
+    }
+
+    public static long PairKey(in uint AID, in uint BID)
+    {
+        // canonical order so (a,b) and (b,a) produce the same key
+        return AID > BID
+            ? ((long)AID << 32) | BID
+            : ((long)BID << 32) | AID;
+    }
+
+    public void RemoveManifold(in Manifold manifold)
+    {
+        collisionPairs.Remove(PairKey(in manifold.A.ID, in manifold.B.ID));
+    }
 
     public void Add(PhysicsBody body)
     {
@@ -237,6 +218,7 @@ internal class SpatialHashGrid : IBroadphase
     public void Clear()
     {
         cells.Clear();
+        collisionPairs.Clear();
     }
     public void DebugDraw(Shapes shapes)
     {

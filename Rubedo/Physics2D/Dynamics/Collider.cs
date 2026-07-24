@@ -26,7 +26,7 @@ public class Collider : Component
     public static float UNIT_CAPSULE_LENGTH => 0.334f * RubedoEngine.SizeOfMeter;
     public static float UNIT_CAPSULE_RADIUS => 0.5f * RubedoEngine.SizeOfMeter;
 
-    public readonly Shape shape;
+    public Shape shape;
 
     public bool isTrigger;
     public byte physicsLayer = 0;
@@ -69,7 +69,7 @@ public class Collider : Component
         remove { onTriggerExitEventHandler -= value; }
     }
 
-    protected Collider(Shape shape, bool isTrigger)
+    public Collider(Shape shape, bool isTrigger)
     {
         this.shape = shape;
         this.isTrigger = isTrigger;
@@ -144,6 +144,34 @@ public class Collider : Component
         return null;
     }
 
+
+    /// <summary>
+    /// Creates a number of polygons all glued together. Go plug this into the compoundbody maker.
+    /// </summary>
+    /// <returns></returns>
+    public static List<Polygon> CreateRandomPolygons(int numPolygons)
+    {
+        List<Polygon> polygons = new List<Polygon>(numPolygons);
+        float angleChange = 360f / numPolygons;
+        for (int j = 0; j < numPolygons; j++)
+        {
+            List<Vector2> vertices = new List<Vector2>();
+            int polygonOnlySideCount = Lib.Random.Range(3, 7);
+            float r = RubedoEngine.SizeOfMeter * 0.5f;
+            float a = MathHelper.Pi / (polygonOnlySideCount % 2 == 1 ? 2 : 4); //make sure a side faces down.
+            Vector2 dir = Lib.MathV.Rotate(Vector2.UnitY, angleChange * j) * r;
+            for (int i = 0; i < polygonOnlySideCount; i++)
+            {
+                Vector2 vert = new Vector2(r * MathF.Cos((MathHelper.TwoPi * i / polygonOnlySideCount) + a),
+                    r * MathF.Sin((MathHelper.TwoPi * i / polygonOnlySideCount) + a));
+                vert += dir;
+                vertices.Add(vert);
+            }
+            polygons.Add(new Polygon(vertices, false));
+        }
+        return polygons;
+    }
+
     /// <summary>
     /// Creates a collider by cloning the given <paramref name="shape"/>.
     /// </summary>
@@ -171,5 +199,18 @@ public class Collider : Component
         shape.transformDirty = true;
         shape.normalsDirty = true;
         shape.boundsDirty = true;
+
+        // Compound shapes also need their children shapes updated.
+        if (shape.type == ShapeType.Compound)
+        {
+            CompoundShape cs = (CompoundShape)shape;
+            for (int i = 0; i < cs.Children.Count; i++)
+            {
+                var child = cs.Children[i].Shape;
+                child.transformDirty = true;
+                child.normalsDirty = true;
+                child.boundsDirty = true;
+            }
+        }
     }
 }
