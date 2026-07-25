@@ -1,9 +1,8 @@
-﻿using Loyc;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
 using Rubedo.EngineDebug;
 using Rubedo.Graphics;
 using Rubedo.Lib;
+using Rubedo.Lib.Collections;
 using Rubedo.Lib.Extensions;
 using Rubedo.Physics2D.Common;
 using Rubedo.Physics2D.Dynamics;
@@ -97,25 +96,30 @@ internal class SpatialHashGrid : IBroadphase
             }
         }
     }
-    public readonly Dictionary<long, Manifold> collisionPairs = new Dictionary<long, Manifold>();
+    public readonly LongMap<Manifold> collisionPairs = new LongMap<Manifold>(1024);
     private int frame = 0;
     public void ComputePairs(List<Manifold> manifolds)
     {
         frame++;
 
-        //can we figure out how to remove manifolds we didn't make without so many sets?
-        foreach (List<PhysicsBody> body in cells.cells.Values)
+        var cellLists = cells.cells.Values;
+        foreach (List<PhysicsBody> body in cellLists)
         {
-            if (body.Count <= 1) //ignore cells with 1 or less things in it.
+            if (body == null)
                 continue;
-            for (int i = 0; i < body.Count - 1; i++)
+            int count = body.Count;
+            if (count <= 1) //ignore cells with 1 or less things in it.
+                continue;
+
+            for (int i = 0; i < count - 1; i++)
             {
                 PhysicsBody bodyA = body[i];
-                for (int j = i + 1; j < body.Count; j++)
+                ref AABB boundsA = ref bodyA.bounds;
+                for (int j = i + 1; j < count; j++)
                 {
                     PhysicsBody bodyB = body[j];
 
-                    if (!PhysicsLayer.LayersCollide(bodyA.collider.physicsLayer, bodyB.collider.physicsLayer))
+                    if (!PhysicsLayer.LayersCollide(in bodyA.collider.physicsLayer, in bodyB.collider.physicsLayer))
                         continue; //layers don't collide, so ignore.
 
                     if ((bodyA.isStatic && bodyB.isStatic) &&
@@ -124,7 +128,7 @@ internal class SpatialHashGrid : IBroadphase
 
                     if (bodyA.IsDestroyed || bodyB.IsDestroyed)
                         continue; //can't collide nonexistant things
-                    if (!bodyA.bounds.Overlaps(in bodyB.bounds))
+                    if (!AABB.Overlaps(in boundsA, in bodyB.bounds))
                         continue;
 
                     long pairKey = PairKey(in bodyA.ID, in bodyB.ID);
@@ -135,7 +139,8 @@ internal class SpatialHashGrid : IBroadphase
                     }
                     else
                     {
-                        Manifold m = new Manifold(bodyA, bodyB); // TODO: ManifoldPool
+                        Manifold m = GlobalPool<Manifold>.Obtain();
+                        m.SetBodies(bodyA, bodyB);
                         m.lastModifiedFrame = frame;
                         collisionPairs.Add(pairKey, m);
                         manifolds.Add(m);
@@ -150,6 +155,7 @@ internal class SpatialHashGrid : IBroadphase
             {
                 collisionPairs.Remove(PairKey(in m.A.ID, in m.B.ID));
                 manifolds.SwapAndRemove(i);
+                GlobalPool<Manifold>.Release(m);
             }
             else
             {
@@ -169,6 +175,11 @@ internal class SpatialHashGrid : IBroadphase
     public void RemoveManifold(in Manifold manifold)
     {
         collisionPairs.Remove(PairKey(in manifold.A.ID, in manifold.B.ID));
+    }
+
+    public void TestClear()
+    {
+        collisionPairs.Clear();
     }
 
     public void Add(PhysicsBody body)
@@ -276,7 +287,7 @@ internal class SpatialHashGrid : IBroadphase
     #region SpatialDictionary
     internal class SpatialDictionary
     {
-        internal readonly Dictionary<long, List<PhysicsBody>> cells = new Dictionary<long, List<PhysicsBody>>();
+        internal readonly LongMap<List<PhysicsBody>> cells = new LongMap<List<PhysicsBody>>();
 
         /// <summary>
         /// Computes and returns a hash key by packing the x and y coordinates into a long.
@@ -294,7 +305,8 @@ internal class SpatialHashGrid : IBroadphase
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Remove(PhysicsBody body)
         {
-            foreach (List<PhysicsBody> list in cells.Values)
+            ref List<PhysicsBody>[] cellValues = ref cells.Values;
+            foreach (List<PhysicsBody> list in cellValues)
             {
                 list.Remove(body);
             }

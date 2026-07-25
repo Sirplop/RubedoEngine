@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Rubedo.Lib.Collections;
 using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Math;
 using System;
@@ -42,7 +43,7 @@ public class Contact
 }
 
 internal enum ManifoldState { New, Stay, Exit }
-public class Manifold : IEquatable<Manifold>
+public class Manifold : IEquatable<Manifold>, IPoolable
 {
     public Vector2 Normal => normal;
     public Vector2 Tangent => tangent;
@@ -51,8 +52,8 @@ public class Manifold : IEquatable<Manifold>
 
     internal int lastModifiedFrame;
 
-    public readonly PhysicsBody A;
-    public readonly PhysicsBody B;
+    public PhysicsBody A;
+    public PhysicsBody B;
     internal Vector2 normal;
     internal Vector2 tangent;
 
@@ -65,7 +66,21 @@ public class Manifold : IEquatable<Manifold>
     internal bool noImpulse;
     internal ManifoldState state;
 
+    public Manifold()
+    {
+        //empty constructor for use with object pool.
+    }
+
     public Manifold(PhysicsBody bodyA, PhysicsBody bodyB)
+    {
+        A = bodyA;
+        B = bodyB;
+        normal = default;
+        noImpulse = bodyA.collider.isTrigger || bodyB.collider.isTrigger;
+        state = ManifoldState.New;
+    }
+
+    public void SetBodies(PhysicsBody bodyA, PhysicsBody bodyB)
     {
         A = bodyA;
         B = bodyB;
@@ -80,7 +95,6 @@ public class Manifold : IEquatable<Manifold>
         contacts[0] = null;
         contacts[1] = null;
         contactCount = 0;
-
     }
 
     public void Update(Contact c)

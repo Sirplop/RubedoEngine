@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
 using BenchmarkDotNet.Running;
-using Rubedo.Benchmark.Benchmarks;
+using Rubedo.Benchmarks;
 
 namespace Rubedo.Benchmark;
 
@@ -104,6 +103,7 @@ internal class BenchmarkRun
 
     public static void Run()
     {
-        BenchmarkRunner.Run<BenchmarkPhysIntegrate>();
+        //BenchmarkRunner.Run<BenchmarkPhysIntegrate>();
+        BenchmarkRunner.Run<BenchmarkSpatialHashGrid>();
     }
 }

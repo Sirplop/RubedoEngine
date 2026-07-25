@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rubedo.Lib;
 using Rubedo.Physics2D.Collision;
+using Rubedo.Physics2D.Dynamics;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -23,14 +24,15 @@ public static class ContactConstraintSolver
 
         for (int i = 0; i < m.contactCount; i++)
         {
-            Contact c = m.contacts[i];
+            ref Contact c = ref m.contacts[i];
 
             // Relative velocity at contact
             c.ra = c.position - m.A.Position;
             c.rb = c.position - m.B.Position;
 
-            RelVel(ref m, ref c, out Vector2 rv);
-
+            Vector2 rv = new Vector2();
+            rv.X = m.B.velocity.X - c.rb.Y * m.B.angularVelocity - m.A.velocity.X + c.ra.Y * m.A.angularVelocity;
+            rv.Y = m.B.velocity.Y + c.rb.X * m.B.angularVelocity - m.A.velocity.Y - c.ra.X * m.A.angularVelocity;
             // Restitution * normal velocity at first impact
             Vector2.Dot(ref rv, ref m.normal, out float vn);
 
@@ -91,7 +93,10 @@ public static class ContactConstraintSolver
     }
     public static void ApplyImpulse(Manifold m)
     {
-        if (m.A._invMass + m.B._invMass == 0) return;
+        ref PhysicsBody A = ref m.A;
+        ref PhysicsBody B = ref m.B;
+
+        if (A._invMass + B._invMass == 0) return;
         Vector2 rv;
         float lambda;
         /*
@@ -99,40 +104,53 @@ public static class ContactConstraintSolver
             So we solve normal impulse after tangential impulse because
             non-penetration is more important.
         */
-        if (m.friction == 0)
-            goto normal; //skip friction if there isn't any
 
-        //solve friction
-        for (int i = 0; i < m.contactCount; i++)
+        if (m.friction != 0)
         {
-            Contact c = m.contacts[i];
+            //solve friction since it exists.
+            for (int i = 0; i < m.contactCount; i++)
+            {
+                ref Contact c = ref m.contacts[i];
+                if (c.penetration < 0f)
+                    continue;
 
-            // Relative velocity at contact
-            RelVel(ref m, ref c, out rv);
+                ref Vector2 ra = ref c.ra;
+                ref Vector2 rb = ref c.rb;
 
-            // Tangential impulse magnitude
-            Vector2.Dot(ref rv, ref m.tangent, out lambda);
+                // Relative velocity at contact
+                rv.X = B.velocity.X - rb.Y * B.angularVelocity - A.velocity.X + ra.Y * A.angularVelocity;
+                rv.Y = B.velocity.Y + rb.X * B.angularVelocity - A.velocity.Y - ra.X * A.angularVelocity;
 
-            //accumulate tangential impulse
-            float maxPt = c.accumImpulse * m.friction;
-            float pt0 = c.accumFriction;
-            c.accumFriction = Lib.Math.Clamp(pt0 + lambda * c.tangentMass, -maxPt, maxPt);
-            lambda = c.accumFriction - pt0;
+                // Tangential impulse magnitude
+                Vector2.Dot(ref rv, ref m.tangent, out lambda);
 
-            Vector2.Multiply(ref m.tangent, lambda, out rv);
+                //accumulate tangential impulse
+                float maxPt = c.accumImpulse * m.friction;
+                float pt0 = c.accumFriction;
+                c.accumFriction = Lib.Math.Clamp(pt0 + lambda * c.tangentMass, -maxPt, maxPt);
+                lambda = c.accumFriction - pt0;
 
-            //apply impulses
-            m.A.ApplyImpulseA(ref rv, ref c.ra);
-            m.B.ApplyImpulseB(ref rv, ref c.rb);
+                Vector2.Multiply(ref m.tangent, lambda, out rv);
+
+                //apply impulses
+                m.A.ApplyImpulseA(ref rv, ref ra);
+                m.B.ApplyImpulseB(ref rv, ref rb);
+            }
         }
 
         //solve penetration
-        normal: for (int i = 0; i < m.contactCount; i++)
+        for (int i = 0; i < m.contactCount; i++)
         {
-            Contact c = m.contacts[i];
+            ref Contact c = ref m.contacts[i];
+            if (c.penetration < 0f)
+                continue;
+
+            ref Vector2 ra = ref c.ra;
+            ref Vector2 rb = ref c.rb;
 
             // Relative velocity at contact
-            RelVel(ref m, ref c, out rv);
+            rv.X = B.velocity.X - rb.Y * B.angularVelocity - A.velocity.X + ra.Y * A.angularVelocity;
+            rv.Y = B.velocity.Y + rb.X * B.angularVelocity - A.velocity.Y - ra.X * A.angularVelocity;
 
             Vector2.Dot(ref rv, ref m.normal, out lambda);
 
@@ -147,15 +165,8 @@ public static class ContactConstraintSolver
             Vector2.Multiply(ref m.normal, lambda, out rv);
 
             //apply impulses
-            m.A.ApplyImpulseA(ref rv, ref c.ra);
-            m.B.ApplyImpulseB(ref rv, ref c.rb);
+            m.A.ApplyImpulseA(ref rv, ref ra);
+            m.B.ApplyImpulseB(ref rv, ref rb);
         }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void RelVel(ref Manifold m, ref Contact c, out Vector2 rv)
-    {
-        rv.X = m.B.velocity.X - c.rb.Y * m.B.angularVelocity - m.A.velocity.X + c.ra.Y * m.A.angularVelocity;
-        rv.Y = m.B.velocity.Y + c.rb.X * m.B.angularVelocity - m.A.velocity.Y - c.ra.X * m.A.angularVelocity;
     }
 }

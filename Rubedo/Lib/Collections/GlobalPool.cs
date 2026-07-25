@@ -8,7 +8,7 @@ namespace Rubedo.Lib.Collections;
 /// </summary>
 public static class GlobalPool<T> where T : new()
 {
-    private static Queue<T> _pool = new Queue<T>(10);
+    private static Stack<T> _pool = new Stack<T>(10);
 
     /// <summary>
     /// Pre-fills the pool with <paramref name="cacheSize"/> objects.
@@ -20,7 +20,7 @@ public static class GlobalPool<T> where T : new()
         if (cacheSize > 0)
         {
             for (int i = 0; i < cacheSize; i++)
-                _pool.Enqueue(new T());
+                _pool.Push(new T());
         }
     }
 
@@ -38,7 +38,7 @@ public static class GlobalPool<T> where T : new()
     public static T Obtain()
     {
         if (_pool.Count > 0)
-            return _pool.Dequeue();
+            return _pool.Pop();
 
         return new T();
     }
@@ -48,7 +48,7 @@ public static class GlobalPool<T> where T : new()
     /// </summary>
     public static void Release(T obj)
     {
-        _pool.Enqueue(obj);
+        _pool.Push(obj);
 
         if (obj is IPoolable poolable)
             poolable.Reset();

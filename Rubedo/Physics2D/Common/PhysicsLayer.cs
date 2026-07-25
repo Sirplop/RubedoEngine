@@ -31,7 +31,7 @@ public static class PhysicsLayer
         }
     }
 
-    public static bool LayersCollide(byte layer1, byte layer2)
+    public static bool LayersCollide(in byte layer1, in byte layer2)
     {
         if (layer1 > 31 || layer2 > 31)
             throw new System.ArgumentOutOfRangeException("layer", "Physics layers can't be more than 31!");

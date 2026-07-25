@@ -7,7 +7,7 @@ using Rubedo.Physics2D.Dynamics;
 using Rubedo.Physics2D.Dynamics.Shapes;
 using System.Numerics;
 
-namespace Rubedo.Benchmark.Benchmarks;
+namespace Rubedo.Benchmarks;
 
 [MemoryDiagnoser]
 public class BenchmarkPhysIntegrate

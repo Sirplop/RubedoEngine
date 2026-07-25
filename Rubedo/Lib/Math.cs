@@ -251,8 +251,6 @@ public static class Math
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Power2Roundup(int x)
     {
-        if (x < 0)
-            return 0;
         --x;
         x |= x >> 1;    // Divide by 2^k for consecutive doublings of k up to 32,
         x |= x >> 2;    // and then or the results.
