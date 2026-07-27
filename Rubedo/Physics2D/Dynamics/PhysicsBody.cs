@@ -5,6 +5,7 @@ using Rubedo.Object;
 using Rubedo.Physics2D.Collision;
 using Rubedo.Physics2D.Common;
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 
 namespace Rubedo.Physics2D.Dynamics;
@@ -15,6 +16,9 @@ namespace Rubedo.Physics2D.Dynamics;
 public class PhysicsBody : Component
 {
     protected static uint ID_Master = 0;
+    public static float LinearSleepTolerance = 0.2f;   // velocity (units/sec), squared internally
+    public static float AngularSleepTolerance = 0.035f; // ~2 degrees, in radians/sec
+    public static float TimeToSleep = 0.5f;              // seconds under threshold before sleeping
 
     internal virtual Transform TargetTransform { get; set; }
     private enum CollisionType { Solid, TriggerSolid, Trigger }
@@ -46,6 +50,16 @@ public class PhysicsBody : Component
 
     public readonly uint ID;
 
+    // --- Sleep system ---
+    public bool IsAwake { get; private set; } = true;
+    public bool canSleep = true;
+    internal float sleepTime = 0f;
+    
+    // --- Island bookkeeping (recomputed every step) ---
+    internal int islandIndex;      // this body's index into PhysicsWorld.bodies for this step
+    internal bool forceAwakeThisStep; // set when WakeUp() is called externally this step
+
+
     public Vector2 Position => TargetTransform.Position;
 
     public Vector2 LinearVelocity { get => velocity; internal set => velocity = value; }
@@ -75,9 +89,9 @@ public class PhysicsBody : Component
         isStatic = true;
     }
 
-    internal void IntegrateForces(float dt)
+    internal void IntegrateForces(in float dt)
     {
-        if (_invMass == 0)
+        if (_invMass == 0 || !IsAwake)
             return;
 
         MathV.MulAdd(ref velocity, ref force, dt * _invMass, out velocity);
@@ -93,9 +107,9 @@ public class PhysicsBody : Component
         torque = 0;
     }
 
-    internal void IntegrateVelocity(float dt)
+    internal void IntegrateVelocity(in float dt)
     {
-        if (_invMass == 0)
+        if (_invMass == 0 || !IsAwake)
             return;
 
         Vector2 pos = TargetTransform.Position;
@@ -104,9 +118,46 @@ public class PhysicsBody : Component
         TargetTransform.Rotation += angularVelocity * dt;
     }
 
+    /// <summary>
+    /// Puts this body to sleep: zeroes velocity/forces and excludes it from
+    /// integration and contact solving until something wakes it back up.
+    /// </summary>
+    internal void Sleep()
+    {
+        if (!IsAwake)
+            return;
+
+        IsAwake = false;
+        velocity = Vector2.Zero;
+        angularVelocity = 0f;
+        force = Vector2.Zero;
+        torque = 0f;
+    }
+    public void WakeUp()
+    {
+        if (_invMass == 0)
+            return;
+
+        IsAwake = true;
+        sleepTime = 0f;
+        forceAwakeThisStep = true; // keeps this body's whole island from re-sleeping this step
+    }
+
+    // Internal wake used by island resolution — doesn't need to set forceAwakeThisStep,
+    // since it's only called when the island has already been judged ineligible to sleep.
+    internal void WakeFromIsland()
+    {
+        IsAwake = true;
+        sleepTime = 0f;
+    }
+
     public override void Update()
     {
         base.Update();
+
+        // Bounds don't change while asleep since the body doesn't move.
+        if (!IsAwake)
+            return;
         //Update bounds for Broad phase
         bounds = collider.shape.GetBoundingBox();
     }

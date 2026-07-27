@@ -91,7 +91,7 @@ public static class ContactConstraintSolver
             m.B.ApplyImpulseB(ref p, ref c.rb);
         }
     }
-    public static void ApplyImpulse(Manifold m)
+    public static void ApplyImpulse(in Manifold m)
     {
         ref PhysicsBody A = ref m.A;
         ref PhysicsBody B = ref m.B;
@@ -104,15 +104,13 @@ public static class ContactConstraintSolver
             So we solve normal impulse after tangential impulse because
             non-penetration is more important.
         */
-
-        if (m.friction != 0)
+        
+        if (!Lib.Math.NearlyEqual(in m.friction, 0))
         {
             //solve friction since it exists.
             for (int i = 0; i < m.contactCount; i++)
             {
                 ref Contact c = ref m.contacts[i];
-                if (c.penetration < 0f)
-                    continue;
 
                 ref Vector2 ra = ref c.ra;
                 ref Vector2 rb = ref c.rb;
@@ -142,8 +140,6 @@ public static class ContactConstraintSolver
         for (int i = 0; i < m.contactCount; i++)
         {
             ref Contact c = ref m.contacts[i];
-            if (c.penetration < 0f)
-                continue;
 
             ref Vector2 ra = ref c.ra;
             ref Vector2 rb = ref c.rb;

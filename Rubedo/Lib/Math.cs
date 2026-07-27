@@ -170,6 +170,11 @@ public static class Math
     {
         return MathF.Abs(a - b) < EPSILON;
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool NearlyEqual(in float a, in float b)
+    {
+        return MathF.Abs(a - b) < EPSILON;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool NearlyZero(in float a, in float zeroLimit = 0.1f)
