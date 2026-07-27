@@ -6,18 +6,8 @@ using System.Threading;
 namespace Rubedo.Lib.Threading;
 
 /// <summary>
-/// A Parallel.For-like dispatcher for workloads where each item is extremely cheap,
-/// so the ThreadPool's dynamic chunking/scheduling overhead in Parallel.For dominates
-/// runtime. Instead of dynamically claiming chunks, the index range is split ONCE into
-/// N contiguous, roughly-equal buckets (one per worker thread) up front. Each thread
-/// then just runs a tight local for-loop over its own bucket with zero synchronization
-/// until it's done.
-///
-/// The worker threads are created once (in the constructor) and reused across calls to
-/// For(...), avoiding OS thread creation cost on every invocation. This is intended for
-/// a single controlling thread calling For(...) repeatedly (e.g. once per frame / per
-/// batch) - it is NOT safe to call For(...) concurrently from multiple threads on the
-/// same dispatcher instance.
+/// A fixed-bucket thread dispatcher for workloads where each item is expected to be of similar cost.
+/// Do not use concurrently with itself.
 /// </summary>
 public sealed class FixedThreadDispatcher : IDisposable
 {
@@ -158,7 +148,9 @@ public sealed class FixedThreadDispatcher : IDisposable
         }
     }
 
-    /// <summary>Shuts down and joins all worker threads. Safe to call once, at the end of the dispatcher's life.</summary>
+    /// <summary>
+    /// Shuts down and joins all worker threads. Safe to call once, at the end of the dispatcher's life.
+    /// </summary>
     public void Dispose()
     {
         _shutdown = true;
