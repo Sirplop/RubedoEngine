@@ -5,7 +5,11 @@ namespace Rubedo.Lib;
 
 public static class Math
 {
-    public const float EPSILON = 0.0005f; //suitably small float value to say "yeah they're close enough". NOTE: this does not work for very large float values.
+    /// <summary>
+    /// Suitably small float value to say "yeah they're close enough". 
+    /// NOTE: this does not work for very large float values.
+    /// </summary>
+    public const float EPSILON = 0.0005f;
     public const float DEG2RAD = 0.0174532924f;
     public const float RAD2DEG = 57.29578f;
 

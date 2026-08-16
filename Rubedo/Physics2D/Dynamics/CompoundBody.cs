@@ -60,6 +60,7 @@ public class CompoundBody : PhysicsBody
             float mass = polygon.GetArea();
             compound.AddChild(polygon, Vector2.Zero, 0, mass);
         }
+        compound.BuildInternalEdges();
         Collider collider = new Collider(compound, isTrigger);
         return collider;
     }

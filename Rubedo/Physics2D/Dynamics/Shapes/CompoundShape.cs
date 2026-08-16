@@ -32,6 +32,14 @@ public readonly struct ChildShape
 
 public class CompoundShape : Shape
 {
+    /// <summary>
+    /// World-unit tolerance for treating two edges as the same seam.
+    /// </summary>
+    private const float EDGE_WELD_EPSILON = 0.01f;
+
+    // [childIndex][edgeIndex] -> adjacency. Null entry for non-polygon children.
+    private EdgeAdjacency[][] edgeAdjacencies;
+
     public List<Vector2> LocalVertices { get; set; } = new List<Vector2>();
 
     public List<ChildShape> Children { get; } = new List<ChildShape>();
@@ -84,6 +92,66 @@ public class CompoundShape : Shape
 
         // Parallel axis theorem: I_total = I_child + m * d^2
         _totalInertia += child.Inertia + mass * Vector2.Dot(localOffset, localOffset);
+    }
+
+    public EdgeAdjacency GetEdgeAdjacency(int childIndex, int edgeIndex)
+    {
+        if (edgeAdjacencies == null) 
+            return EdgeAdjacency.None;
+
+        EdgeAdjacency[] arr = edgeAdjacencies[childIndex];
+        if (arr == null || edgeIndex < 0 || edgeIndex >= arr.Length) 
+            return EdgeAdjacency.None;
+
+        return arr[edgeIndex];
+    }
+
+    /// <summary>
+    /// Scans every pair of polygon children for coincident edges and records
+    /// them as internal seams. Run after every addition of one or more children.
+    /// </summary>
+    public void BuildInternalEdges()
+    {
+        edgeAdjacencies = new EdgeAdjacency[Children.Count][];
+        for (int i = 0; i < Children.Count; i++)
+            if (Children[i].Shape is Polygon polyI)
+                edgeAdjacencies[i] = new EdgeAdjacency[polyI.VertexCount];
+
+        for (int i = 0; i < Children.Count; i++)
+        {
+            if (Children[i].Shape is not Polygon polyA)
+                continue;
+
+            for (int j = i + 1; j < Children.Count; j++)
+            {
+                if (Children[j].Shape is not Polygon polyB)
+                    continue;
+
+                for (int ea = 0; ea < polyA.VertexCount; ea++)
+                {
+                    Vector2 a1 = polyA.vertices[ea];
+                    Vector2 a2 = polyA.vertices[(ea + 1) % polyA.VertexCount];
+
+                    for (int eb = 0; eb < polyB.VertexCount; eb++)
+                    {
+                        Vector2 b1 = polyB.vertices[eb];
+                        Vector2 b2 = polyB.vertices[(eb + 1) % polyB.VertexCount];
+
+                        // A shared seam runs opposite winding: A's start = B's
+                        // end and vice versa.
+                        bool coincident =
+                            Vector2.DistanceSquared(a1, b2) < EDGE_WELD_EPSILON * EDGE_WELD_EPSILON &&
+                            Vector2.DistanceSquared(a2, b1) < EDGE_WELD_EPSILON * EDGE_WELD_EPSILON;
+
+                        if (!coincident)
+                            continue;
+
+                        edgeAdjacencies[i][ea] = new EdgeAdjacency(true, j, eb);
+                        edgeAdjacencies[j][eb] = new EdgeAdjacency(true, i, ea);
+                    }
+                }
+            }
+        }
     }
 
     public override Shape Clone()

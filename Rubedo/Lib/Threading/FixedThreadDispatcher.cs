@@ -64,9 +64,8 @@ public sealed class FixedThreadDispatcher : IDisposable
 
         _body = body;
 
-        // Only hand work to as many threads as there are items, but every thread still
-        // participates in the completion countdown (with an empty [start,end) range if
-        // it has no work), which keeps the signaling logic simple and branch-free below.
+        // Work is given to as many threads as there are items, but all threads contribute to the wait.
+
         int activeThreads = System.Math.Min(_threadCount, total);
         int baseChunk = total / activeThreads;
         int remainder = total % activeThreads; // first `remainder` buckets get one extra item
@@ -154,9 +153,12 @@ public sealed class FixedThreadDispatcher : IDisposable
     public void Dispose()
     {
         _shutdown = true;
-        foreach (var s in _startSignals) s.Set();
-        foreach (var t in _threads) t.Join();
-        foreach (var s in _startSignals) s.Dispose();
+        foreach (var s in _startSignals) 
+            s.Set();
+        foreach (var t in _threads) 
+            t.Join();
+        foreach (var s in _startSignals) 
+            s.Dispose();
         _completionSignal.Dispose();
     }
 }

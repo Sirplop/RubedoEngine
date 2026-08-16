@@ -172,7 +172,7 @@ public static class MathV
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Normalize(ref Vector2 vec)
     {
-        if (MathV.NearlyZero(ref vec))
+        if (NearlyZero(ref vec))
         {
             vec.X = vec.Y = 0;
             return;
@@ -190,7 +190,7 @@ public static class MathV
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Normalize(ref float x, ref float y)
     {
-        if (x == 0 && y == 0)
+        if (Math.NearlyZero(in x, Math.EPSILON) && Math.NearlyEqual(in y, Math.EPSILON))
         {
             x = 0;
             y = 0;

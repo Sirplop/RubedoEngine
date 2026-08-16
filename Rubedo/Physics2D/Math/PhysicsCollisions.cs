@@ -704,7 +704,6 @@ public static class PhysicsCollisions
             return CompoundToCompound(ref m, compound, (CompoundShape)other, isCompoundA);
 
         bool anyCollision = false;
-        float deepestPenetration = float.MinValue;
         Manifold best = null;
 
         AABB otherAabb = other.GetBoundingBox();
@@ -720,7 +719,7 @@ public static class PhysicsCollisions
             // Scratch manifold reusing the real bodies so warm-start impulses
             // can still carry over once we commit the winning child below.
             Manifold childManifold = new Manifold(m.A, m.B);
-            bool collided = TestChildVsShape(ref childManifold, compound, in child, other, isCompoundA);
+            bool collided = TestChildVsShape(ref childManifold, compound, i, in child, other, isCompoundA);
 
             if (!collided)
                 continue;
@@ -808,7 +807,7 @@ public static class PhysicsCollisions
     /// resolves to the compound's own center. We compute its true world
     /// position on the fly instead and go through the raw-position overloads.
     /// </summary>
-    private static bool TestChildVsShape(ref Manifold m, CompoundShape compound, in ChildShape child, Shape other, bool childIsA)
+    private static bool TestChildVsShape(ref Manifold m, CompoundShape compound, int index, in ChildShape child, Shape other, bool childIsA)
     {
         if (child.Shape.type == ShapeType.Circle)
         {
@@ -837,6 +836,7 @@ public static class PhysicsCollisions
                     hit = CircleToPolygon(ref m, worldPos, radius, (Polygon)other);
                     if (hit && !childIsA)
                         m.normal = -m.normal;
+                    InternalEdgeUtility.TryCorrectNormal(compound, index, m);
                     return hit;
 
                 default:
@@ -857,7 +857,6 @@ public static class PhysicsCollisions
         m.contactCount = 0;
 
         bool anyCollision = false;
-        float deepestPenetration = float.MinValue;
         Manifold best = null;
 
         // Both sides get re-checked once per opposing child in the loop below
@@ -885,7 +884,7 @@ public static class PhysicsCollisions
                 ChildShape childB = compoundB.Children[j];
 
                 Manifold childManifold = new Manifold(m.A, m.B);
-                bool collided = TestChildVsChild(ref childManifold, compoundA, in childA, compoundB, in childB);
+                bool collided = TestChildVsChild(ref childManifold, compoundA, i, in childA, compoundB, j, in childB);
 
                 if (!collided)
                     continue;
@@ -903,7 +902,7 @@ public static class PhysicsCollisions
 
                 // First contact
                 int childContacts = childManifold.contactCount;
-                if (childContacts >= 1)
+                if (childContacts == 1)
                 {
                     Contact contact = childManifold.contacts[0];
 
@@ -939,19 +938,6 @@ public static class PhysicsCollisions
                             best.contacts[smaller] = contact;
                     }
                 }
-
-                /*
-                float totalPenetration = 0f;
-                for (int c = 0; c < childManifold.contactCount; c++)
-                    totalPenetration += childManifold.contacts[c].penetration;
-
-                if (totalPenetration > deepestPenetration)
-                {
-                    deepestPenetration = totalPenetration;
-                    best = childManifold;
-                    anyCollision = true;
-                }
-                */
             }
         }
 
@@ -974,7 +960,7 @@ public static class PhysicsCollisions
     /// normal always points from childA toward childB regardless of which
     /// compound was the outer "a" — CompoundToCompound flips it if needed.
     /// </summary>
-    private static bool TestChildVsChild(ref Manifold m, CompoundShape compoundA, in ChildShape childA, CompoundShape compoundB, in ChildShape childB)
+    private static bool TestChildVsChild(ref Manifold m, CompoundShape compoundA, int indexA, in ChildShape childA, CompoundShape compoundB, int indexB, in ChildShape childB)
     {
         bool aIsCircle = childA.Shape.type == ShapeType.Circle;
         bool bIsCircle = childB.Shape.type == ShapeType.Circle;
@@ -1018,6 +1004,8 @@ public static class PhysicsCollisions
             };
             if (hit)
                 m.normal = -m.normal; // raw helper gives circleB->childA; flip to childA->childB
+            InternalEdgeUtility.TryCorrectNormal(compoundA, indexA, m);
+            InternalEdgeUtility.TryCorrectNormal(compoundB, indexB, m);
             return hit;
         }
 

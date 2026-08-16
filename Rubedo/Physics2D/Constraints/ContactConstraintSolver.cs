@@ -96,7 +96,9 @@ public static class ContactConstraintSolver
         ref PhysicsBody A = ref m.A;
         ref PhysicsBody B = ref m.B;
 
-        if (A._invMass + B._invMass == 0) return;
+        if (A._invMass + B._invMass == 0) 
+            return;
+
         Vector2 rv;
         float lambda;
         /*

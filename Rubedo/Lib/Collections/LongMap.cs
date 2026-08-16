@@ -81,7 +81,9 @@ public class LongMap<T> where T : class
         int mask = capacity - 1;
         int idx = (int)((unchecked((ulong)key) * GOLDEN) & (uint)mask);
 
-        while (true)
+        // Bound the number of probes to capacity to avoid infinite loop when table
+        // contains no empty slot (e.g. lots of deletions or near-full).
+        for (int probes = 0; probes < capacity; probes++)
         {
             byte s = states[idx];
             if (s == 0) // empty slot -> not present
@@ -96,6 +98,11 @@ public class LongMap<T> where T : class
             }
             idx = (idx + 1) & mask;
         }
+
+        // If we've probed 'capacity' times and didn't find an empty slot or the key,
+        // the key is not present (prevents infinite looping).
+        value = null;
+        return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,7 +114,8 @@ public class LongMap<T> where T : class
         int idx = (int)((unchecked((ulong)key) * GOLDEN) & (uint)mask);
         int firstTombstone = -1;
 
-        while (true)
+        // Bound probes to capacity to guarantee termination even if there is no empty slot.
+        for (int probes = 0; probes < capacity; probes++)
         {
             byte s = states[idx];
             if (s == 0)
@@ -131,6 +139,21 @@ public class LongMap<T> where T : class
             }
             idx = (idx + 1) & mask;
         }
+
+        // If we probed the whole table and only found tombstones, use the first tombstone.
+        if (firstTombstone != -1)
+        {
+            idx = firstTombstone;
+            keys[idx] = key;
+            values[idx] = value;
+            states[idx] = 1;
+            count++;
+            return;
+        }
+
+        // Table truly full (no empty slot and no tombstones) -> resize and insert.
+        Resize();
+        Add(key, value);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
