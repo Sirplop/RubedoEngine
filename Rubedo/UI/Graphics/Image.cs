@@ -98,7 +98,7 @@ public class Image : UIComponent, IColorable
         {
             case DrawMode.Default:
                 Vector2 pos = new Vector2(Clip.Left, Clip.Top);
-                Vector2 scale = new Vector2(Region.Width / Width, Region.Height / Height);
+                Vector2 scale = new Vector2(Width / Region.Width, Height / Region.Height);
                 GUI.SpriteBatch.Draw(Region, pos, Color, _rotation, Vector2.Zero, scale, SpriteEffects.None, 0);
                 break;
             case DrawMode.Tiled:

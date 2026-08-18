@@ -253,7 +253,7 @@ internal class SpatialHashGrid : IBroadphase
         {
             Vector2 textPosition = new Vector2((float)x * cellSize + 0.25f * cellSize,
                 (float)y * cellSize + 0.75f * cellSize);
-            DebugText.Instance.DrawText(textPosition, 0.05f, cellCount.ToString(), 24, Renderer.Space.World);
+            DebugText.Instance.DrawText(textPosition, 1f, cellCount.ToString(), 24, Renderer.Space.World);
         }
     }
 

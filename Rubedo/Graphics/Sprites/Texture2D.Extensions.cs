@@ -12,7 +12,7 @@ namespace Rubedo.Graphics.Sprites;
 public static class Texture2DExtensions
 {
     /// <summary>
-    /// Creates a 1x1 texture of the given color.
+    /// Creates a 1x1 texture.
     /// </summary>
     public static Texture2D CreateSolidColor()
     {
