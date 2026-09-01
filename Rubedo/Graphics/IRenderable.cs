@@ -1,4 +1,5 @@
-﻿using Rubedo.Lib;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Lib;
 
 namespace Rubedo.Graphics;
 
@@ -31,6 +32,11 @@ public interface IRenderable
     /// The render layer for this renderable. If you're looking for in-layer sorting, you want <seealso cref="LayerDepth"/>.
     /// </summary>
     int RenderLayer { get; set; }
+
+    /// <summary>
+    /// Get the shader effect attached to this IRenderable, if it exists.
+    /// </summary>
+    Effect GetEffect();
 
     /// <summary>
     /// Determines if the object is visible to the camera.

@@ -27,7 +27,11 @@ public class Renderer : IDisposable
 
     private bool _isDisposed;
     private Game _game;
-    private BasicEffect _effect;
+    private BasicEffect _effect; 
+    private Camera _currentCamera;
+    private SamplerState _currentSampler;
+
+    internal BasicEffect DefaultEffect => _effect;
 
     /// <summary>
     /// The scale at which all things are rendered at.
@@ -61,15 +65,26 @@ public class Renderer : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public void Begin(Camera camera, SamplerState sampler)
+    public void Begin(Camera camera, SamplerState sampler, Effect effect = null)
     {
         ArgumentNullException.ThrowIfNull(camera);
+        _currentCamera = camera;
+        _currentSampler = sampler;
 
-        _effect.View = camera.GetView();
-        _effect.Projection = camera.GetProjection();
-        _effect.World = Matrix.Identity;
+        if (effect != null)
+        {
+            effect.Parameters["World"]?.SetValue(Matrix.Identity);
+            effect.Parameters["View"]?.SetValue(_currentCamera.GetView());
+            effect.Parameters["Projection"]?.SetValue(_currentCamera.GetProjection());
+        }
+        else
+        {
+            _effect.View = camera.GetView();
+            _effect.Projection = camera.GetProjection();
+            _effect.World = Matrix.Identity;
+        }
 
-        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: _effect);
+        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: effect ?? _effect);
     }
     public void End()
     {

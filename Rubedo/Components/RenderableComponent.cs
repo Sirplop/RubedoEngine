@@ -1,4 +1,5 @@
-﻿using Rubedo.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Rubedo.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
 
@@ -41,8 +42,14 @@ public abstract class RenderableComponent : Component, IRenderable
         }
     }
 
-
     protected int _renderLayer = (int)Graphics.Sprites.RenderLayer.Default;
+
+    public Effect materialShader = null;
+
+    public Effect GetEffect()
+    {
+        return materialShader;
+    }
 
     public virtual bool IsVisibleToCamera(Camera camera)
     {

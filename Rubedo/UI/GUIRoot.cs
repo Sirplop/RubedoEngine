@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rubedo.Graphics;
 using Rubedo.Input;
 using Rubedo.Lib;
@@ -269,5 +270,10 @@ public class GUIRoot : UIComponent, IDisposable, IRenderable
             shapes.DrawBox(worldTopLeft, worldBottomRight, Color.White);
         }
         shapes.End();
+    }
+
+    public Effect GetEffect()
+    {
+        return null;
     }
 }

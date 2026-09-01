@@ -2,6 +2,7 @@
 using Rubedo.Object;
 using Rubedo.UI;
 using Rubedo.Graphics;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Rubedo;
 
@@ -118,13 +119,18 @@ public class GameState
         for (int h = 0; h < camera.RenderLayers.Count; h++)
         {
             int layer = camera.RenderLayers[h];
-            sb.Begin(camera, camera.samplerState);
-            List<IRenderable> renderables = Renderables.ComponentsWithLayer(layer);
-            for (int j = 0; j < renderables.Count; j++)
+            Dictionary<Effect, List<IRenderable>> renderByEffect = Renderables.ComponentsWithLayer(layer);
+            foreach (Effect effect in renderByEffect.Keys)
             {
-                renderables[j].Render(sb, camera);
+                List<IRenderable> renderables = renderByEffect[effect];
+                sb.Begin(camera, camera.samplerState, effect);
+
+                for (int j = 0; j < renderables.Count; j++)
+                {
+                    renderables[j].Render(sb, camera);
+                }
+                sb.End();
             }
-            sb.End();
         }
         camera.ResetViewport();
     }
