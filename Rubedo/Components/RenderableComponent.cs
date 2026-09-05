@@ -24,6 +24,7 @@ public abstract class RenderableComponent : Component, IRenderable
         {
             _layerDepth = (value * LAYER_SCALE) - 5e-1f;
             _realLayerDepth = value;
+            attachedState?.Renderables.MarkDirty(_renderLayer);
         }
     }
     protected int _realLayerDepth = 0;
@@ -44,11 +45,38 @@ public abstract class RenderableComponent : Component, IRenderable
 
     protected int _renderLayer = (int)Graphics.Sprites.RenderLayer.Default;
 
-    public Effect materialShader = null;
+    /// <summary>
+    /// An optional shader override for this renderable. Null uses the renderer's default effect.
+    /// </summary>
+    public Effect Shader { get; set; } = null;
 
-    public Effect GetEffect()
+    /// <summary>
+    /// See <see cref="Material.IsTransparent"/>. Picks this renderable's default BlendState -
+    /// <seealso cref="BlendState.AlphaBlend"/> when true, <seealso cref="BlendState.Opaque"/> when false.
+    /// </summary>
+    public bool IsTransparent { get; set; } = true;
+
+    /// <summary>
+    /// The texture backing this renderable's Material.
+    /// </summary>
+    protected abstract Texture2D MaterialTexture { get; }
+
+    private Material _materialCache;
+    private Texture2D _cachedTexture;
+    private Effect _cachedEffect;
+    private bool _cachedTransparent;
+
+    public Material GetMaterial()
     {
-        return materialShader;
+        Texture2D texture = MaterialTexture;
+        if (_materialCache == null || texture != _cachedTexture || Shader != _cachedEffect || IsTransparent != _cachedTransparent)
+        {
+            _materialCache = Material.Get(texture, Shader, IsTransparent);
+            _cachedTexture = texture;
+            _cachedEffect = Shader;
+            _cachedTransparent = IsTransparent;
+        }
+        return _materialCache;
     }
 
     public virtual bool IsVisibleToCamera(Camera camera)

@@ -34,9 +34,10 @@ public interface IRenderable
     int RenderLayer { get; set; }
 
     /// <summary>
-    /// Get the shader effect attached to this IRenderable, if it exists.
+    /// Gets the material (texture + shader + blend state + transparency) this renderable draws
+    /// with. Renderables sharing an equal <seealso cref="Material"/> are batched together.
     /// </summary>
-    Effect GetEffect();
+    Material GetMaterial();
 
     /// <summary>
     /// Determines if the object is visible to the camera.

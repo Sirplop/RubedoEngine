@@ -11,6 +11,8 @@ namespace Rubedo.Components;
 
 public class Sprite : RenderableComponent
 {
+    protected override Texture2D MaterialTexture => _texture?.Texture;
+
     protected TextureRegion2D _texture;
     protected Color _color = Color.White;
     protected Vector2 _pivot;

@@ -39,6 +39,20 @@ public static class CollectionExtensions
             arr[i] = valFactory();
         }
     }
+
+    /// <summary>
+    /// Adds a key-value pair to the dictionary if it doesn't exist, otherwise sets the existing value to <paramref name="value"/>
+    /// </summary>
+    /// <param name="key">The key to try to add to</param>
+    /// <param name="value">The value to set</param>
+    public static void AddOrSet<K, V>(this Dictionary<K, V> dict, K key, V value)
+    {
+        if (dict == null)
+            return;
+        if (!dict.TryAdd(key, value))
+            dict[key] = value; //we failed to add the value, so set it instead.
+    }
+
     /// <summary>
     /// O(n) Fisher-Yates shuffle.
     /// </summary>

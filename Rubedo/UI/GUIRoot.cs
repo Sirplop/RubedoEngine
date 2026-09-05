@@ -42,7 +42,7 @@ public class GUIRoot : UIComponent, IDisposable, IRenderable
     private int _renderLayer = (int)Rubedo.Graphics.Sprites.RenderLayer.UI;
     public int PixelPerUnit { get; set; }
 
-    public Point TargetResolution 
+    public Point TargetResolution
     {
         get => _targetResolution;
         set
@@ -104,7 +104,7 @@ public class GUIRoot : UIComponent, IDisposable, IRenderable
 
     protected Selectable _currentFocus = null;
     private const float MOUSE_DEADZONE = 10f; //squared value
-#endregion
+    #endregion
 
     /// <summary>
     /// Construct a new GUI Root node.
@@ -272,8 +272,9 @@ public class GUIRoot : UIComponent, IDisposable, IRenderable
         shapes.End();
     }
 
-    public Effect GetEffect()
+    public Material GetMaterial()
     {
-        return null;
+        // GUI does not draw via a material - this is just for sorting order.
+        return Material.Get(null, null, isTransparent: true);
     }
 }

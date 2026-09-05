@@ -68,6 +68,7 @@ public abstract class Emitter : RenderableComponent
     }
     private RectF _bounds;
     protected bool _boundsDirty = true;
+    protected override Texture2D MaterialTexture => Texture?.Texture;
 
     protected internal Interval maxAge;
     protected internal EmitterState state = EmitterState.INIT;

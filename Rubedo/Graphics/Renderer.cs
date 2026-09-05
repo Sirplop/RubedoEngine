@@ -27,7 +27,7 @@ public class Renderer : IDisposable
 
     private bool _isDisposed;
     private Game _game;
-    private BasicEffect _effect; 
+    private BasicEffect _effect;
     private Camera _currentCamera;
     private SamplerState _currentSampler;
 
@@ -86,6 +86,34 @@ public class Renderer : IDisposable
 
         Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: effect ?? _effect);
     }
+
+    /// <summary>
+    /// Begins a batch using a <see cref="Material"/>'s effect and blend state.
+    /// </summary>
+    public void Begin(Camera camera, SamplerState sampler, Material material)
+    {
+        ArgumentNullException.ThrowIfNull(camera);
+        ArgumentNullException.ThrowIfNull(material);
+        _currentCamera = camera;
+        _currentSampler = sampler;
+
+        Effect effect = material.Effect;
+        if (effect != null && effect != _effect)
+        {
+            effect.Parameters["World"]?.SetValue(Matrix.Identity);
+            effect.Parameters["View"]?.SetValue(camera.GetView());
+            effect.Parameters["Projection"]?.SetValue(camera.GetProjection());
+        }
+        else
+        {
+            _effect.View = camera.GetView();
+            _effect.Projection = camera.GetProjection();
+            _effect.World = Matrix.Identity;
+        }
+
+        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: material.BlendState, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: effect ?? _effect);
+    }
+
     public void End()
     {
         Sprites.End();

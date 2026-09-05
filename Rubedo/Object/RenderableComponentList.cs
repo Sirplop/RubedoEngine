@@ -1,87 +1,105 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Rubedo.Graphics;
+﻿using Rubedo.Graphics;
+using Rubedo.Lib.Extensions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Rubedo.Object;
 
 /// <summary>
 /// The list of renderable components that are to be rendered by the game state.
 /// </summary>
-public class RenderableComponentList
+public class RenderableComponentList : IComparer<IRenderable>
 {
     /// <summary>
-    /// Renderables are sorted into rendering layers and grouped by effect, for easy drawing.
+    /// Renderables are sorted into rendering layers, for easy drawing.
     /// </summary>
-    private readonly Dictionary<int, Dictionary<Effect, List<IRenderable>>> _renderablesByLayer = new Dictionary<int, Dictionary<Effect, List<IRenderable>>>();
+    private readonly Dictionary<int, List<IRenderable>> _layers = new Dictionary<int, List<IRenderable>>();
+    private readonly Dictionary<int, bool> _dirtyLayers = new Dictionary<int, bool>();
+
+    private static readonly List<IRenderable> EmptyLayer = new List<IRenderable>();
 
     public void Add(IRenderable component)
     {
-        AddToRenderLayer(component, component.RenderLayer);
+        AddToLayer(component, component.RenderLayer);
+        MarkDirty(component.RenderLayer);
     }
     public void Remove(IRenderable component)
     {
-        _renderablesByLayer[component.RenderLayer][component.GetEffect()].Remove(component);
+        RemoveFromLayer(component, component.RenderLayer);
+        MarkDirty(component.RenderLayer);
     }
 
     public void UpdateRenderableLayer(IRenderable component, int oldLayer, int newLayer)
     {
-        if (_renderablesByLayer.TryGetValue(oldLayer, out Dictionary<Effect, List<IRenderable>> layer))
-        {
-            if (layer.TryGetValue(component.GetEffect(), out List<IRenderable> renderables))
-            {
-                renderables.Remove(component);
-                AddToRenderLayer(component, newLayer);
-            }
-        }
+        RemoveFromLayer(component, oldLayer);
+        AddToLayer(component, newLayer);
+        MarkDirty(component.RenderLayer);
     }
 
-    private void AddToRenderLayer(IRenderable component, int layer)
+    private void AddToLayer(IRenderable component, int layer)
     {
-        Dictionary<Effect, List<IRenderable>> effectDict = ComponentsWithLayer(layer);
-        if (!effectDict.TryGetValue(component.GetEffect(), out List<IRenderable> list))
+        GetOrCreateLayer(layer).Add(component);
+    }
+
+    private void RemoveFromLayer(IRenderable component, int layer)
+    {
+        if (_layers.TryGetValue(layer, out List<IRenderable> list))
+        {
+            int index = list.IndexOf(component);
+            if (index < 0)
+                return;
+            list.SwapAndRemove(index);
+            _dirtyLayers.AddOrSet(layer, true);
+        }
+    }
+    private List<IRenderable> GetOrCreateLayer(int layer)
+    {
+        if (!_layers.TryGetValue(layer, out List<IRenderable> list))
         {
             list = new List<IRenderable>();
-            effectDict.Add(component.GetEffect(), list);
+            _layers[layer] = list;
         }
-        int index = FindSortIndex(component, list);
-        list.Insert(index, component);
+        return list;
     }
 
-    private int FindSortIndex(IRenderable component, List<IRenderable> list)
+    public void SortLayers()
     {
-        int high = list.Count - 1;
-        int low = 0;
-        int mid = 0;
-        if (list.Count == 0 || list[0].LayerDepth >= component.LayerDepth)
-            return 0;
-        else if (list[high].LayerDepth <= component.LayerDepth)
-            return high;
-        else
+        foreach (int layer in _layers.Keys)
         {
-            while (low <= high)
+            if (_dirtyLayers.ContainsKey(layer))
             {
-                mid = (high + low) / 2;
-                if (list[mid].LayerDepth >= component.LayerDepth)
-                    high = mid - 1;
-                else
-                    low = mid + 1;
+                _layers[layer].Sort(this);
             }
-            return mid;
         }
+        _dirtyLayers.Clear();
     }
 
-    public Dictionary<Effect, List<IRenderable>> ComponentsWithLayer(int layer)
+    /// <summary>
+    /// Gets the renderables of a given layer. Make sure to call <see cref="SortLayers"/> beforehand!
+    /// </summary>
+    public List<IRenderable> GetLayer(int layer)
     {
-        if (!_renderablesByLayer.TryGetValue(layer, out Dictionary<Effect, List<IRenderable>> value))
-        {
-            value = _renderablesByLayer[layer] = new Dictionary<Effect, List<IRenderable>>();
-        }
-        return value;
+        return _layers.TryGetValue(layer, out List<IRenderable> list) ? list : EmptyLayer;
     }
 
     public void Clear()
     {
-        _renderablesByLayer.Clear();
+        _layers.Clear();
+        _dirtyLayers.Clear();
+    }
+
+    public int Compare(IRenderable a, IRenderable b)
+    {
+        int depth = a.LayerDepth.CompareTo(b.LayerDepth);
+        if (depth != 0)
+            return depth;
+        return RuntimeHelpers.GetHashCode(a).CompareTo(RuntimeHelpers.GetHashCode(b));
+    }
+
+    public void MarkDirty(int layer)
+    {
+        _dirtyLayers.AddOrSet(layer, true);
     }
 }

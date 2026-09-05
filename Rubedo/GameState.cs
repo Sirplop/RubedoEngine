@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Rubedo.Graphics;
 using Rubedo.Object;
 using Rubedo.UI;
-using Rubedo.Graphics;
-using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace Rubedo;
 
@@ -107,6 +106,7 @@ public class GameState
 
     public virtual void Draw(Renderer sb)
     {
+        Renderables.SortLayers();
         for (int i = 0; i < _cameras.Count; i++)
         {
             DrawCamera(_cameras[i], sb);
@@ -119,22 +119,28 @@ public class GameState
         for (int h = 0; h < camera.RenderLayers.Count; h++)
         {
             int layer = camera.RenderLayers[h];
-            Dictionary<Effect, List<IRenderable>> renderByEffect = Renderables.ComponentsWithLayer(layer);
-            foreach (Effect effect in renderByEffect.Keys)
+            List<IRenderable> renderables = Renderables.GetLayer(layer);
+            Material current = null;
+            bool began = false;
+            for (int i = 0; i < renderables.Count; i++)
             {
-                List<IRenderable> renderables = renderByEffect[effect];
-                sb.Begin(camera, camera.samplerState, effect);
-
-                for (int j = 0; j < renderables.Count; j++)
+                IRenderable r = renderables[i];
+                Material material = r.GetMaterial();
+                if (!ReferenceEquals(material, current))
                 {
-                    renderables[j].Render(sb, camera);
+                    if (began)
+                        sb.End();
+                    sb.Begin(camera, camera.samplerState, material);
+                    began = true;
+                    current = material;
                 }
-                sb.End();
+                r.Render(sb, camera);
             }
+            if (began)
+                sb.End();
         }
         camera.ResetViewport();
     }
-
     #region Object adding
     public void Add(Entity obj)
     {

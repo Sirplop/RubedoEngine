@@ -196,6 +196,7 @@ public static class Assets
         _ = new FontAssetBox(string.Empty, "fonts");
         _ = new SoundAssetBox(string.Empty, "sounds");
         _ = new AnimationAssetBox<SpriteAnimation>(string.Empty, "textures");
+        _ = new ShaderAssetBox(string.Empty, "shaders");
     }
 
     #region Fonts
