@@ -84,7 +84,8 @@ public class Renderer : IDisposable
             _effect.World = Matrix.Identity;
         }
 
-        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: BlendState.AlphaBlend, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: effect ?? _effect);
+        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: BlendState.AlphaBlend, samplerState: sampler, 
+            rasterizerState: RasterizerState.CullNone, effect: effect ?? _effect, transformMatrix: camera.GetView());
     }
 
     /// <summary>
@@ -100,9 +101,13 @@ public class Renderer : IDisposable
         Effect effect = material.Effect;
         if (effect != null && effect != _effect)
         {
+            Matrix projection = camera.GetProjection();
+            Matrix view = camera.GetView();
+
+            effect.Parameters["MatrixTransform"]?.SetValue(view * projection);
             effect.Parameters["World"]?.SetValue(Matrix.Identity);
-            effect.Parameters["View"]?.SetValue(camera.GetView());
-            effect.Parameters["Projection"]?.SetValue(camera.GetProjection());
+            effect.Parameters["View"]?.SetValue(view);
+            effect.Parameters["Projection"]?.SetValue(projection);
         }
         else
         {
@@ -111,7 +116,8 @@ public class Renderer : IDisposable
             _effect.World = Matrix.Identity;
         }
 
-        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: material.BlendState, samplerState: sampler, rasterizerState: RasterizerState.CullNone, effect: effect ?? _effect);
+        Sprites.Begin(sortMode: SpriteSortMode.Deferred, blendState: material.BlendState, samplerState: sampler, 
+            rasterizerState: RasterizerState.CullNone, effect: effect ?? _effect, transformMatrix: camera.GetView());
     }
 
     public void End()
