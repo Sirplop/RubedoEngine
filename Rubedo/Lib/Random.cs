@@ -12,36 +12,36 @@ public struct Squirrel3
     private const uint NOISE1 = 0xb5297a4d;
     private const uint NOISE2 = 0x68e31da4;
     private const uint NOISE3 = 0x1b56c4e9;
-    private const uint CAP = uint.MaxValue;
-    private const double CAP_DOUBLE = (double)CAP;
+
+    private const float INV_2POW24 = 1f / (1 << 24);
 
     private int _n;
-    private long _seed;
+    private int _seed;
 
-    public Squirrel3(long seed = 0)
+    public Squirrel3(int seed = 0)
     {
         _n = 0;
         _seed = seed;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public double Next()
+    public float Next()
     {
         ++_n;
-        return Rnd(_n, _seed) / CAP_DOUBLE;
+        return Rnd(_n, _seed) * INV_2POW24; // Rnd already returns top-24-bit range, see below
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public long NextRaw()
+    public int NextRaw()
     {
         ++_n;
-        return Rnd(_n, _seed);
+        return (int)RndFull(_n, _seed);
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public float Range(float min, float max)
     {
-        return (float)(Next() * (max - min) + min);
+        return Next() * (max - min) + min;
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Range(int min, int max)
@@ -49,16 +49,37 @@ public struct Squirrel3
         return Math.FloorToInt(Next() * (max - min) + min);
     }
 
-    private static long Rnd(long n, long seed = 0)
+    /// <summary>
+    /// Truncates the output to 24 bits.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static uint Rnd(int n, int seed = 0)
     {
-        n *= NOISE1;
-        n += seed;
-        n ^= n >> 8;
-        n += NOISE2;
-        n ^= n << 8;
-        n *= NOISE3;
-        n ^= n >> 8;
-        return n % (CAP - 1); //CAP-1 / CAP, even in double precision, equals 1. Insanity.
+        uint x = (uint)n;
+        x *= NOISE1;
+        x += (uint)seed;
+        x ^= x >> 8;
+        x += NOISE2;
+        x ^= x << 8;
+        x *= NOISE3;
+        x ^= x >> 8;
+        return x >> 8;
+    }
+    /// <summary>
+    /// Full length RND function without truncating to 24.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static uint RndFull(int n, int seed = 0)
+    {
+        uint x = (uint)n;
+        x *= NOISE1;
+        x += (uint)seed;
+        x ^= x >> 8;
+        x += NOISE2;
+        x ^= x << 8;
+        x *= NOISE3;
+        x ^= x >> 8;
+        return x;
     }
 
     /// <summary>
@@ -96,7 +117,7 @@ public struct Squirrel3
 
 public static class Random
 {
-    private static Squirrel3 rnd = new Squirrel3(DateTime.Now.Ticks);
+    private static Squirrel3 rnd = new Squirrel3((int)DateTime.Now.Ticks);
     public static ref Squirrel3 GetRND => ref rnd;
 
     /// <summary>

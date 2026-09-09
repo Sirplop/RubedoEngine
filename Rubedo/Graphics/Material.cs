@@ -105,8 +105,8 @@ public sealed class Material : IEquatable<Material>
     }
 
     /// <summary>
-    /// Releases the cloned effect backing a unique material. Do not call this on materials
-    /// obtained through <see cref="Get"/>
+    /// Releases the cloned effect backing a unique material. Calling this on materials
+    /// obtained through <see cref="Get"/> does nothing.
     /// </summary>
     public void Dispose()
     {

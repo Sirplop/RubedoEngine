@@ -13,7 +13,7 @@ public class WeightedList<T>
     public WeightedList()
     {
         list = new List<(T, float)>();
-        rnd = new Squirrel3(System.DateTime.Now.Ticks);
+        rnd = new Squirrel3((int)System.DateTime.Now.Ticks);
     }
 
     public void Add(T val, float weight)
