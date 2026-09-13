@@ -1,5 +1,4 @@
-﻿using Loyc;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System;
 
 namespace Rubedo.Lib.Extensions;

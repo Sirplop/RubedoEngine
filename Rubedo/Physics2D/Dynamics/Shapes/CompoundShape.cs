@@ -1,5 +1,4 @@
-﻿using Loyc.Collections;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Rubedo.Graphics;
 using Rubedo.Lib;
 using Rubedo.Object;
