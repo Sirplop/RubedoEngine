@@ -119,6 +119,12 @@ internal class SpatialHashGrid : IBroadphase
                 {
                     PhysicsBody bodyB = body[j];
 
+                    if (!bodyA.IsAwake && !bodyB.IsAwake)
+                        continue; // neither can move; any existing manifold is kept alive by the sweep
+
+                    if (!AABB.Overlaps(in boundsA, in bodyB.bounds))
+                        continue;
+
                     if (!PhysicsLayer.LayersCollide(in bodyA.collider.physicsLayer, in bodyB.collider.physicsLayer))
                         continue; //layers don't collide, so ignore.
 
@@ -128,8 +134,6 @@ internal class SpatialHashGrid : IBroadphase
 
                     if (bodyA.IsDestroyed || bodyB.IsDestroyed)
                         continue; //can't collide nonexistant things
-                    if (!AABB.Overlaps(in boundsA, in bodyB.bounds))
-                        continue;
 
                     long pairKey = PairKey(in bodyA.ID, in bodyB.ID);
 
@@ -153,9 +157,19 @@ internal class SpatialHashGrid : IBroadphase
             Manifold m = manifolds[i];
             if (m.lastModifiedFrame != frame)
             {
-                collisionPairs.Remove(PairKey(in m.A.ID, in m.B.ID));
-                manifolds.SwapAndRemove(i);
-                GlobalPool<Manifold>.Release(m);
+                if (!m.A.IsAwake && !m.B.IsAwake &&
+                    !m.A.IsDestroyed && !m.B.IsDestroyed &&
+                    bodySet.Contains(m.A) && bodySet.Contains(m.B))
+                {
+                    m.lastModifiedFrame = frame;   // frozen pair, stays alive
+                    m.noImpulse = m.A.collider.isTrigger || m.B.collider.isTrigger;
+                }
+                else
+                {
+                    collisionPairs.Remove(PairKey(in m.A.ID, in m.B.ID));
+                    manifolds.SwapAndRemove(i);
+                    GlobalPool<Manifold>.Release(m);
+                }
             }
             else
             {

@@ -43,6 +43,8 @@ public class Sprite : RenderableComponent
     public float Width => _texture.Width;
     public float Height => _texture.Height;
 
+    public Vector2 Size => new Vector2(Width, Height);
+
     public override RectF Bounds
     {
         get

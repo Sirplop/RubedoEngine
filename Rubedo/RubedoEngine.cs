@@ -20,7 +20,7 @@ namespace Rubedo;
 /// </summary>
 public class RubedoEngine : Game
 {
-    public static float SizeOfMeter = 30f;
+    public static float SizeOfMeter = 1f;
 
     public static RubedoEngine Instance { get; private set; }
     public static GraphicsDeviceManager Graphics { get; private set; }

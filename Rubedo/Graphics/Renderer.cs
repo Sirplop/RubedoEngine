@@ -17,7 +17,7 @@ public class Renderer : IDisposable
     /// Because the position is cast down to an int much later, floating point rounding issues with scale being = 1 means
     /// that occasionally sprites can be nudged over a pixel. It looks bad. This fixes that by making the scale never below 1, but close enough.
     /// </summary>
-    public const float FIX_FLOATING_ROUNDING = 1.0001f;
+    public const float FIX_FLOATING_ROUNDING = 1.0000f;
 
     public enum Space
     {
@@ -36,7 +36,7 @@ public class Renderer : IDisposable
     /// <summary>
     /// The scale at which all things are rendered at.
     /// </summary>
-    public float GlobalScale = 1 / 24f;
+    public float GlobalScale = 1f;
 
     public SpriteBatch Sprites { get; }
 

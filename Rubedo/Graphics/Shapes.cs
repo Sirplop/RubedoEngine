@@ -568,9 +568,9 @@ public sealed class Shapes : IDisposable
         DrawLine(rect.Left, rect.Bottom, rect.Left, rect.Top, color, thickness);
     }
 
-    public void DrawBox(Transform transform, float width, float height, Color color)
+    public void DrawBox(Transform transform, float width, float height, Color color, float thickness = 2)
     {
-        DrawBox(transform.Position, width, height, transform.Rotation, transform.Scale, color);
+        DrawBox(transform.Position, width, height, transform.Rotation, transform.Scale, color, thickness);
     }
 
     public void DrawBox(float x, float y, float width, float height, Color color, float thickness)
@@ -589,7 +589,7 @@ public sealed class Shapes : IDisposable
         DrawBox(min, max, color);
     }
 
-    public void DrawBox(Vector2 center, float width, float height, float angle, Vector2 scale, Color color)
+    public void DrawBox(Vector2 center, float width, float height, float angle, Vector2 scale, Color color, float thickness = 2)
     {
         float left = -width * 0.5f * scale.X;
         float right = left + width * scale.X;
@@ -633,14 +633,14 @@ public sealed class Shapes : IDisposable
         dx = rx4 + center.X;
         dy = ry4 + center.Y;
 
-        DrawLine(ax, ay, bx, by, color);
-        DrawLine(bx, by, cx, cy, color);
-        DrawLine(cx, cy, dx, dy, color);
-        DrawLine(dx, dy, ax, ay, color);
+        DrawLine(ax, ay, bx, by, color, thickness);
+        DrawLine(bx, by, cx, cy, color, thickness);
+        DrawLine(cx, cy, dx, dy, color, thickness);
+        DrawLine(dx, dy, ax, ay, color, thickness);
     }
     #endregion
     #region Hollow Circle
-    public void DrawCircle(Vector2 position, float radius, Color color)
+    public void DrawCircle(Vector2 position, float radius, Color color, float thickness = 2)
     {
         float angle = MathHelper.TwoPi / CIRCLE_SEGMENTS;
 
@@ -659,14 +659,14 @@ public sealed class Shapes : IDisposable
             float by = ax * sin + ay * cos;
 
             DrawLine(ax + position.X, ay + position.Y,
-                bx + position.X, by + position.Y, color);
+                bx + position.X, by + position.Y, color, thickness);
 
             // Save the last transform for the next transform in the loop.
             ax = bx;
             ay = by;
         }
     }
-    public void DrawCircle(Transform transform, float radius, Color color)
+    public void DrawCircle(Transform transform, float radius, Color color, float thickness = 2)
     {
         radius *= Lib.MathV.Max(transform.Scale);
 
@@ -688,7 +688,7 @@ public sealed class Shapes : IDisposable
             float by = ax * sin + ay * cos;
 
             DrawLine(ax + pos.X, ay + pos.Y,
-                bx + pos.X, by + pos.Y, color);
+                bx + pos.X, by + pos.Y, color, thickness);
 
             // Save the last transform for the next transform in the loop.
             ax = bx;
@@ -697,7 +697,7 @@ public sealed class Shapes : IDisposable
     }
     #endregion
     #region Hollow Capsule
-    public void DrawCapsule(Transform transform, float radius, Vector2 start, Vector2 end, Color color)
+    public void DrawCapsule(Transform transform, float radius, Vector2 start, Vector2 end, Color color, float thickness = 2)
     {
         float angle = MathHelper.Pi / (CAPSULE_SEGMENTS * 0.5f);
 
@@ -721,7 +721,7 @@ public sealed class Shapes : IDisposable
             DrawLine(
                 matrix.TransformPoint(ax, ay) + start,
                 matrix.TransformPoint(bx, by) + start,
-                color);
+                color, thickness);
 
             // Save the last transform for the next transform in the loop.
             ax = bx;
@@ -731,7 +731,7 @@ public sealed class Shapes : IDisposable
         DrawLine(
                 matrix.TransformPoint(ax, ay) + start,
                 matrix.TransformPoint(bx, by) + end,
-            color);
+            color, thickness);
         for (int i = 0; i < CAPSULE_HALF_SEGMENTS; i++)
         {
             // Perform a 2D rotation transform to get the next point on the circle.
@@ -741,7 +741,7 @@ public sealed class Shapes : IDisposable
             DrawLine(
                 matrix.TransformPoint(ax, ay) + end,
                 matrix.TransformPoint(bx, by) + end,
-                color);
+                color, thickness);
 
             // Save the last transform for the next transform in the loop.
             ax = bx;
@@ -750,12 +750,12 @@ public sealed class Shapes : IDisposable
         DrawLine(
                 matrix.TransformPoint(ax, ay) + end,
                 matrix.TransformPoint(bx, by) + start,
-                color);
+                color, thickness);
     }
     #endregion
     #region Hollow Polygon
     
-    public void DrawPolygon(Vector2[] vertices, Transform transform, Color color)
+    public void DrawPolygon(Vector2[] vertices, Transform transform, Color color, float thickness = 2)
     {
         if (vertices is null || vertices.Length < 3)
         {
@@ -773,7 +773,7 @@ public sealed class Shapes : IDisposable
             a = matrix.TransformPoint(a);
             b = matrix.TransformPoint(b);
 
-            DrawLine(a, b, color);
+            DrawLine(a, b, color, thickness);
         }
     }
     #endregion

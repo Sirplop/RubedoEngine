@@ -8,8 +8,10 @@ using System.Collections.ObjectModel;
 
 namespace Rubedo.Physics2D.Collision;
 
-public class Contact
+public struct Contact
 {
+    public bool alive = false;
+
     public Vector2 Position => position;
     public float Penetration => penetration;
 
@@ -30,6 +32,7 @@ public class Contact
 
     public Contact(Vector2 position, float impulse = 0, float friction = 0, float penetration = 0)
     {
+        alive = true;
         this.position = position;
         accumFriction = friction;
         accumImpulse = impulse;
@@ -38,7 +41,9 @@ public class Contact
 
     public Contact Clone()
     {
-        return new Contact(position, accumImpulse, accumFriction, penetration);
+        Contact contact = new Contact(position, accumImpulse, accumFriction, penetration);
+        contact.alive = alive;
+        return contact;
     }
 }
 
@@ -54,6 +59,8 @@ public class Manifold : IEquatable<Manifold>, IPoolable
 
     public PhysicsBody A;
     public PhysicsBody B;
+    public int A_solver;
+    public int B_solver;
     internal Vector2 normal;
     internal Vector2 tangent;
 
@@ -62,9 +69,11 @@ public class Manifold : IEquatable<Manifold>, IPoolable
     internal int contactCount;
 
     internal float friction;
+    internal bool noFriction;
     internal float restitution;
     internal bool noImpulse;
     internal ManifoldState state;
+    internal float invMass;
 
     public Manifold()
     {
@@ -92,8 +101,8 @@ public class Manifold : IEquatable<Manifold>, IPoolable
     public void Reset()
     {
         normal = default;
-        contacts[0] = null;
-        contacts[1] = null;
+        contacts[0] = default;
+        contacts[1] = default;
         contactCount = 0;
     }
 
@@ -101,7 +110,7 @@ public class Manifold : IEquatable<Manifold>, IPoolable
     {
         Contact cOld = contacts[0];
 
-        if (cOld != null)
+        if (cOld.alive)
         {
             c.accumFriction = cOld.accumFriction;
             c.accumImpulse = cOld.accumImpulse;
@@ -115,7 +124,7 @@ public class Manifold : IEquatable<Manifold>, IPoolable
     {
         Contact cOld = contacts[0];
 
-        if (cOld != null)
+        if (cOld.alive)
         {
             c1.accumFriction = cOld.accumFriction;
             c1.accumImpulse = cOld.accumImpulse;
@@ -123,7 +132,7 @@ public class Manifold : IEquatable<Manifold>, IPoolable
         contacts[0] = c1;
 
         cOld = contacts[1];
-        if (cOld != null)
+        if (cOld.alive)
         {
             c2.accumFriction = cOld.accumFriction;
             c2.accumImpulse = cOld.accumImpulse;

@@ -99,8 +99,8 @@ public class LongMap<T> where T : class
             idx = (idx + 1) & mask;
         }
 
-        // If we've probed 'capacity' times and didn't find an empty slot or the key,
-        // the key is not present (prevents infinite looping).
+        // If we've probed 'capacity' times and didn't find an empty
+        // slot or the key, then the key is not present.
         value = null;
         return false;
     }

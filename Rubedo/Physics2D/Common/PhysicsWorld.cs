@@ -27,6 +27,7 @@ public class PhysicsWorld
     public List<PhysicsBody> bodies = new List<PhysicsBody>();
 
     internal List<Manifold> manifolds = new List<Manifold>();
+    private Manifold[] activeManifolds;
 
     // --- Island / sleep bookkeeping ---
     private int[] islandParent = new int[0];
@@ -52,6 +53,7 @@ public class PhysicsWorld
         // Switch the collision system here:
         broadphase = new SpatialHashGrid(3);
         timer = new Timer();
+        activeManifolds = new Manifold[0];
     }
 
     public void AddBody(PhysicsBody b)
@@ -105,7 +107,11 @@ public class PhysicsWorld
             bodies[i].Update();
 
         for (i = 0; i < bodies.Count; i++)
-            bodies[i].IntegrateForces(dt);
+        {
+            PhysicsBody b = bodies[i];
+            b.IntegrateForces(dt);
+            b.solverIndex = i;
+        }
 
         timer.Start();
 
@@ -123,42 +129,53 @@ public class PhysicsWorld
         timer.Step("N.ISLAND: ");
 
         float invDT = 1f / dt;
-        if (multithreadSolver)
-        {
-            dispatcher.For(0, manifolds.Count, i =>
-            {
-                Manifold m = manifolds[i];
-                if (!m.noImpulse && (IsActive(m.A) || IsActive(m.B)))
-                    ContactConstraintSolver.PresolveConstraint(m, invDT);
-            });
-        }
-        else
-        {
-            for (i = 0; i < manifolds.Count; i++)
-            {
-                Manifold m = manifolds[i];
-                if (!m.noImpulse && (IsActive(m.A) || IsActive(m.B)))
-                    ContactConstraintSolver.PresolveConstraint(m, invDT);
-            }
-        }
-        timer.Step("N.PC: ");
 
+        if (activeManifolds.Length < manifolds.Count)
+        {
+            activeManifolds = new Manifold[Lib.Math.Power2Roundup(manifolds.Count)];
+        }
+        int activeCount = 0;
         for (i = 0; i < manifolds.Count; i++)
         {
             Manifold m = manifolds[i];
             if (!m.noImpulse && (IsActive(m.A) || IsActive(m.B)))
-                ContactConstraintSolver.WarmStart(m);
+                activeManifolds[activeCount++] = m;
+        }
+
+        if (multithreadSolver)
+        {
+            dispatcher.For(0, activeCount, i =>
+            {
+                Manifold m = activeManifolds[i];
+                ContactConstraintSolver.PresolveConstraint(m, invDT);
+            });
+        }
+        else
+        {
+            for (i = 0; i < activeCount; i++)
+            {
+                Manifold m = activeManifolds[i];
+                ContactConstraintSolver.PresolveConstraint(m, invDT);
+            }
+        }
+        timer.Step("N.PC: ");
+
+        for (i = 0; i < activeCount; i++)
+        {
+            Manifold m = activeManifolds[i];
+            ContactConstraintSolver.WarmStart(m);
         }
         timer.Step("N.WS: ");
 
         //Process maxIterations times for more stability
         for (int j = 0; j < maxIterations; j++)
-            for (i = 0; i < manifolds.Count; i++)
+        {
+            for (i = 0; i < activeCount; i++)
             {
-                Manifold m = manifolds[i];
-                if (!m.noImpulse && (IsActive(m.A) || IsActive(m.B)))
-                    ContactConstraintSolver.ApplyImpulse(in m);
+                Manifold m = activeManifolds[i];
+                ContactConstraintSolver.ApplyImpulse(in m);
             }
+        }
 
         timer.Step("MC: "+ manifolds.Count + " N.AI: ");
         //Integrate positions

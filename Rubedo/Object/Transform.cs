@@ -96,7 +96,7 @@ public class Transform
             UpdateTransform();
             return _localPosition;
         }
-        set => SetLocalPosition(ref value);
+        set => SetLocalPosition(value);
     }
     /// <summary>
     /// Gets the local-space rotation in degrees.
@@ -132,7 +132,7 @@ public class Transform
             UpdateTransform();
             return _localScale;
         }
-        set => SetLocalScale(ref value);
+        set => SetLocalScale(value);
     }
     #endregion
     #region World
@@ -196,7 +196,7 @@ public class Transform
             UpdateTransform();
             return _scale;
         }
-        set => SetScale(ref value);
+        set => SetScale(value);
     }
     #endregion
     #region Matrix
@@ -240,7 +240,7 @@ public class Transform
             parent._children.Add(this);
 
         _parent = parent;
-        SetDirty(Dirt.Position & Dirt.Rotation & Dirt.Scale);
+        SetDirty(Dirt.Position | Dirt.Rotation | Dirt.Scale);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -303,9 +303,12 @@ public class Transform
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetRotation(float radians)
     {
+        if (_rotation == radians)
+            return; //already this rotation.
+
         _rotation = radians;
         if (_parent != null)
-            LocalRotation = _parent.Rotation + radians;
+            LocalRotation = radians - _parent.Rotation;
         else
             LocalRotation = radians;
     }
@@ -315,7 +318,7 @@ public class Transform
         SetRotation(Lib.Math.ToRadians(degrees));
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetScale(ref Vector2 scale)
+    public void SetScale(Vector2 scale)
     {
         _scale = scale;
         if (_parent != null)
@@ -325,7 +328,7 @@ public class Transform
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetLocalPosition(ref Vector2 localPosition)
+    public void SetLocalPosition(Vector2 localPosition)
     {
         if (localPosition == _localPosition)
             return;
@@ -337,12 +340,16 @@ public class Transform
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetLocalRotation(float radians)
     {
-        _localRotation = radians % MathHelper.TwoPi;
+        float rat = radians % MathHelper.TwoPi;
+        if (_localRotation == rat)
+            return;
+
+        _localRotation = rat;
         _localDirty = _rotationDirty = true;
         SetDirty(Dirt.Rotation);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetLocalScale(ref Vector2 scale)
+    public void SetLocalScale(Vector2 scale)
     {
         _localScale = scale;
         _localDirty = _scaleDirty = true;

@@ -17,9 +17,10 @@ public static class ContactConstraintSolver
         const float PENETRATION_SLOP = 0.01f;
         const float BAUMGARTE = 0.2f;
 
-        float invMassSum = m.A._invMass + m.B._invMass;
+        m.invMass = m.A._invMass + m.B._invMass;
         float e = MathF.Min(m.A.material.restitution, m.B.material.restitution);
         m.friction = (m.A.material.friction + m.B.material.friction) * 0.5f;
+        m.noFriction = Lib.Math.NearlyEqual(in m.friction, 0);
         MathV.Right(ref m.normal, out m.tangent);
 
         for (int i = 0; i < m.contactCount; i++)
@@ -56,14 +57,14 @@ public static class ContactConstraintSolver
             MathV.Cross(ref c.ra, ref m.normal, out float rn1);
             MathV.Cross(ref c.rb, ref m.normal, out float rn2);
 
-            c.normalMass = 1f / (invMassSum + m.A._invInertia * (rn1 * rn1) +
+            c.normalMass = 1f / (m.invMass + m.A._invInertia * (rn1 * rn1) +
                                         m.B._invInertia * (rn2 * rn2));
 
             MathV.Cross(ref c.ra, ref m.tangent, out float rt1);
             MathV.Cross(ref c.rb, ref m.tangent, out float rt2);
 
             //negated here because it's only used negated.
-            c.tangentMass = -1f / (invMassSum + m.A._invInertia * (rt1 * rt1) +
+            c.tangentMass = -1f / (m.invMass + m.A._invInertia * (rt1 * rt1) +
                                          m.B._invInertia * (rt2 * rt2));
 
             // Position error is fed back to the velocity constraint as a bias value
@@ -93,10 +94,10 @@ public static class ContactConstraintSolver
     }
     public static void ApplyImpulse(in Manifold m)
     {
-        ref PhysicsBody A = ref m.A;
-        ref PhysicsBody B = ref m.B;
+        PhysicsBody A = m.A;
+        PhysicsBody B = m.B;
 
-        if (A._invMass + B._invMass == 0) 
+        if (m.invMass == 0) 
             return;
 
         Vector2 rv;
@@ -106,16 +107,16 @@ public static class ContactConstraintSolver
             So we solve normal impulse after tangential impulse because
             non-penetration is more important.
         */
-        
-        if (!Lib.Math.NearlyEqual(in m.friction, 0))
+
+        if (!m.noFriction)
         {
             //solve friction since it exists.
             for (int i = 0; i < m.contactCount; i++)
             {
                 ref Contact c = ref m.contacts[i];
 
-                ref Vector2 ra = ref c.ra;
-                ref Vector2 rb = ref c.rb;
+                Vector2 ra = c.ra;
+                Vector2 rb = c.rb;
 
                 // Relative velocity at contact
                 rv.X = B.velocity.X - rb.Y * B.angularVelocity - A.velocity.X + ra.Y * A.angularVelocity;
@@ -143,8 +144,8 @@ public static class ContactConstraintSolver
         {
             ref Contact c = ref m.contacts[i];
 
-            ref Vector2 ra = ref c.ra;
-            ref Vector2 rb = ref c.rb;
+            Vector2 ra = c.ra;
+            Vector2 rb = c.rb;
 
             // Relative velocity at contact
             rv.X = B.velocity.X - rb.Y * B.angularVelocity - A.velocity.X + ra.Y * A.angularVelocity;

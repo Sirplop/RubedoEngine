@@ -49,6 +49,7 @@ public class PhysicsBody : Component
     public readonly Collider collider;
 
     public readonly uint ID;
+    public int solverIndex;
 
     // --- Sleep system ---
     public bool IsAwake { get; private set; } = true;
